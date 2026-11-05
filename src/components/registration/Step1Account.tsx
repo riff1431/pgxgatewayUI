@@ -7,8 +7,11 @@ import {
   Phone, 
   Send, 
   User, 
-  MessageSquare 
+  MessageSquare,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 
 interface Step1AccountProps {
   onNext: () => void
@@ -16,70 +19,127 @@ interface Step1AccountProps {
 }
 
 export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
+  const { register, login, merchant } = useAuth()
+  const [isSignInMode, setIsSignInMode] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
-    fullName: '',
-    businessEmail: '',
-    phone: '',
-    whatsapp: '',
-    telegram: '',
+    fullName: merchant?.fullName || '',
+    businessEmail: merchant?.businessEmail || '',
+    phone: merchant?.phone || '',
+    whatsapp: merchant?.whatsapp || '',
+    telegram: merchant?.telegram || '',
     password: '',
   })
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errorMessage) setErrorMessage(null)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onNext()
+    setErrorMessage(null)
+    setSubmitting(true)
+
+    try {
+      if (isSignInMode) {
+        await login({
+          businessEmail: formData.businessEmail,
+          password: formData.password,
+        })
+      } else {
+        await register({
+          fullName: formData.fullName,
+          businessEmail: formData.businessEmail,
+          phone: formData.phone,
+          whatsapp: formData.whatsapp,
+          telegram: formData.telegram,
+          password: formData.password,
+        })
+      }
+      onNext()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An error occurred during authentication.'
+      setErrorMessage(msg)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Step Header with Dual-Ring Purple Glow */}
-      <div className="flex items-center gap-3.5 pb-3 border-b border-cyan-500/20">
-        <div className="w-13 h-13 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.6),inset_0_0_10px_rgba(217,70,239,0.3)] shrink-0">
-          <User className="h-6 w-6" />
-        </div>
-        <div>
-          <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
-            Step 1 of 3
+      <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+        <div className="flex items-center gap-3.5">
+          <div className="w-13 h-13 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.6),inset_0_0_10px_rgba(217,70,239,0.3)] shrink-0">
+            <User className="h-6 w-6" />
           </div>
-          <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-            Account & Contact Information
-          </h2>
-          <p className="text-xs text-slate-400">
-            Let's create your account and get your contact details.
-          </p>
+          <div>
+            <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
+              Step 1 of 3
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              {isSignInMode ? 'Merchant Sign In' : 'Account & Contact Information'}
+            </h2>
+            <p className="text-xs text-slate-400">
+              {isSignInMode
+                ? 'Sign in to manage your merchant account & processing application.'
+                : "Let's create your account and get your contact details."}
+            </p>
+          </div>
         </div>
+
+        {/* Toggle between Register and Sign In */}
+        <button
+          type="button"
+          onClick={() => {
+            setIsSignInMode(!isSignInMode)
+            setErrorMessage(null)
+          }}
+          className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 underline underline-offset-4 cursor-pointer transition-colors"
+        >
+          {isSignInMode ? 'Create New Account' : 'Already have account? Sign In'}
+        </button>
       </div>
 
-      {/* Dual-Chamber Inputs Grid (2 columns on sm+) */}
+      {/* Error alert banner */}
+      {errorMessage && (
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+          <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Dual-Chamber Inputs Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         
-        {/* Full Name */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-200">
-            Full Name <span className="text-fuchsia-400">*</span>
-          </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
-            <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
-              <User className="h-4 w-4" />
+        {/* Full Name (Registration only) */}
+        {!isSignInMode && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              Full Name <span className="text-fuchsia-400">*</span>
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                <User className="h-4 w-4" />
+              </div>
+              <input
+                type="text"
+                required={!isSignInMode}
+                value={formData.fullName}
+                onChange={(e) => handleChange('fullName', e.target.value)}
+                placeholder="Enter your full name"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+              />
             </div>
-            <input
-              type="text"
-              required
-              value={formData.fullName}
-              onChange={(e) => handleChange('fullName', e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-            />
           </div>
-        </div>
+        )}
 
         {/* Business Email */}
-        <div className="space-y-1.5">
+        <div className={`space-y-1.5 ${isSignInMode ? 'sm:col-span-2' : ''}`}>
           <label className="text-xs font-semibold text-slate-200">
             Business Email <span className="text-fuchsia-400">*</span>
           </label>
@@ -98,70 +158,74 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           </div>
         </div>
 
-        {/* Phone Number */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-200">
-            Phone Number <span className="text-fuchsia-400">*</span>
-          </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
-            <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
-              <Phone className="h-4 w-4" />
+        {/* Phone Number (Registration only) */}
+        {!isSignInMode && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              Phone Number <span className="text-fuchsia-400">*</span>
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                <Phone className="h-4 w-4" />
+              </div>
+              <input
+                type="tel"
+                required={!isSignInMode}
+                value={formData.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                placeholder="+1 (___) ___-____"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+              />
             </div>
-            <input
-              type="tel"
-              required
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="+1 (___) ___-____"
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-            />
           </div>
-        </div>
+        )}
 
-        {/* WhatsApp Number */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-200">
-            WhatsApp Number <span className="text-fuchsia-400">*</span>
-          </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
-            <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-emerald-400 shrink-0">
-              <MessageSquare className="h-4 w-4" />
+        {/* WhatsApp Number (Registration only) */}
+        {!isSignInMode && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              WhatsApp Number
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-emerald-400 shrink-0">
+                <MessageSquare className="h-4 w-4" />
+              </div>
+              <input
+                type="tel"
+                value={formData.whatsapp}
+                onChange={(e) => handleChange('whatsapp', e.target.value)}
+                placeholder="+1 (___) ___-____"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+              />
             </div>
-            <input
-              type="tel"
-              required
-              value={formData.whatsapp}
-              onChange={(e) => handleChange('whatsapp', e.target.value)}
-              placeholder="+1 (___) ___-____"
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-            />
           </div>
-        </div>
+        )}
 
-        {/* Telegram Username */}
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-200">
-            Telegram Username <span className="text-fuchsia-400">*</span>
-          </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
-            <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-sky-400 shrink-0">
-              <Send className="h-4 w-4" />
+        {/* Telegram Username (Registration only) */}
+        {!isSignInMode && (
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              Telegram Username
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-sky-400 shrink-0">
+                <Send className="h-4 w-4" />
+              </div>
+              <input
+                type="text"
+                value={formData.telegram}
+                onChange={(e) => handleChange('telegram', e.target.value)}
+                placeholder="@yourusername"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+              />
             </div>
-            <input
-              type="text"
-              required
-              value={formData.telegram}
-              onChange={(e) => handleChange('telegram', e.target.value)}
-              placeholder="@yourusername"
-              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-            />
           </div>
-        </div>
+        )}
 
-        {/* Create Password */}
-        <div className="space-y-1.5">
+        {/* Password */}
+        <div className={`space-y-1.5 ${isSignInMode ? 'sm:col-span-2' : ''}`}>
           <label className="text-xs font-semibold text-slate-200">
-            Create Password <span className="text-fuchsia-400">*</span>
+            {isSignInMode ? 'Password' : 'Create Password'} <span className="text-fuchsia-400">*</span>
           </label>
           <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
@@ -200,9 +264,20 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
 
         <button
           type="submit"
-          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+          disabled={submitting}
+          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
-          Next Step <span>&rarr;</span>
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Processing...</span>
+            </>
+          ) : (
+            <>
+              <span>{isSignInMode ? 'Sign In & Continue' : 'Next Step'}</span>
+              <span>&rarr;</span>
+            </>
+          )}
         </button>
       </div>
     </form>

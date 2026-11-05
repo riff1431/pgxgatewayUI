@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Bell, ChevronDown, User } from 'lucide-react'
 import Logo from '@/components/brand/Logo'
+import { useAuth } from '@/context/AuthContext'
 
 interface NavbarProps {
   isDashboard?: boolean
@@ -8,6 +9,8 @@ interface NavbarProps {
 
 export default function Navbar({ isDashboard = false }: NavbarProps) {
   const location = useLocation()
+  const { merchant, unreadCount, isAuthenticated } = useAuth()
+  const merchantName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#05091a]/85 border-b border-cyan-500/20 backdrop-blur-xl">
@@ -54,33 +57,38 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
 
         {/* Right Action Area */}
         <div className="flex items-center gap-4">
-          {isDashboard ? (
+          {isDashboard || isAuthenticated ? (
             <>
               {/* Notification Bell with Badge */}
-              <button 
-                type="button" 
+              <Link 
+                to="/dashboard"
                 aria-label="Notifications"
                 className="relative p-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
               >
                 <Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)]">
-                  2
-                </span>
-              </button>
+                {Boolean(unreadCount && unreadCount > 0) && (
+                  <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)]">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Merchant Profile Pill */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-400/60 bg-[#09112a] shadow-[0_0_12px_rgba(0,240,255,0.3)] text-white text-xs font-semibold cursor-pointer hover:border-cyan-300 transition-colors">
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-400/60 bg-[#09112a] shadow-[0_0_12px_rgba(0,240,255,0.3)] text-white text-xs font-semibold cursor-pointer hover:border-cyan-300 transition-colors"
+              >
                 <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-300">
                   <User className="h-3.5 w-3.5" />
                 </div>
-                <span>Merchant</span>
+                <span>{merchantName}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-              </div>
+              </Link>
             </>
           ) : (
             /* Sign In Button Pill */
             <Link
-              to="/dashboard"
+              to="/register?step=1"
               className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-400/80 bg-[#08102a]/80 text-white text-xs font-semibold shadow-[0_0_14px_rgba(0,240,255,0.35)] hover:bg-cyan-500/10 hover:border-cyan-300 transition-all"
             >
               <User className="h-3.5 w-3.5 text-cyan-400" />

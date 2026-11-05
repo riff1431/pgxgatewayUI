@@ -9,21 +9,24 @@ import {
   Settings, 
   Tag 
 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 
 export default function Sidebar({ className = '' }: { className?: string }) {
   const [activeTab, setActiveTab] = useState('dashboard')
   const navigate = useNavigate()
+  const { unreadCount, logout } = useAuth()
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
     { id: 'application', label: 'My Application', icon: FileText, path: '/register?step=3' },
     { id: 'documents', label: 'Documents', icon: Folder, path: '/register?step=3' },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: 2, path: '#messages' },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount, path: '#messages' },
     { id: 'offer', label: 'Offer', icon: Tag, path: '#offer' },
     { id: 'settings', label: 'Account Settings', icon: Settings, path: '#settings' },
   ]
 
   const handleSignOut = () => {
+    logout()
     navigate('/register?step=1')
   }
 
@@ -59,7 +62,7 @@ export default function Sidebar({ className = '' }: { className?: string }) {
                   <span>{item.label}</span>
                 </div>
 
-                {item.badge && (
+                {Boolean(item.badge && item.badge > 0) && (
                   <span className="w-5 h-5 rounded-full bg-fuchsia-600 text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)]">
                     {item.badge}
                   </span>

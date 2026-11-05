@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes, useLocation, Navigate } from 'react-route
 import Navbar from '@/components/layout/Navbar'
 import DashboardPage from '@/pages/DashboardPage'
 import RegistrationPage from '@/pages/RegistrationPage'
+import { AuthProvider } from '@/context/AuthContext'
 
 function AppContent() {
   const location = useLocation()
@@ -31,7 +32,9 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppContent />
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </BrowserRouter>
   )
 }

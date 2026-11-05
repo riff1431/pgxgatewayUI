@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { 
+  AlertCircle,
   AlertTriangle, 
   ArrowLeftRight, 
   Briefcase, 
@@ -8,9 +9,12 @@ import {
   Coins, 
   CreditCard, 
   Globe, 
+  Loader2,
   MessageSquare, 
   Store 
 } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 
 interface Step2BusinessProps {
   onNext: () => void
@@ -18,25 +22,43 @@ interface Step2BusinessProps {
 }
 
 export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
+  const { merchant, refreshStatus, addToast } = useAuth()
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
-    legalName: '',
-    industry: '',
-    website: '',
-    yearsInBusiness: '',
-    currentProcessor: '',
-    monthlyVolume: '',
-    avgTransaction: '',
-    chargebackRate: '',
-    switchReason: '',
+    legalName: merchant?.legalName || '',
+    industry: merchant?.industry || '',
+    website: merchant?.website || '',
+    yearsInBusiness: merchant?.yearsInBusiness || '',
+    currentProcessor: merchant?.currentProcessor || '',
+    monthlyVolume: merchant?.monthlyVolume || '',
+    avgTransaction: merchant?.avgTransaction || '',
+    chargebackRate: merchant?.chargebackRate || '',
+    switchReason: merchant?.switchReason || '',
   })
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errorMessage) setErrorMessage(null)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onNext()
+    setErrorMessage(null)
+    setSubmitting(true)
+
+    try {
+      await api.merchants.updateStep2(formData)
+      await refreshStatus()
+      addToast('Business Information Saved', 'Proceed to Step 3 document verification.', 'success')
+      onNext()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update business information.'
+      setErrorMessage(msg)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -58,6 +80,14 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
           </p>
         </div>
       </div>
+
+      {/* Error alert banner */}
+      {errorMessage && (
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+          <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       {/* Dual-Chamber Inputs Grid (2 columns on sm+) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,12 +128,14 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
               className="w-full bg-transparent pl-3 pr-8 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer"
             >
               <option value="" disabled className="bg-[#070e28] text-slate-400">Select your industry</option>
-              <option value="ecommerce" className="bg-[#070e28]">eCommerce & Retail</option>
-              <option value="gaming" className="bg-[#070e28]">Gaming & Casino</option>
-              <option value="travel" className="bg-[#070e28]">Travel & Airlines</option>
-              <option value="digital" className="bg-[#070e28]">Digital Services & SaaS</option>
-              <option value="streaming" className="bg-[#070e28]">Streaming & Creator Content</option>
-              <option value="highrisk" className="bg-[#070e28]">High-Risk / Specialty</option>
+              <option value="e-commerce" className="bg-[#070e28]">E-Commerce & Retail</option>
+              <option value="crypto" className="bg-[#070e28]">Crypto & Digital Assets</option>
+              <option value="gaming" className="bg-[#070e28]">iGaming & Esports</option>
+              <option value="saas" className="bg-[#070e28]">SaaS & Software</option>
+              <option value="travel" className="bg-[#070e28]">Travel & Hospitality</option>
+              <option value="forex" className="bg-[#070e28]">Forex & Trading</option>
+              <option value="digital-goods" className="bg-[#070e28]">Digital Products & Services</option>
+              <option value="other" className="bg-[#070e28]">Other Industry</option>
             </select>
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
               ▼
@@ -111,10 +143,10 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
           </div>
         </div>
 
-        {/* Business Website */}
+        {/* Website URL */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Business Website <span className="text-slate-400">(if any)</span>
+            Website URL
           </label>
           <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
@@ -124,7 +156,7 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
               type="url"
               value={formData.website}
               onChange={(e) => handleChange('website', e.target.value)}
-              placeholder="https://www.yourwebsite.com"
+              placeholder="https://yourwebsite.com"
               className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
             />
           </div>
@@ -133,23 +165,22 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
         {/* Years in Business */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Years in Business <span className="text-fuchsia-400">*</span>
+            Years in Business
           </label>
           <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
               <Calendar className="h-4 w-4" />
             </div>
             <select
-              required
               value={formData.yearsInBusiness}
               onChange={(e) => handleChange('yearsInBusiness', e.target.value)}
               className="w-full bg-transparent pl-3 pr-8 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer"
             >
-              <option value="" disabled className="bg-[#070e28] text-slate-400">Select duration</option>
-              <option value="startup" className="bg-[#070e28]">Less than 1 year (Startup)</option>
-              <option value="1-2" className="bg-[#070e28]">1 - 2 years</option>
-              <option value="3-5" className="bg-[#070e28]">3 - 5 years</option>
-              <option value="5+" className="bg-[#070e28]">5+ years</option>
+              <option value="" disabled className="bg-[#070e28] text-slate-400">Select business tenure</option>
+              <option value="startup" className="bg-[#070e28]">New Startup (&lt; 1 Year)</option>
+              <option value="1-2" className="bg-[#070e28]">1 - 2 Years</option>
+              <option value="3-5" className="bg-[#070e28]">3 - 5 Years</option>
+              <option value="5+" className="bg-[#070e28]">5+ Years Established</option>
             </select>
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
               ▼
@@ -157,39 +188,29 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
           </div>
         </div>
 
-        {/* Current Payment Processor */}
+        {/* Current Processor */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Current Payment Processor <span className="text-fuchsia-400">*</span>
+            Current Processor
           </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
+          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
               <CreditCard className="h-4 w-4" />
             </div>
-            <select
-              required
+            <input
+              type="text"
               value={formData.currentProcessor}
               onChange={(e) => handleChange('currentProcessor', e.target.value)}
-              className="w-full bg-transparent pl-3 pr-8 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer"
-            >
-              <option value="" disabled className="bg-[#070e28] text-slate-400">Select your current processor</option>
-              <option value="stripe" className="bg-[#070e28]">Stripe</option>
-              <option value="paypal" className="bg-[#070e28]">PayPal / Braintree</option>
-              <option value="adyen" className="bg-[#070e28]">Adyen</option>
-              <option value="authorizenet" className="bg-[#070e28]">Authorize.Net</option>
-              <option value="other" className="bg-[#070e28]">Local / Other Processor</option>
-              <option value="none" className="bg-[#070e28]">None (New Merchant)</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-              ▼
-            </div>
+              placeholder="e.g. Stripe, PayPal, Square, First Data"
+              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+            />
           </div>
         </div>
 
-        {/* Monthly Processing Volume (USD) */}
+        {/* Estimated Monthly Volume */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Monthly Processing Volume (USD) <span className="text-fuchsia-400">*</span>
+            Estimated Monthly Volume <span className="text-fuchsia-400">*</span>
           </label>
           <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
@@ -201,12 +222,12 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
               onChange={(e) => handleChange('monthlyVolume', e.target.value)}
               className="w-full bg-transparent pl-3 pr-8 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer"
             >
-              <option value="" disabled className="bg-[#070e28] text-slate-400">Select range</option>
-              <option value="0-50k" className="bg-[#070e28]">$10,000 - $50,000</option>
-              <option value="50k-100k" className="bg-[#070e28]">$50,000 - $100,000</option>
-              <option value="100k-250k" className="bg-[#070e28]">$100,000 - $250,000</option>
-              <option value="250k-500k" className="bg-[#070e28]">$250,000 - $500,000</option>
-              <option value="500k+" className="bg-[#070e28]">$500,000+</option>
+              <option value="" disabled className="bg-[#070e28] text-slate-400">Select monthly processing volume</option>
+              <option value="under-10k" className="bg-[#070e28]">&lt; $10,000 / month</option>
+              <option value="10k-50k" className="bg-[#070e28]">$10,000 - $50,000 / month</option>
+              <option value="50k-250k" className="bg-[#070e28]">$50,000 - $250,000 / month</option>
+              <option value="250k-1m" className="bg-[#070e28]">$250,000 - $1,000,000 / month</option>
+              <option value="1m+" className="bg-[#070e28]">$1,000,000+ / month (Enterprise)</option>
             </select>
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
               ▼
@@ -214,38 +235,29 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
           </div>
         </div>
 
-        {/* Average Transaction Amount (USD) */}
+        {/* Average Transaction Size */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Average Transaction Amount (USD) <span className="text-fuchsia-400">*</span>
+            Average Transaction Size
           </label>
-          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
+          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
               <ArrowLeftRight className="h-4 w-4" />
             </div>
-            <select
-              required
+            <input
+              type="text"
               value={formData.avgTransaction}
               onChange={(e) => handleChange('avgTransaction', e.target.value)}
-              className="w-full bg-transparent pl-3 pr-8 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer"
-            >
-              <option value="" disabled className="bg-[#070e28] text-slate-400">Select range</option>
-              <option value="sub25" className="bg-[#070e28]">Under $25</option>
-              <option value="25-100" className="bg-[#070e28]">$25 - $100</option>
-              <option value="100-250" className="bg-[#070e28]">$100 - $250</option>
-              <option value="250-1000" className="bg-[#070e28]">$250 - $1,000</option>
-              <option value="1000+" className="bg-[#070e28]">$1,000+</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-xs">
-              ▼
-            </div>
+              placeholder="e.g. $75"
+              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+            />
           </div>
         </div>
 
-        {/* Chargeback Rate */}
+        {/* Chargeback Ratio */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-200">
-            Chargeback Rate <span className="text-slate-400">(if known)</span>
+            Estimated Chargeback Ratio
           </label>
           <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_15px_rgba(0,240,255,0.45)] transition-all relative">
             <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
@@ -302,9 +314,20 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
 
         <button
           type="submit"
-          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+          disabled={submitting}
+          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
         >
-          Next Step <span>&rarr;</span>
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <span>Next Step</span>
+              <span>&rarr;</span>
+            </>
+          )}
         </button>
       </div>
     </form>

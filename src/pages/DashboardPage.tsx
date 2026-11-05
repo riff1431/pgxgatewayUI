@@ -3,8 +3,12 @@ import ProcessingOfferCard from '@/components/dashboard/ProcessingOfferCard'
 import QuickActions from '@/components/dashboard/QuickActions'
 import Sidebar from '@/components/dashboard/Sidebar'
 import HologramCard from '@/components/brand/HologramCard'
+import { useAuth } from '@/context/AuthContext'
 
 export default function DashboardPage() {
+  const { merchant } = useAuth()
+  const displayName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
+
   return (
     <div className="min-h-[calc(100vh-4.5rem)] max-w-[1440px] mx-auto p-4 sm:p-6 lg:p-8 relative">
       
@@ -27,7 +31,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 relative">
             <div className="space-y-1">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
-                Welcome, Merchant
+                Welcome, {displayName}
               </h1>
               <p className="text-sm sm:text-base text-slate-300">
                 Track your application and view your processing offer.
