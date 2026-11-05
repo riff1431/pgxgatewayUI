@@ -10,7 +10,6 @@ import {
   ChevronDown, 
   ChevronUp, 
   Activity, 
-  ShieldCheck, 
   Search, 
   Check, 
   AlertCircle
@@ -188,9 +187,9 @@ export default function SupportPage() {
         </div>
       </section>
 
-      {/* 4 Direct Contact Channels */}
+      {/* 3 Direct Contact Channels */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* Card 1 */}
           <a
@@ -250,25 +249,6 @@ export default function SupportPage() {
             </p>
             <div className="pt-2 text-xs font-mono text-fuchsia-300 font-semibold group-hover:underline">
               Register@pgxgateway.com
-            </div>
-          </a>
-
-          {/* Card 4 */}
-          <a
-            href="mailto:disputes@pgxgateway.com"
-            className="p-6 rounded-3xl bg-[#060b24]/90 border border-purple-500/30 space-y-3 hover:border-purple-400 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] group block cursor-pointer"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400 flex items-center justify-center text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform">
-              <ShieldCheck className="h-6 w-6" />
-            </div>
-            <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
-              Dispute Hotline
-            </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Urgent Ethoca & Verifi RDR alert mitigation to prevent chargeback ratios exceeding threshold.
-            </p>
-            <div className="pt-2 text-xs font-mono text-purple-300 font-semibold group-hover:underline">
-              disputes@pgxgateway.com
             </div>
           </a>
 
