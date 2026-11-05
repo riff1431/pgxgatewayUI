@@ -161,6 +161,29 @@ export const api = {
       }
       return res
     },
+
+    updateProfile: async (payload: {
+      fullName?: string
+      phone?: string
+      whatsapp?: string
+      telegram?: string
+    }) => {
+      const res = await request<ApiMerchant>('/auth/profile', {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      })
+      if (res.data) {
+        setStoredMerchant(res.data)
+      }
+      return res
+    },
+
+    changePassword: async (payload: { currentPassword: string; newPassword: string }) => {
+      return request<{ message: string }>('/auth/change-password', {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      })
+    },
   },
 
   // Merchant Application Flow
@@ -241,6 +264,12 @@ export const api = {
 
     markAsRead: async (id: string) => {
       return request<ApiNotification>(`/dashboard/messages/${id}/read`, {
+        method: 'PATCH',
+      })
+    },
+
+    markAllAsRead: async () => {
+      return request<{ message: string; unreadCount: number }>('/dashboard/messages/read-all', {
         method: 'PATCH',
       })
     },

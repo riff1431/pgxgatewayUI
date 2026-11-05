@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { api } from '@/lib/api'
 
-export default function QuickActions({ className = '' }: { className?: string }) {
+interface QuickActionsProps {
+  className?: string
+  onNavigateTab?: (tabId: string) => void
+}
+
+export default function QuickActions({ className = '', onNavigateTab }: QuickActionsProps) {
   const navigate = useNavigate()
   const { unreadCount, notifications, refreshMessages, addToast } = useAuth()
   
@@ -44,7 +49,13 @@ export default function QuickActions({ className = '' }: { className?: string })
       title: 'Upload Documents',
       icon: UploadCloud,
       borderType: 'cyan',
-      onClick: () => navigate('/register?step=3'),
+      onClick: () => {
+        if (onNavigateTab) {
+          onNavigateTab('documents')
+        } else {
+          navigate('/register?step=3')
+        }
+      },
     },
     {
       id: 'messages',
@@ -52,7 +63,13 @@ export default function QuickActions({ className = '' }: { className?: string })
       icon: Mail,
       badge: unreadCount,
       borderType: 'purple',
-      onClick: () => setModalType('messages'),
+      onClick: () => {
+        if (onNavigateTab) {
+          onNavigateTab('messages')
+        } else {
+          setModalType('messages')
+        }
+      },
     },
     {
       id: 'activity',

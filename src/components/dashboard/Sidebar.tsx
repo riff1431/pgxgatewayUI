@@ -11,19 +11,35 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
-export default function Sidebar({ className = '' }: { className?: string }) {
-  const [activeTab, setActiveTab] = useState('dashboard')
+interface SidebarProps {
+  className?: string
+  activeTab?: string
+  onTabChange?: (tabId: string) => void
+}
+
+export default function Sidebar({ className = '', activeTab: controlledTab, onTabChange }: SidebarProps) {
+  const [internalTab, setInternalTab] = useState('dashboard')
   const navigate = useNavigate()
   const { unreadCount, logout } = useAuth()
 
+  const currentTab = controlledTab !== undefined ? controlledTab : internalTab
+
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
-    { id: 'application', label: 'My Application', icon: FileText, path: '/register?step=3' },
-    { id: 'documents', label: 'Documents', icon: Folder, path: '/register?step=3' },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount, path: '#messages' },
-    { id: 'offer', label: 'Offer', icon: Tag, path: '#offer' },
-    { id: 'settings', label: 'Account Settings', icon: Settings, path: '#settings' },
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'application', label: 'My Application', icon: FileText },
+    { id: 'documents', label: 'Documents', icon: Folder },
+    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount },
+    { id: 'offer', label: 'Offer', icon: Tag },
+    { id: 'settings', label: 'Account Settings', icon: Settings },
   ]
+
+  const handleTabClick = (tabId: string) => {
+    if (onTabChange) {
+      onTabChange(tabId)
+    } else {
+      setInternalTab(tabId)
+    }
+  }
 
   const handleSignOut = () => {
     logout()
@@ -39,18 +55,13 @@ export default function Sidebar({ className = '' }: { className?: string }) {
         <div className="space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = activeTab === item.id
+            const isActive = currentTab === item.id
 
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => {
-                  setActiveTab(item.id)
-                  if (item.path.startsWith('/')) {
-                    navigate(item.path)
-                  }
-                }}
+                onClick={() => handleTabClick(item.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300 cursor-pointer ${
                   isActive
                     ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white border-2 border-fuchsia-400 shadow-[0_0_18px_rgba(217,70,239,0.85)] scale-[1.02]'

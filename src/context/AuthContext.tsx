@@ -53,6 +53,9 @@ interface AuthContextType {
   logout: () => void
   refreshStatus: () => Promise<void>
   refreshMessages: () => Promise<void>
+  updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string }) => Promise<void>
+  changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>
+  markAllAsRead: () => Promise<void>
 }
 
 const defaultOffer = {
@@ -251,6 +254,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     addToast('Signed Out', 'You have been signed out.', 'info')
   }
 
+  const updateProfile = async (payload: {
+    fullName?: string
+    phone?: string
+    whatsapp?: string
+    telegram?: string
+  }) => {
+    const res = await api.auth.updateProfile(payload)
+    if (res.data) {
+      setMerchant(res.data)
+      addToast('Profile Updated', 'Your profile details have been saved.', 'success')
+    }
+  }
+
+  const changePassword = async (payload: { currentPassword: string; newPassword: string }) => {
+    await api.auth.changePassword(payload)
+    addToast('Security Updated', 'Your password has been changed successfully.', 'success')
+  }
+
+  const markAllAsRead = async () => {
+    await api.dashboard.markAllAsRead()
+    setUnreadCount(0)
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+    addToast('Inbox Updated', 'All notifications marked as read.', 'info')
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -271,6 +299,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshStatus,
         refreshMessages,
+        updateProfile,
+        changePassword,
+        markAllAsRead,
       }}
     >
       {children}
