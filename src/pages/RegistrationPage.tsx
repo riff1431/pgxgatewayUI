@@ -16,17 +16,14 @@ export default function RegistrationPage() {
   const navigate = useNavigate()
   const { isAuthenticated, merchant } = useAuth()
 
-  // If merchant is already authenticated and has submitted application or approved, redirect directly to dashboard
+  // If merchant is already authenticated and has submitted an application (not in draft), redirect directly to dashboard
   useEffect(() => {
-    if (
-      isAuthenticated &&
-      (merchant?.applicationStatus === 'approved' ||
-        merchant?.applicationStatus === 'under_review' ||
-        merchant?.currentStep === 3)
-    ) {
-      navigate('/dashboard', { replace: true })
+    if (isAuthenticated && merchant) {
+      if (merchant.applicationStatus && merchant.applicationStatus !== 'draft') {
+        navigate('/dashboard', { replace: true })
+      }
     }
-  }, [isAuthenticated, merchant?.applicationStatus, merchant?.currentStep, navigate])
+  }, [isAuthenticated, merchant, navigate])
 
   // Derive step directly from searchParams (single source of truth)
   const stepParam = Number(searchParams.get('step'))
