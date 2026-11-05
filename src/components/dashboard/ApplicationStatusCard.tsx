@@ -82,8 +82,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 border-2 border-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.8)]">
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
-            <span className="text-[10px] sm:text-xs font-bold text-white mt-2">1</span>
-            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight">
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2">
               Account & Contact
             </span>
           </div>
@@ -93,8 +92,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 border-2 border-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.8)]">
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
-            <span className="text-[10px] sm:text-xs font-bold text-white mt-2">2</span>
-            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight">
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2">
               Business & Processing
             </span>
           </div>
@@ -110,8 +108,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
                 3
               </div>
             )}
-            <span className="text-[10px] sm:text-xs font-bold text-white mt-2">3</span>
-            <span className={`text-[10px] sm:text-[11px] leading-tight ${isApproved ? 'font-medium text-slate-300' : 'font-semibold text-fuchsia-300'}`}>
+            <span className={`text-[10px] sm:text-[11px] leading-tight mt-2 ${isApproved ? 'font-medium text-slate-300' : 'font-semibold text-fuchsia-300'}`}>
               Verification & Documents
             </span>
           </div>

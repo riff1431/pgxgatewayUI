@@ -14,34 +14,74 @@ import { useAuth } from '@/context/AuthContext'
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { isAuthenticated, merchant } = useAuth()
+  const { isAuthenticated, merchant, addToast } = useAuth()
 
-  // If merchant is already authenticated and has submitted an application (not in draft), redirect directly to dashboard
+  // Determine dynamic completion state of each step
+  const isStep1Complete = Boolean(isAuthenticated && merchant && merchant.businessEmail)
+  const isStep2Complete = Boolean(
+    isStep1Complete && 
+    merchant?.legalName && 
+    merchant?.industry && 
+    merchant?.monthlyVolume
+  )
+  const isStep3Complete = Boolean(isStep2Complete && merchant?.agreedToTerms)
+
+  // Maximum step the user is allowed to access right now
+  const maxAllowedStep = !isStep1Complete ? 1 : !isStep2Complete ? 2 : 3
+
+  // Completed steps array for visual progress
+  const completedSteps: number[] = []
+  if (isStep1Complete) completedSteps.push(1)
+  if (isStep2Complete) completedSteps.push(2)
+  if (isStep3Complete) completedSteps.push(3)
+
+  // Derive active step safely
+  const stepParam = Number(searchParams.get('step')) || 1
+  const step = Math.min(Math.max(stepParam, 1), 3)
+
+  // If user tries to access a step they haven't unlocked yet, redirect them back to their max allowed step
   useEffect(() => {
-    if (isAuthenticated && merchant) {
-      if (merchant.applicationStatus && merchant.applicationStatus !== 'draft') {
-        navigate('/dashboard', { replace: true })
-      }
+    if (step > maxAllowedStep) {
+      setSearchParams({ step: String(maxAllowedStep) }, { replace: true })
+      const requiredStep = !isStep1Complete ? 1 : 2
+      addToast(
+        `Step ${requiredStep} Required`,
+        `Please complete Step ${requiredStep} (${requiredStep === 1 ? 'Account & Contact' : 'Business & Processing'}) to continue.`,
+        'warning'
+      )
+    }
+  }, [step, maxAllowedStep, isStep1Complete, setSearchParams, addToast])
+
+  // If merchant has already fully submitted their application, redirect to dashboard
+  useEffect(() => {
+    if (isAuthenticated && merchant?.agreedToTerms && merchant?.applicationStatus && merchant.applicationStatus !== 'draft') {
+      navigate('/dashboard', { replace: true })
     }
   }, [isAuthenticated, merchant, navigate])
 
-  // Derive step directly from searchParams (single source of truth)
-  const stepParam = Number(searchParams.get('step'))
-  const step = stepParam >= 1 && stepParam <= 3 ? stepParam : 1
-
-  const handleStepChange = (newStep: number) => {
-    setSearchParams({ step: String(newStep) })
+  const handleStepClick = (targetStep: number) => {
+    if (targetStep <= maxAllowedStep) {
+      setSearchParams({ step: String(targetStep) })
+    } else {
+      const requiredStep = !isStep1Complete ? 1 : 2
+      addToast(
+        `Step ${requiredStep} Required`,
+        `Please complete Step ${requiredStep} before proceeding to Step ${targetStep}.`,
+        'warning'
+      )
+    }
   }
 
   const handleNext = () => {
-    if (step < 3) {
-      handleStepChange(step + 1)
+    const nextStep = step + 1
+    if (nextStep <= 3) {
+      setSearchParams({ step: String(nextStep) })
     }
   }
 
   const handleBack = () => {
     if (step > 1) {
-      handleStepChange(step - 1)
+      setSearchParams({ step: String(step - 1) })
     }
   }
 
@@ -75,7 +115,7 @@ export default function RegistrationPage() {
             </p>
           </div>
 
-          {/* Value Propositions (Unified Glowing Purple Badges as in Reference) */}
+          {/* Value Propositions (Unified Glowing Purple Badges) */}
           <div className="space-y-4">
             {/* Fast */}
             <div className="flex items-center gap-3">
@@ -124,7 +164,9 @@ export default function RegistrationPage() {
             {/* Top Stepper */}
             <RegistrationStepper 
               currentStep={step} 
-              onStepClick={handleStepChange} 
+              maxAllowedStep={maxAllowedStep}
+              completedSteps={completedSteps}
+              onStepClick={handleStepClick} 
             />
 
             {/* Step Contents */}
@@ -154,21 +196,23 @@ export default function RegistrationPage() {
           </div>
         </div>
 
-        {/* Right Column: 99% Approval Badge & Holographic 3D Card */}
-        <div className="lg:col-span-3 flex flex-col items-center justify-between space-y-6 pt-2">
-          {/* Approval Crest */}
-          <ApprovalBadge />
+        {/* Right Column: Holographic Card & Approval Crest */}
+        <div className="lg:col-span-3 flex flex-col justify-between space-y-6 pt-2">
+          {/* Top Approval Crest Badge */}
+          <div className="flex justify-center">
+            <ApprovalBadge />
+          </div>
 
-          {/* Hologram Card with Globe */}
-          <div className="my-auto py-4">
+          {/* Tilted Hologram Card */}
+          <div className="flex justify-center">
             <HologramCard />
           </div>
         </div>
 
       </div>
 
-      {/* Bottom Full-Width Approved Industries Bar */}
-      <div className="mt-8 pt-4">
+      {/* Bottom Ticker: Industries We Approve */}
+      <div className="mt-6 pt-4 border-t border-cyan-500/15">
         <IndustriesBar />
       </div>
 
