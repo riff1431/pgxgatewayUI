@@ -3,6 +3,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# Support build-time environment variables for Dokploy
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy package manifests
 COPY package*.json ./
 
@@ -24,10 +28,10 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx configuration for SPA routing
+# Copy custom nginx configuration for React Router SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose HTTP port for Dokploy
+# Expose HTTP port for Dokploy Traefik proxy
 EXPOSE 80
 
 # Run nginx in foreground
