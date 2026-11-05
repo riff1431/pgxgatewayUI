@@ -89,6 +89,28 @@ export interface ApplicationItem {
   updatedAt: string
 }
 
+export interface SystemConfigData {
+  siteName: string
+  logoUrl?: string
+  faviconUrl?: string
+  supportEmail?: string
+  supportPhone?: string
+  supportTelegram?: string
+  supportWhatsapp?: string
+  updatedAt?: string
+}
+
+export interface MerchantMessageItem {
+  _id: string
+  merchantId: string
+  title: string
+  content: string
+  type: 'system' | 'offer' | 'document' | 'general' | 'compliance'
+  isRead: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export const adminApi = {
   login: async (payload: { email: string; password: string }) => {
     const res = await adminRequest<{ email: string; role: string }>('/admin/login', {
@@ -136,6 +158,48 @@ export const adminApi = {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/review`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
+    })
+  },
+
+  // White-Label Branding & System Configuration
+  getSystemConfig: async () => {
+    return adminRequest<SystemConfigData>('/admin/config', { method: 'GET' })
+  },
+
+  updateSystemConfig: async (payload: Partial<SystemConfigData>) => {
+    return adminRequest<SystemConfigData>('/admin/config', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  getPublicConfig: async () => {
+    const API_BASE =
+      import.meta.env.VITE_API_URL ||
+      (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1' : 'http://localhost:5000/api/v1')
+    try {
+      const res = await fetch(`${API_BASE}/admin/config/public`)
+      const json = await res.json()
+      return json?.data as SystemConfigData | undefined
+    } catch {
+      return undefined
+    }
+  },
+
+  // Two-Way Direct Messaging with Merchants
+  sendMessageToMerchant: async (
+    merchantId: string,
+    payload: { title: string; content: string; type?: string }
+  ) => {
+    return adminRequest<MerchantMessageItem>(`/admin/merchants/${merchantId}/message`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  getMerchantMessages: async (merchantId: string) => {
+    return adminRequest<MerchantMessageItem[]>(`/admin/merchants/${merchantId}/messages`, {
+      method: 'GET',
     })
   },
 }

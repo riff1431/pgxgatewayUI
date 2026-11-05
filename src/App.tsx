@@ -1,9 +1,12 @@
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import Navbar from '@/components/layout/Navbar'
-import DashboardPage from '@/pages/DashboardPage'
+import Home from '@/pages/Home'
 import RegistrationPage from '@/pages/RegistrationPage'
+import DashboardPage from '@/pages/DashboardPage'
+import Checkout from '@/pages/Checkout'
 import AdminPage from '@/pages/AdminPage'
 import { AuthProvider } from '@/context/AuthContext'
+import { BrandingProvider } from '@/context/BrandingContext'
 
 function AppContent() {
   const location = useLocation()
@@ -21,9 +24,10 @@ function AppContent() {
       {/* Main Content View */}
       <main className="flex-1 flex flex-col">
         <Routes>
-          <Route path="/" element={<RegistrationPage />} />
+          <Route path="/" element={<Home />} />
           <Route path="/register" element={<RegistrationPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -35,9 +39,11 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <BrandingProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </BrandingProvider>
     </BrowserRouter>
   )
 }

@@ -16,7 +16,13 @@ import {
   Coins,
   FileText,
   X,
-  AlertCircle
+  AlertCircle,
+  MessageSquare,
+  Palette,
+  Send,
+  Phone,
+  Globe,
+  Check
 } from 'lucide-react'
 import {
   adminApi,
@@ -24,8 +30,11 @@ import {
   removeStoredAdminToken,
   type AdminStats,
   type ApplicationItem,
+  type SystemConfigData,
+  type MerchantMessageItem,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
+import { useBranding } from '@/context/BrandingContext'
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredAdminToken())
@@ -39,6 +48,30 @@ export default function AdminPage() {
   const [applications, setApplications] = useState<ApplicationItem[]>([])
   const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'approved' | 'rejected'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  const { updateLocalBranding } = useBranding()
+  const [adminSection, setAdminSection] = useState<'applications' | 'branding'>('applications')
+
+  // White-Label & Branding Form State
+  const [brandingForm, setBrandingForm] = useState<SystemConfigData>({
+    siteName: 'PGX Gateway',
+    logoUrl: '',
+    faviconUrl: '/favicon.svg',
+    supportEmail: 'support@pgxgateway.com',
+    supportPhone: '+1 (800) 749-4283',
+    supportTelegram: '@pgxsupport',
+    supportWhatsapp: '+1 (800) 749-4283',
+  })
+  const [brandingSaving, setBrandingSaving] = useState(false)
+
+  // Direct Merchant Messaging State
+  const [messagingApp, setMessagingApp] = useState<ApplicationItem | null>(null)
+  const [messageTitle, setMessageTitle] = useState('')
+  const [messageContent, setMessageContent] = useState('')
+  const [messageType, setMessageType] = useState<'general' | 'document' | 'offer' | 'system'>('general')
+  const [messageSending, setMessageSending] = useState(false)
+  const [merchantHistory, setMerchantHistory] = useState<MerchantMessageItem[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
 
   // Review Modal State
   const [selectedApp, setSelectedApp] = useState<ApplicationItem | null>(null)
@@ -68,12 +101,14 @@ export default function AdminPage() {
     if (!token) return
     setLoading(true)
     try {
-      const [statsRes, appsRes] = await Promise.all([
+      const [statsRes, appsRes, configRes] = await Promise.all([
         adminApi.getStats(),
         adminApi.getApplications({ status: statusFilter, search: searchQuery }),
+        adminApi.getSystemConfig(),
       ])
       if (statsRes.data) setStats(statsRes.data)
       if (appsRes.data) setApplications(appsRes.data)
+      if (configRes.data) setBrandingForm(configRes.data)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to fetch admin data'
       showToast('Error', msg, 'error')
@@ -88,13 +123,15 @@ export default function AdminPage() {
       if (!token) return
       setLoading(true)
       try {
-        const [statsRes, appsRes] = await Promise.all([
+        const [statsRes, appsRes, configRes] = await Promise.all([
           adminApi.getStats(),
           adminApi.getApplications({ status: statusFilter, search: searchQuery }),
+          adminApi.getSystemConfig(),
         ])
         if (isSubscribed) {
           if (statsRes.data) setStats(statsRes.data)
           if (appsRes.data) setApplications(appsRes.data)
+          if (configRes.data) setBrandingForm(configRes.data)
         }
       } catch (err: unknown) {
         if (isSubscribed) {
@@ -114,6 +151,67 @@ export default function AdminPage() {
       isSubscribed = false
     }
   }, [token, statusFilter, searchQuery])
+
+  // Save White-Label Branding Settings
+  const handleSaveBranding = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBrandingSaving(true)
+    try {
+      const res = await adminApi.updateSystemConfig(brandingForm)
+      if (res.data) {
+        setBrandingForm(res.data)
+        updateLocalBranding(res.data)
+        showToast('Branding Saved', 'Logo, favicon, website name & contact details updated.', 'success')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save branding settings'
+      showToast('Error', msg, 'error')
+    } finally {
+      setBrandingSaving(false)
+    }
+  }
+
+  // Open Direct Message Modal
+  const openMessageModal = async (app: ApplicationItem) => {
+    setMessagingApp(app)
+    setMessageTitle(`Notice regarding application for ${app.legalName || app.fullName}`)
+    setMessageContent('')
+    setMessageType('general')
+    setHistoryLoading(true)
+    try {
+      const res = await adminApi.getMerchantMessages(app._id)
+      if (res.data) setMerchantHistory(res.data)
+    } catch {
+      setMerchantHistory([])
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  // Send Direct Message to Merchant
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!messagingApp || !messageContent.trim()) return
+
+    setMessageSending(true)
+    try {
+      const res = await adminApi.sendMessageToMerchant(messagingApp._id, {
+        title: messageTitle.trim() || 'Notice from Underwriting Desk',
+        content: messageContent.trim(),
+        type: messageType,
+      })
+      if (res.data) {
+        setMerchantHistory((prev) => [res.data, ...prev])
+        showToast('Message Dispatched', `Delivered in real-time to ${messagingApp.fullName}`, 'success')
+        setMessageContent('')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to deliver message'
+      showToast('Error', msg, 'error')
+    } finally {
+      setMessageSending(false)
+    }
+  }
 
   // Handle Admin Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -311,7 +409,42 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* KPI Stats Cards */}
+      {/* Admin Section Tabs Navigation */}
+      <div className="flex items-center gap-3 border-b border-cyan-500/20 pb-3">
+        <button
+          type="button"
+          onClick={() => setAdminSection('applications')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            adminSection === 'applications'
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          <span>Merchant Applications</span>
+          <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono">
+            {applications.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setAdminSection('branding')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            adminSection === 'branding'
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Palette className="h-4 w-4" />
+          <span>White-Label & Branding</span>
+        </button>
+      </div>
+
+      {/* SECTION 1: APPLICATIONS & UNDERWRITING */}
+      {adminSection === 'applications' && (
+        <div className="space-y-6">
+          {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Merchants */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between">
@@ -486,7 +619,17 @@ export default function AdminPage() {
                       </td>
 
                       {/* Action */}
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => openMessageModal(app)}
+                          className="px-3 py-1.5 rounded-full bg-[#09153a] hover:bg-[#0f215c] border border-cyan-400/60 text-cyan-300 font-bold text-xs shadow-[0_0_10px_rgba(0,240,255,0.2)] hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] cursor-pointer transition-all inline-flex items-center gap-1.5"
+                          title="Send Direct Real-Time Message to Merchant"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5 text-cyan-400" />
+                          <span>Message</span>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => openReviewModal(app)}
@@ -503,6 +646,251 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+    </div>
+  )}
+
+  {/* SECTION 2: WHITE-LABEL & BRANDING CONFIGURATION */}
+  {adminSection === 'branding' && (
+    <div className="space-y-6 animate-fade-in">
+      <div className="p-5 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl">
+        <div className="flex items-center gap-3 pb-3 border-b border-cyan-500/20">
+          <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)]">
+            <Palette className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-white">White-Label & System Branding Settings</h2>
+            <p className="text-xs text-slate-400">
+              Customize your platform name, logo image, browser favicon, and compliance contact details in real-time.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveBranding} className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Form Fields (8 Cols) */}
+          <div className="lg:col-span-7 space-y-5">
+            
+            {/* Website / Platform Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
+                <span>Platform Brand Name / Website Title</span>
+                <span className="text-[10px] text-cyan-400 font-mono">Dynamic Header & Titlebar</span>
+              </label>
+              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
+                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                  <Globe className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={brandingForm.siteName}
+                  onChange={(e) => setBrandingForm({ ...brandingForm, siteName: e.target.value })}
+                  placeholder="e.g. PGX Gateway or Your Brand Name"
+                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Custom Logo Image URL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
+                <span>Custom Logo Image URL</span>
+                <span className="text-[10px] text-slate-400">PNG / SVG / WebP (Cloudinary or Direct URL)</span>
+              </label>
+              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
+                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                  <Building2 className="h-4 w-4" />
+                </div>
+                <input
+                  type="url"
+                  value={brandingForm.logoUrl || ''}
+                  onChange={(e) => setBrandingForm({ ...brandingForm, logoUrl: e.target.value })}
+                  placeholder="https://res.cloudinary.com/.../your-logo.png (Leave blank for default vector logo)"
+                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Custom Favicon URL */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
+                <span>Browser Tab Favicon URL</span>
+                <span className="text-[10px] text-slate-400">.ico / .svg / .png (Browser tab icon)</span>
+              </label>
+              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
+                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  value={brandingForm.faviconUrl || ''}
+                  onChange={(e) => setBrandingForm({ ...brandingForm, faviconUrl: e.target.value })}
+                  placeholder="/favicon.svg or https://.../favicon.ico"
+                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Support Email & Support Phone */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-200">Support Email</label>
+                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 transition-all">
+                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    value={brandingForm.supportEmail || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, supportEmail: e.target.value })}
+                    placeholder="support@yourbrand.com"
+                    className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-200">Support Phone / Hot Line</label>
+                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 transition-all">
+                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={brandingForm.supportPhone || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, supportPhone: e.target.value })}
+                    placeholder="+1 (800) 000-0000"
+                    className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Telegram & WhatsApp Handles */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-200">Official Telegram Handle</label>
+                <input
+                  type="text"
+                  value={brandingForm.supportTelegram || ''}
+                  onChange={(e) => setBrandingForm({ ...brandingForm, supportTelegram: e.target.value })}
+                  placeholder="@yourbrandsupport"
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-200">Official WhatsApp Contact</label>
+                <input
+                  type="text"
+                  value={brandingForm.supportWhatsapp || ''}
+                  onChange={(e) => setBrandingForm({ ...brandingForm, supportWhatsapp: e.target.value })}
+                  placeholder="+1 (800) 000-0000"
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="pt-3">
+              <button
+                type="submit"
+                disabled={brandingSaving}
+                className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-extrabold text-sm border border-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_30px_rgba(217,70,239,0.9)] transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {brandingSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Saving Branding Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 stroke-[2.5]" />
+                    <span>Save System & Branding Settings</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+          </div>
+
+          {/* Real-Time Live Brand Preview (5 Cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="p-5 rounded-2xl bg-[#030617] border border-cyan-500/40 shadow-xl space-y-4">
+              <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center justify-between">
+                <span>Live Real-Time Brand Preview</span>
+                <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  WYSIWYG
+                </span>
+              </div>
+
+              {/* Simulated Browser Navbar Preview */}
+              <div className="p-3 rounded-xl bg-[#05091a] border border-slate-700 space-y-2">
+                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-800">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                  <div className="ml-2 flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-mono truncate max-w-[200px]">
+                    {brandingForm.faviconUrl ? (
+                      <img src={brandingForm.faviconUrl} alt="Favicon" className="w-3 h-3 object-contain" />
+                    ) : (
+                      <ShieldCheck className="h-3 w-3 text-cyan-400" />
+                    )}
+                    <span>{brandingForm.siteName || 'PGX Gateway'}</span>
+                  </div>
+                </div>
+
+                {/* Navbar Visual */}
+                <div className="pt-1 flex items-center justify-between">
+                  {brandingForm.logoUrl ? (
+                    <img
+                      src={brandingForm.logoUrl}
+                      alt={brandingForm.siteName}
+                      className="h-7 w-auto object-contain drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]"
+                      onError={(e) => {
+                        // Fallback indicator
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  ) : (
+                    <div className="text-sm font-black italic tracking-wide text-white">
+                      <span>{brandingForm.siteName?.split(' ')[0] || 'PGX'}</span>
+                      <span className="text-fuchsia-400">/</span>
+                      <div className="text-[8px] font-bold tracking-[0.2em] text-cyan-400 uppercase -mt-0.5">
+                        {brandingForm.siteName?.split(' ').slice(1).join(' ') || 'GATEWAY'}
+                      </div>
+                    </div>
+                  )}
+
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {brandingForm.supportEmail || 'support@pgxgateway.com'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Favicon Box */}
+              <div className="p-3 rounded-xl bg-[#05091a] border border-cyan-500/20 flex items-center justify-between text-xs">
+                <div>
+                  <div className="font-bold text-white">Browser Tab Icon (Favicon)</div>
+                  <div className="text-[10px] text-slate-400">Loaded in browser header dynamically</div>
+                </div>
+                <div className="w-8 h-8 rounded-lg bg-slate-900 border border-cyan-400/50 flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,0.4)]">
+                  {brandingForm.faviconUrl ? (
+                    <img src={brandingForm.faviconUrl} alt="Favicon" className="w-5 h-5 object-contain" />
+                  ) : (
+                    <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  )}
 
       {/* Review & Decision Modal */}
       {selectedApp && (
@@ -713,6 +1101,196 @@ export default function AdminPage() {
                   </>
                 )}
               </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Direct Merchant Messaging Modal */}
+      {messagingApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-6 sm:p-7 space-y-5 my-8">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)]">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">
+                    Direct Message to {messagingApp.fullName}
+                  </h3>
+                  <div className="text-xs text-cyan-300">
+                    {messagingApp.legalName || 'Merchant'} • {messagingApp.businessEmail}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMessagingApp(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Quick Templates Selector */}
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Quick Preset Templates:
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMessageTitle('KYC Document Clarification Required')
+                    setMessageContent(
+                      'Please upload an uncropped, high-resolution copy of your business registration document and Director Government ID to complete underwriting review.'
+                    )
+                    setMessageType('document')
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                >
+                  📄 Request KYC Re-upload
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMessageTitle('Processing Volume Limit Raised')
+                    setMessageContent(
+                      'Good news! Following our risk review, your monthly processing limit has been elevated to $500,000 with next-day settlement.'
+                    )
+                    setMessageType('offer')
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-fuchsia-400/40 text-fuchsia-300 text-[11px] font-semibold transition-colors cursor-pointer"
+                >
+                  🚀 Volume Raised to $500k
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMessageTitle('Underwriting & Transaction Inquiry')
+                    setMessageContent(
+                      'Could you please specify your expected average ticket size and primary processing currencies to help us optimize your acquiring rails?'
+                    )
+                    setMessageType('general')
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-[11px] font-semibold transition-colors cursor-pointer"
+                >
+                  💬 Inquire Details
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSendMessage} className="space-y-4">
+              
+              {/* Category & Title */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 block font-semibold">Message Category</label>
+                  <select
+                    value={messageType}
+                    onChange={(e) => setMessageType(e.target.value as 'general' | 'document' | 'offer' | 'system')}
+                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                  >
+                    <option value="general">General Notice</option>
+                    <option value="document">Document Request</option>
+                    <option value="offer">Offer & Terms</option>
+                    <option value="system">Compliance Alert</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-[10px] text-slate-400 block font-semibold">Subject / Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={messageTitle}
+                    onChange={(e) => setMessageTitle(e.target.value)}
+                    placeholder="e.g. Underwriting Inquiry"
+                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* Message Content */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 block font-semibold">Message Body</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Type your message to the merchant here. This will be delivered directly to their dashboard Messages tab in real-time..."
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Send Button */}
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-[10px] text-slate-400">
+                  ⚡ Pushes instant WebSocket notification to merchant
+                </span>
+
+                <button
+                  type="submit"
+                  disabled={messageSending}
+                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {messageSending ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Sending Message...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-3.5 w-3.5" />
+                      <span>Send Message to Merchant</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </form>
+
+            {/* Conversation History */}
+            <div className="pt-3 border-t border-cyan-500/20 space-y-2">
+              <div className="text-xs font-bold text-cyan-300 flex items-center justify-between">
+                <span>Recent Message History with this Merchant</span>
+                {historyLoading && <Loader2 className="h-3 w-3 animate-spin text-cyan-400" />}
+              </div>
+
+              <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                {merchantHistory.length === 0 ? (
+                  <div className="text-center py-4 text-slate-500 text-xs">
+                    {historyLoading ? 'Loading message history...' : 'No previous messages logged with this merchant.'}
+                  </div>
+                ) : (
+                  merchantHistory.map((item) => (
+                    <div
+                      key={item._id}
+                      className="p-2.5 rounded-xl bg-[#091332] border border-cyan-500/20 text-xs space-y-1"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white">{item.title}</span>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(item.createdAt).toLocaleDateString()} {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-300 leading-relaxed">{item.content}</p>
+                      <div className="flex items-center gap-2 pt-0.5 text-[9px] text-slate-400">
+                        <span className="capitalize px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono">
+                          {item.type}
+                        </span>
+                        <span>{item.isRead ? '✓ Read by merchant' : '• Unread'}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
           </div>

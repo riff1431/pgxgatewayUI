@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useBranding } from '@/context/BrandingContext'
 
 interface LogoProps {
   className?: string
@@ -6,8 +7,26 @@ interface LogoProps {
 }
 
 export default function Logo({ className = '', size = 'md' }: LogoProps) {
+  const { branding } = useBranding()
   const isSm = size === 'sm'
   const isLg = size === 'lg'
+
+  // If a custom logo image URL is configured by the admin, display the custom image
+  if (branding.logoUrl) {
+    const imgHeight = isSm ? 'h-7' : isLg ? 'h-12' : 'h-9'
+    return (
+      <Link 
+        to="/" 
+        className={`inline-flex items-center select-none group transition-transform hover:scale-[1.02] ${className}`}
+      >
+        <img
+          src={branding.logoUrl}
+          alt={branding.siteName || 'Logo'}
+          className={`${imgHeight} w-auto object-contain drop-shadow-[0_0_12px_rgba(0,240,255,0.4)]`}
+        />
+      </Link>
+    )
+  }
 
   return (
     <Link 
@@ -21,7 +40,7 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
           }`}
           style={{ fontFamily: 'system-ui, sans-serif' }}
         >
-          PGX
+          {branding.siteName ? branding.siteName.split(' ')[0] : 'PGX'}
         </span>
         <span 
           className={`font-black italic bg-gradient-to-r from-fuchsia-400 to-pink-500 bg-clip-text text-transparent ml-0.5 drop-shadow-[0_0_12px_rgba(217,70,239,0.8)] ${
@@ -36,7 +55,9 @@ export default function Logo({ className = '', size = 'md' }: LogoProps) {
           isSm ? 'text-[8px]' : isLg ? 'text-[12px]' : 'text-[9px] sm:text-[10px]'
         }`}
       >
-        GATEWAY
+        {branding.siteName && branding.siteName.split(' ').length > 1
+          ? branding.siteName.split(' ').slice(1).join(' ')
+          : 'GATEWAY'}
       </span>
     </Link>
   )
