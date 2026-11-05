@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { 
   Building2, 
   Eye, 
@@ -19,6 +20,7 @@ interface Step1AccountProps {
 }
 
 export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
+  const navigate = useNavigate()
   const { register, login, merchant } = useAuth()
   const [isSignInMode, setIsSignInMode] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -50,16 +52,18 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           businessEmail: formData.businessEmail,
           password: formData.password,
         })
-      } else {
-        await register({
-          fullName: formData.fullName,
-          businessEmail: formData.businessEmail,
-          phone: formData.phone,
-          whatsapp: formData.whatsapp,
-          telegram: formData.telegram,
-          password: formData.password,
-        })
+        navigate('/dashboard')
+        return
       }
+
+      await register({
+        fullName: formData.fullName,
+        businessEmail: formData.businessEmail,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        telegram: formData.telegram,
+        password: formData.password,
+      })
       onNext()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An error occurred during authentication.'

@@ -71,7 +71,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
             <>
               {/* Notification Bell with Badge */}
               <Link 
-                to="/dashboard"
+                to="/dashboard?tab=messages"
                 aria-label="Notifications"
                 className="relative p-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
               >

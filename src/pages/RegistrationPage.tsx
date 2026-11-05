@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layers, Rocket, ShieldCheck } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
@@ -8,10 +9,24 @@ import RegistrationStepper from '@/components/registration/RegistrationStepper'
 import Step1Account from '@/components/registration/Step1Account'
 import Step2Business from '@/components/registration/Step2Business'
 import Step3Verification from '@/components/registration/Step3Verification'
+import { useAuth } from '@/context/AuthContext'
 
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { isAuthenticated, merchant } = useAuth()
+
+  // If merchant is already authenticated and has submitted application or approved, redirect directly to dashboard
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      (merchant?.applicationStatus === 'approved' ||
+        merchant?.applicationStatus === 'under_review' ||
+        merchant?.currentStep === 3)
+    ) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, merchant?.applicationStatus, merchant?.currentStep, navigate])
 
   // Derive step directly from searchParams (single source of truth)
   const stepParam = Number(searchParams.get('step'))
