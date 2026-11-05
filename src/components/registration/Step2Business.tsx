@@ -18,7 +18,7 @@ import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
 interface Step2BusinessProps {
-  onNext: () => void
+  onNext: () => void | Promise<void>
   onBack: () => void
 }
 
@@ -31,7 +31,7 @@ interface FormErrors {
 }
 
 export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
-  const { merchant, refreshStatus, addToast } = useAuth()
+  const { merchant, addToast } = useAuth()
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -166,9 +166,8 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
         chargebackRate: formData.chargebackRate,
         switchReason: formData.switchReason.trim(),
       })
-      await refreshStatus()
       addToast('Business Information Saved', 'Proceeding to Step 3 document verification.', 'success')
-      onNext()
+      await onNext()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to update business information.'
       setErrorMessage(msg)

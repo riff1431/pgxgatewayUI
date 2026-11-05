@@ -11,7 +11,7 @@ const defaultBranding: SystemConfigData = {
   siteName: 'PGX Gateway',
   logoUrl: '',
   faviconUrl: '/favicon.svg',
-  supportEmail: 'support@pgxgateway.com',
+  supportEmail: 'Register@pgxgateway.com',
   supportPhone: '+1 (800) 749-4283',
   supportTelegram: '@pgxsupport',
   supportWhatsapp: '+1 (800) 749-4283',

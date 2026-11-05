@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Layers, Rocket, ShieldCheck } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { isAuthenticated, merchant, addToast } = useAuth()
+  const { isAuthenticated, merchant, addToast, refreshMerchant } = useAuth()
 
   // Determine dynamic completion state of each step
   const isStep1Complete = Boolean(isAuthenticated && merchant && merchant.businessEmail)
@@ -72,12 +72,15 @@ export default function RegistrationPage() {
     }
   }
 
-  const handleNext = () => {
+  // Async-aware step advancement: refresh merchant profile first then navigate
+  const handleNext = useCallback(async () => {
     const nextStep = step + 1
     if (nextStep <= 3) {
+      // Refresh merchant data so step-completion guards see updated values
+      await refreshMerchant()
       setSearchParams({ step: String(nextStep) })
     }
-  }
+  }, [step, refreshMerchant, setSearchParams])
 
   const handleBack = () => {
     if (step > 1) {

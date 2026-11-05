@@ -193,7 +193,12 @@ export default function SupportPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
           {/* Card 1 */}
-          <div className="p-6 rounded-3xl bg-[#060b24]/90 border border-cyan-500/30 space-y-3 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(0,240,255,0.1)] group">
+          <a
+            href="https://t.me/PgxFirm"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-6 rounded-3xl bg-[#060b24]/90 border border-cyan-500/30 space-y-3 hover:border-cyan-400 transition-all shadow-[0_0_15px_rgba(0,240,255,0.1)] group block cursor-pointer"
+          >
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.5)] group-hover:scale-105 transition-transform">
               <MessageSquare className="h-6 w-6" />
             </div>
@@ -203,13 +208,18 @@ export default function SupportPage() {
             <p className="text-xs text-slate-300 leading-relaxed">
               Instant direct messenger channel for registered enterprise merchants and urgent questions.
             </p>
-            <div className="pt-2 text-xs font-mono text-cyan-300 font-semibold">
-              @PGXGatewayDesk
+            <div className="pt-2 text-xs font-mono text-cyan-300 font-semibold group-hover:underline">
+              @PgxFirm
             </div>
-          </div>
+          </a>
 
           {/* Card 2 */}
-          <div className="p-6 rounded-3xl bg-[#060b24]/90 border border-emerald-500/30 space-y-3 hover:border-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)] group">
+          <a
+            href="https://wa.me/14378824800"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-6 rounded-3xl bg-[#060b24]/90 border border-emerald-500/30 space-y-3 hover:border-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)] group block cursor-pointer"
+          >
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.5)] group-hover:scale-105 transition-transform">
               <Phone className="h-6 w-6" />
             </div>
@@ -219,13 +229,16 @@ export default function SupportPage() {
             <p className="text-xs text-slate-300 leading-relaxed">
               Direct connection with dedicated account managers for processing limit increases and banking reviews.
             </p>
-            <div className="pt-2 text-xs font-mono text-emerald-300 font-semibold">
-              +1 (800) 749-0199
+            <div className="pt-2 text-xs font-mono text-emerald-300 font-semibold group-hover:underline">
+              +1 (437) 882-4800
             </div>
-          </div>
+          </a>
 
           {/* Card 3 */}
-          <div className="p-6 rounded-3xl bg-[#060b24]/90 border border-fuchsia-500/30 space-y-3 hover:border-fuchsia-400 transition-all shadow-[0_0_15px_rgba(217,70,239,0.1)] group">
+          <a
+            href="mailto:Register@pgxgateway.com"
+            className="p-6 rounded-3xl bg-[#060b24]/90 border border-fuchsia-500/30 space-y-3 hover:border-fuchsia-400 transition-all shadow-[0_0_15px_rgba(217,70,239,0.1)] group block cursor-pointer"
+          >
             <div className="w-12 h-12 rounded-2xl bg-fuchsia-500/20 border border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)] group-hover:scale-105 transition-transform">
               <Mail className="h-6 w-6" />
             </div>
@@ -235,13 +248,16 @@ export default function SupportPage() {
             <p className="text-xs text-slate-300 leading-relaxed">
               Official underwriting, KYC documentation submission, and general merchant queries.
             </p>
-            <div className="pt-2 text-xs font-mono text-fuchsia-300 font-semibold">
-              support@pgxgateway.com
+            <div className="pt-2 text-xs font-mono text-fuchsia-300 font-semibold group-hover:underline">
+              Register@pgxgateway.com
             </div>
-          </div>
+          </a>
 
           {/* Card 4 */}
-          <div className="p-6 rounded-3xl bg-[#060b24]/90 border border-purple-500/30 space-y-3 hover:border-purple-400 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] group">
+          <a
+            href="mailto:disputes@pgxgateway.com"
+            className="p-6 rounded-3xl bg-[#060b24]/90 border border-purple-500/30 space-y-3 hover:border-purple-400 transition-all shadow-[0_0_15px_rgba(168,85,247,0.1)] group block cursor-pointer"
+          >
             <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400 flex items-center justify-center text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.5)] group-hover:scale-105 transition-transform">
               <ShieldCheck className="h-6 w-6" />
             </div>
@@ -251,10 +267,10 @@ export default function SupportPage() {
             <p className="text-xs text-slate-300 leading-relaxed">
               Urgent Ethoca & Verifi RDR alert mitigation to prevent chargeback ratios exceeding threshold.
             </p>
-            <div className="pt-2 text-xs font-mono text-purple-300 font-semibold">
+            <div className="pt-2 text-xs font-mono text-purple-300 font-semibold group-hover:underline">
               disputes@pgxgateway.com
             </div>
-          </div>
+          </a>
 
         </div>
       </section>

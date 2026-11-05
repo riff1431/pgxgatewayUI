@@ -17,7 +17,7 @@ import {
 import { useAuth } from '@/context/AuthContext'
 
 interface Step1AccountProps {
-  onNext: () => void
+  onNext: () => void | Promise<void>
   onBack?: () => void
 }
 
@@ -199,7 +199,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           businessEmail: formData.businessEmail.trim(),
           password: formData.password,
         })
-        onNext()
+        await onNext()
         return
       }
 
@@ -211,7 +211,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           whatsapp: formData.whatsapp.trim(),
           telegram: formData.telegram.trim(),
         })
-        onNext()
+        await onNext()
         return
       }
 
@@ -224,7 +224,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
         telegram: formData.telegram.trim(),
         password: formData.password,
       })
-      onNext()
+      await onNext()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An error occurred during authentication.'
       setGlobalError(msg)

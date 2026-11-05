@@ -52,6 +52,7 @@ interface AuthContextType {
   login: (payload: { businessEmail: string; password: string }) => Promise<void>
   logout: () => void
   refreshStatus: () => Promise<void>
+  refreshMerchant: () => Promise<void>
   refreshMessages: () => Promise<void>
   updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string }) => Promise<void>
   changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>
@@ -96,15 +97,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  // Refresh status from backend
+  // Refresh the full merchant profile from backend
+  const refreshMerchant = useCallback(async () => {
+    if (!token) return
+    try {
+      const res = await api.auth.getMe()
+      if (res.data) {
+        setMerchant(res.data)
+        setApplicationStatus(res.data.applicationStatus || 'under_review')
+        setCurrentStep(res.data.currentStep || 1)
+      }
+    } catch (err) {
+      console.warn('Failed to refresh merchant:', err)
+    }
+  }, [token])
+
+  // Refresh status from backend (also refreshes full merchant profile)
   const refreshStatus = useCallback(async () => {
     if (!token) return
     try {
-      const res = await api.merchants.getStatus()
-      if (res.data) {
-        setApplicationStatus(res.data.status)
-        setCurrentStep(res.data.currentStep)
-      }
+      // Refresh full merchant profile so step completion checks work
+      await refreshMerchant()
       const offerRes = await api.merchants.getOffer()
       if (offerRes.data) {
         setOffer(offerRes.data)
@@ -112,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       console.warn('Failed to refresh status:', err)
     }
-  }, [token])
+  }, [token, refreshMerchant])
 
   // Refresh messages from backend
   const refreshMessages = useCallback(async () => {
@@ -172,10 +185,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isSubscribed = true
     const loadInitialData = async () => {
       try {
-        const res = await api.merchants.getStatus()
-        if (isSubscribed && res.data) {
-          setApplicationStatus(res.data.status)
-          setCurrentStep(res.data.currentStep)
+        // Refresh full merchant profile for accurate step-completion checks
+        const meRes = await api.auth.getMe()
+        if (isSubscribed && meRes.data) {
+          setMerchant(meRes.data)
+          setApplicationStatus(meRes.data.applicationStatus || 'under_review')
+          setCurrentStep(meRes.data.currentStep || 1)
         }
         const offerRes = await api.merchants.getOffer()
         if (isSubscribed && offerRes.data) {
@@ -298,6 +313,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         logout,
         refreshStatus,
+        refreshMerchant,
         refreshMessages,
         updateProfile,
         changePassword,
