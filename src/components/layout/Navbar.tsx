@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Bell, ChevronDown, User } from 'lucide-react'
+import { Bell, ChevronDown, ShieldCheck, User } from 'lucide-react'
 import Logo from '@/components/brand/Logo'
 import { useAuth } from '@/context/AuthContext'
 
@@ -56,7 +56,17 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
         </nav>
 
         {/* Right Action Area */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          {/* Admin Desk Shortcut */}
+          <Link
+            to="/admin"
+            title="Underwriting & Approvals Desk"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-purple-500/50 bg-purple-600/15 text-fuchsia-300 text-xs font-bold shadow-[0_0_10px_rgba(217,70,239,0.3)] hover:bg-purple-600/25 hover:border-fuchsia-400 hover:text-white transition-all cursor-pointer"
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-fuchsia-400" />
+            <span className="hidden sm:inline">Admin</span>
+          </Link>
+
           {isDashboard || isAuthenticated ? (
             <>
               {/* Notification Bell with Badge */}
