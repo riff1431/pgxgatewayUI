@@ -29,6 +29,16 @@ export interface ToastMessage {
   type?: 'success' | 'info' | 'warning' | 'error'
 }
 
+export interface OfferData {
+  rate: string
+  volume: string
+  settlement: string
+  reserve: string
+  isAvailable: boolean
+  accepted?: boolean
+  acceptedAt?: string
+}
+
 interface AuthContextType {
   merchant: ApiMerchant | null
   token: string | null
@@ -36,13 +46,7 @@ interface AuthContextType {
   isLoading: boolean
   applicationStatus: string
   currentStep: number
-  offer: {
-    rate: string
-    volume: string
-    settlement: string
-    reserve: string
-    isAvailable: boolean
-  }
+  offer: OfferData
   unreadCount: number
   notifications: ApiNotification[]
   toasts: ToastMessage[]
@@ -65,6 +69,7 @@ interface AuthContextType {
   refreshStatus: () => Promise<void>
   refreshMerchant: () => Promise<void>
   refreshMessages: () => Promise<void>
+  acceptOffer: () => Promise<void>
   updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string }) => Promise<void>
   changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>
   markOneAsRead: (id: string) => Promise<void>
@@ -81,12 +86,13 @@ interface AuthContextType {
   }) => Promise<ApiNotification | null>
 }
 
-const defaultOffer = {
-  rate: '2.9% + $0.30',
-  volume: 'Up to $250,000',
-  settlement: 'Daily (Next Day)',
-  reserve: '5% (90 Days)',
-  isAvailable: true,
+const defaultOffer: OfferData = {
+  rate: '',
+  volume: '',
+  settlement: '',
+  reserve: '',
+  isAvailable: false,
+  accepted: false,
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -99,7 +105,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     merchant?.applicationStatus || 'under_review'
   )
   const [currentStep, setCurrentStep] = useState<number>(merchant?.currentStep || 1)
-  const [offer, setOffer] = useState(merchant?.offer || defaultOffer)
+  const [offer, setOffer] = useState<OfferData>(() => {
+    if (merchant?.offer && typeof merchant.offer.isAvailable === 'boolean') {
+      return merchant.offer
+    }
+    return defaultOffer
+  })
   const [unreadCount, setUnreadCount] = useState<number>(0)
   const [notifications, setNotifications] = useState<ApiNotification[]>([])
   const [toasts, setToasts] = useState<ToastMessage[]>([])
@@ -147,6 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setMerchant(res.data)
         setApplicationStatus(res.data.applicationStatus || 'under_review')
         setCurrentStep(res.data.currentStep || 1)
+        if (res.data.offer) {
+          setOffer(res.data.offer)
+        }
       }
     } catch (err) {
       console.warn('Failed to refresh merchant:', err)
@@ -196,6 +210,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[WebSocket Event] Application updated:', data)
       setApplicationStatus(data.applicationStatus)
       if (data.currentStep) setCurrentStep(data.currentStep)
+      if (data.offer) {
+        setOffer(data.offer as OfferData)
+      }
       playMessageSound('urgent')
       addToast(
         'Application Status Updated',
@@ -207,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubOffer = subscribeToOfferUpdate((data) => {
       console.log('[WebSocket Event] Offer updated:', data)
       if (data.offer) {
-        setOffer(data.offer as typeof defaultOffer)
+        setOffer(data.offer as OfferData)
       }
       playMessageSound('incoming')
       addToast('New Processing Offer Available', 'Your rates have been updated.', 'info')
@@ -347,9 +364,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     removeStoredToken()
     setToken(null)
     setMerchant(null)
+    setOffer(defaultOffer)
     disconnectSocket()
     addToast('Signed Out', 'You have been signed out.', 'info')
   }
+
+  const acceptOffer = useCallback(async () => {
+    try {
+      const res = await api.merchants.acceptOffer()
+      if (res.data) {
+        setOffer(res.data)
+      }
+      addToast('Offer Accepted', 'Your customized processing terms are now active.', 'success')
+      await refreshMessages()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to accept offer.'
+      addToast('Offer Acceptance', msg, 'error')
+    }
+  }, [refreshMessages, addToast])
 
   const updateProfile = async (payload: {
     fullName?: string
@@ -492,6 +524,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshStatus,
         refreshMerchant,
         refreshMessages,
+        acceptOffer,
         updateProfile,
         changePassword,
         markOneAsRead,

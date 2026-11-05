@@ -20,7 +20,8 @@ interface SidebarProps {
 export default function Sidebar({ className = '', activeTab: controlledTab, onTabChange }: SidebarProps) {
   const [internalTab, setInternalTab] = useState('dashboard')
   const navigate = useNavigate()
-  const { unreadCount, logout } = useAuth()
+  const { unreadCount, logout, offer } = useAuth()
+  const hasNewOffer = Boolean(offer?.isAvailable && !offer?.accepted)
 
   const currentTab = controlledTab !== undefined ? controlledTab : internalTab
 
@@ -29,7 +30,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
     { id: 'application', label: 'My Application', icon: FileText },
     { id: 'documents', label: 'Documents', icon: Folder },
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount },
-    { id: 'offer', label: 'Offer', icon: Tag },
+    { id: 'offer', label: 'Offer', icon: Tag, isOfferNew: hasNewOffer },
     { id: 'settings', label: 'Account Settings', icon: Settings },
   ]
 
@@ -76,6 +77,12 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                 {Boolean(item.badge && item.badge > 0) && (
                   <span className="w-5 h-5 rounded-full bg-fuchsia-600 text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)]">
                     {item.badge}
+                  </span>
+                )}
+
+                {item.isOfferNew && (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[10px] font-bold shadow-[0_0_8px_rgba(16,185,129,0.5)]">
+                    Ready
                   </span>
                 )}
               </button>

@@ -22,7 +22,9 @@ import {
   Send,
   Phone,
   Globe,
-  Check
+  Check,
+  Tag,
+  Sparkles,
 } from 'lucide-react'
 import {
   adminApi,
@@ -265,6 +267,7 @@ export default function AdminPage() {
           volume: offerVolume,
           settlement: offerSettlement,
           reserve: offerReserve,
+          isAvailable: status === 'approved' ? true : Boolean(selectedApp.offer?.isAvailable),
         },
         notes: reviewNotes,
       })
@@ -279,6 +282,67 @@ export default function AdminPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to submit underwriting review'
       showToast('Action Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Submit Processing Offer to Merchant (makes offer show up on merchant dashboard)
+  const handleSubmitOffer = async () => {
+    if (!selectedApp) return
+    setReviewLoading(true)
+    try {
+      await adminApi.submitOffer(
+        selectedApp._id,
+        {
+          rate: offerRate,
+          volume: offerVolume,
+          settlement: offerSettlement,
+          reserve: offerReserve,
+          isAvailable: true,
+        },
+        reviewNotes || 'Your customized processing offer is now available. Please review and accept to proceed.'
+      )
+
+      showToast(
+        'Processing Offer Submitted! 📋',
+        `Offer dispatched to ${selectedApp.fullName}. Merchant dashboard updated in real time.`,
+        'success'
+      )
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit processing offer'
+      showToast('Offer Dispatch Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Reset/Revoke Offer to Blank/Pending
+  const handleRevokeOffer = async () => {
+    if (!selectedApp) return
+    setReviewLoading(true)
+    try {
+      await adminApi.reviewApplication(selectedApp._id, {
+        status: selectedApp.applicationStatus === 'approved' ? 'approved' : 'under_review',
+        offer: {
+          rate: '',
+          volume: '',
+          settlement: '',
+          reserve: '',
+          isAvailable: false,
+          accepted: false,
+        },
+        notes: 'Processing offer retracted for underwriting re-assessment.',
+      })
+
+      showToast('Offer Reset', 'Merchant dashboard offer reset to blank state.', 'success')
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to reset offer'
+      showToast('Reset Failed', msg, 'error')
     } finally {
       setReviewLoading(false)
     }
@@ -548,13 +612,14 @@ export default function AdminPage() {
                 <th className="p-4">Est. Volume</th>
                 <th className="p-4">KYC Docs</th>
                 <th className="p-4">Status</th>
+                <th className="p-4">Offer</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
               {applications.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-400 text-xs">
+                  <td colSpan={7} className="text-center py-12 text-slate-400 text-xs">
                     {loading ? 'Loading applications from database...' : 'No merchant applications found.'}
                   </td>
                 </tr>
@@ -623,6 +688,25 @@ export default function AdminPage() {
                         )}
                       </td>
 
+                      {/* Offer Status */}
+                      <td className="p-4">
+                        {app.offer?.isAvailable ? (
+                          app.offer.accepted ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.25)]">
+                              <Check className="h-3 w-3 stroke-[3]" /> Accepted ({app.offer.rate || 'Live'})
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-purple-300 bg-purple-500/10 border border-purple-400/50 shadow-[0_0_8px_rgba(217,70,239,0.25)]">
+                              <Tag className="h-3 w-3" /> Offer Sent ({app.offer.rate || 'Custom'})
+                            </span>
+                          )
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-slate-400 bg-slate-800/60 border border-slate-700/60">
+                            <Clock className="h-3 w-3 text-amber-400" /> Blank (Not Sent)
+                          </span>
+                        )}
+                      </td>
+
                       {/* Action */}
                       <td className="p-4 text-right space-x-2 whitespace-nowrap">
                         <button
@@ -638,9 +722,10 @@ export default function AdminPage() {
                         <button
                           type="button"
                           onClick={() => openReviewModal(app)}
-                          className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.6)] hover:shadow-[0_0_18px_rgba(217,70,239,0.85)] cursor-pointer transition-all"
+                          className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.6)] hover:shadow-[0_0_18px_rgba(217,70,239,0.85)] cursor-pointer transition-all inline-flex items-center gap-1.5"
                         >
-                          Review & Decision
+                          <Tag className="h-3 w-3" />
+                          <span>Review & Offer</span>
                         </button>
                       </td>
                     </tr>
@@ -1019,11 +1104,53 @@ export default function AdminPage() {
             </div>
 
             {/* Offer Terms Customizer */}
-            <div className="space-y-2 pt-2 border-t border-cyan-500/20">
-              <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Coins className="h-4 w-4" />
-                <span>Customize Processing Offer Terms</span>
-              </span>
+            <div className="space-y-3 pt-2 border-t border-cyan-500/20">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Coins className="h-4 w-4" />
+                  <span>Customize Processing Offer Terms</span>
+                </span>
+
+                {selectedApp.offer?.isAvailable && (
+                  <button
+                    type="button"
+                    onClick={handleRevokeOffer}
+                    disabled={reviewLoading}
+                    className="text-[11px] text-red-400 hover:text-red-300 underline cursor-pointer"
+                  >
+                    Reset to Blank
+                  </button>
+                )}
+              </div>
+
+              {selectedApp.offer?.isAvailable ? (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <div>
+                      <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
+                      <div className="text-[11px] text-emerald-200/80">
+                        Terms: {selectedApp.offer.rate} • {selectedApp.offer.volume} • {selectedApp.offer.settlement}
+                      </div>
+                    </div>
+                  </div>
+                  {selectedApp.offer.accepted && (
+                    <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-[10px] font-bold shrink-0">
+                      Accepted by Merchant ✓
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+                  <Clock className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-bold text-amber-200">No Offer Sent Yet (Currently Blank)</div>
+                    <div className="text-[11px] text-amber-300/80 mt-0.5 leading-relaxed">
+                      Merchant dashboard currently displays: <em>"Please check back every 24hrs to see if offer is available and accept to proceed"</em> with blank rate fields.
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <div>
@@ -1078,21 +1205,40 @@ export default function AdminPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-cyan-500/20">
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-cyan-500/20">
               <button
                 type="button"
                 disabled={reviewLoading}
                 onClick={() => handleDecision('rejected')}
-                className="px-5 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 cursor-pointer disabled:opacity-50"
               >
-                Decline Application
+                Decline
+              </button>
+
+              <button
+                type="button"
+                disabled={reviewLoading}
+                onClick={handleSubmitOffer}
+                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {reviewLoading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                    <span>Sending Offer...</span>
+                  </>
+                ) : (
+                  <>
+                    <Tag className="h-3.5 w-3.5" />
+                    <span>{selectedApp.offer?.isAvailable ? 'Update Processing Offer' : 'Submit Processing Offer'}</span>
+                  </>
+                )}
               </button>
 
               <button
                 type="button"
                 disabled={reviewLoading}
                 onClick={() => handleDecision('approved')}
-                className="px-7 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
               >
                 {reviewLoading ? (
                   <>

@@ -1,15 +1,29 @@
 import { useState } from 'react'
-import { Tag, Check, ShieldCheck, X } from 'lucide-react'
+import { Tag, Check, ShieldCheck, X, Clock, Sparkles } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function ProcessingOfferCard({ className = '' }: { className?: string }) {
-  const { offer } = useAuth()
+  const { offer, acceptOffer } = useAuth()
   const [showModal, setShowModal] = useState(false)
+  const [accepting, setAccepting] = useState(false)
+
+  const isAvailable = Boolean(offer?.isAvailable && offer.rate)
+  const isAccepted = Boolean(offer?.accepted)
 
   // Split rate string if possible (e.g., "2.9% + $0.30")
-  const rateParts = offer.rate ? offer.rate.split('+') : ['2.9%', '$0.30']
-  const baseRate = rateParts[0]?.trim() || '2.9%'
-  const perTxFee = rateParts[1]?.trim() ? `+ ${rateParts[1].trim()}` : '+ $0.30'
+  const rateParts = offer?.rate ? offer.rate.split('+') : []
+  const baseRate = rateParts[0]?.trim() || ''
+  const perTxFee = rateParts[1]?.trim() ? `+ ${rateParts[1].trim()}` : ''
+
+  const handleAcceptOffer = async () => {
+    setAccepting(true)
+    try {
+      await acceptOffer()
+      setShowModal(false)
+    } finally {
+      setAccepting(false)
+    }
+  }
 
   return (
     <>
@@ -26,13 +40,28 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             </h3>
           </div>
 
-          {/* Green Pill: Offer Available */}
-          <span className="px-3.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)]">
-            Offer Available
-          </span>
+          {/* Status Badge */}
+          {isAvailable ? (
+            isAccepted ? (
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/80 shadow-[0_0_10px_rgba(0,240,255,0.4)] flex items-center gap-1.5">
+                <Check className="h-3 w-3 stroke-[3]" />
+                Terms Accepted
+              </span>
+            ) : (
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex items-center gap-1.5 animate-pulse">
+                <Sparkles className="h-3 w-3" />
+                Offer Available
+              </span>
+            )
+          ) : (
+            <span className="px-3.5 py-1 rounded-full text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-400/70 shadow-[0_0_10px_rgba(245,158,11,0.25)] flex items-center gap-1.5">
+              <Clock className="h-3 w-3 animate-pulse" />
+              Awaiting Offer
+            </span>
+          )}
         </div>
 
-        {/* Metrics Row (4 Columns) */}
+        {/* Metrics Row (4 Columns) - Left blank if offer is not sent */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 text-center divide-x-0 sm:divide-x divide-slate-800">
           
           {/* Rate */}
@@ -40,11 +69,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Rate
             </div>
-            <div className="text-xl sm:text-2xl font-black text-white mt-1">
-              {baseRate}
+            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? baseRate : '—'}
             </div>
-            <div className="text-[11px] font-medium text-slate-400">
-              {perTxFee}
+            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isAvailable ? perTxFee : '—'}
             </div>
           </div>
 
@@ -53,11 +82,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Volume
             </div>
-            <div className="text-[11px] font-medium text-slate-400 mt-0.5">
-              Up to
+            <div className={`text-[11px] font-medium mt-0.5 ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isAvailable ? 'Up to' : '—'}
             </div>
-            <div className="text-lg sm:text-xl font-black text-white">
-              {offer.volume?.replace('Up to', '').trim() || '$250,000'}
+            <div className={`text-lg sm:text-xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.volume?.replace('Up to', '').trim() || '$250,000') : '—'}
             </div>
           </div>
 
@@ -66,11 +95,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Settlement
             </div>
-            <div className="text-xl sm:text-2xl font-black text-white mt-1">
-              {offer.settlement?.split('(')[0]?.trim() || 'Daily'}
+            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.settlement?.split('(')[0]?.trim() || 'Daily') : '—'}
             </div>
-            <div className="text-[11px] font-medium text-slate-400">
-              (Next Day)
+            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.settlement?.includes('(') ? offer.settlement.slice(offer.settlement.indexOf('(')) : '(Next Day)') : '—'}
             </div>
           </div>
 
@@ -79,38 +108,64 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
               Reserve
             </div>
-            <div className="text-xl sm:text-2xl font-black text-white mt-1">
-              {offer.reserve?.split('(')[0]?.trim() || '5%'}
+            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.reserve?.split('(')[0]?.trim() || '5%') : '—'}
             </div>
-            <div className="text-[11px] font-medium text-slate-400">
-              (90 Days)
+            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.reserve?.includes('(') ? offer.reserve.slice(offer.reserve.indexOf('(')) : '(90 Days)') : '—'}
             </div>
           </div>
 
         </div>
 
-        {/* View Offer Button */}
+        {/* If offer not sent: Display 24-hr reminder message */}
+        {!isAvailable && (
+          <div className="my-1.5 p-3.5 rounded-2xl bg-[#09153a]/90 border border-amber-500/35 text-amber-200 text-xs sm:text-sm flex items-center gap-3 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-400/50 flex items-center justify-center text-amber-300 shrink-0">
+              <Clock className="h-4 w-4" />
+            </div>
+            <div className="flex-1 font-semibold leading-relaxed">
+              Please check back every 24hrs to see if offer is available and accept to proceed
+            </div>
+          </div>
+        )}
+
+        {/* Action Button */}
         <div className="pt-2">
-          <button
-            type="button"
-            onClick={() => setShowModal(true)}
-            className="w-full py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_28px_rgba(217,70,239,0.9)] hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span>View Offer</span>
-            <span>&rarr;</span>
-          </button>
+          {isAvailable ? (
+            <button
+              type="button"
+              onClick={() => setShowModal(true)}
+              className="w-full py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_28px_rgba(217,70,239,0.9)] hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>{isAccepted ? 'View Accepted Offer Terms' : 'View Offer & Accept to Proceed'}</span>
+              <span>&rarr;</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="w-full py-2.5 rounded-full bg-slate-900/80 border border-slate-700/60 text-slate-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+            >
+              <Clock className="h-4 w-4 text-amber-400/80" />
+              <span>Offer Pending Underwriter Review</span>
+            </button>
+          )}
         </div>
 
       </div>
 
       {/* Offer Modal */}
-      {showModal && (
+      {showModal && isAvailable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-6 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-6 w-6 text-fuchsia-400" />
-                <h3 className="text-lg font-bold text-white">PGX Processing Terms</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-white">PGX Processing Terms</h3>
+                  <div className="text-[11px] text-cyan-300">Customized Underwriting Schedule</div>
+                </div>
               </div>
               <button
                 type="button"
@@ -141,13 +196,22 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             </div>
 
             <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setShowModal(false)}
-                className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs sm:text-sm shadow-[0_0_15px_rgba(0,240,255,0.5)] cursor-pointer"
-              >
-                <Check className="inline h-4 w-4 mr-1" /> Accept & Continue
-              </button>
+              {isAccepted ? (
+                <div className="w-full py-2.5 rounded-full bg-emerald-500/20 border border-emerald-400/80 text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+                  <Check className="h-4 w-4 stroke-[3]" />
+                  <span>Terms Accepted & Active</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={accepting}
+                  onClick={handleAcceptOffer}
+                  className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(0,240,255,0.6)] hover:shadow-[0_0_28px_rgba(0,240,255,0.85)] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Check className="h-4 w-4 stroke-[3]" />
+                  <span>{accepting ? 'Recording Acceptance...' : 'Accept to Proceed'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

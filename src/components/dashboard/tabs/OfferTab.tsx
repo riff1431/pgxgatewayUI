@@ -6,27 +6,30 @@ import {
   ArrowRight,
   Sparkles,
   Check,
-  FileCheck
+  FileCheck,
+  Clock
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function OfferTab() {
-  const { offer, applicationStatus, addToast } = useAuth()
-  const [accepted, setAccepted] = useState(applicationStatus === 'approved')
+  const { offer, applicationStatus, acceptOffer } = useAuth()
+  const [submitting, setSubmitting] = useState(false)
 
+  const isAvailable = Boolean(offer?.isAvailable && offer.rate)
+  const isAccepted = Boolean(offer?.accepted)
   const isApproved = applicationStatus === 'approved'
 
-  const rateParts = offer.rate ? offer.rate.split('+') : ['2.9%', '$0.30']
-  const baseRate = rateParts[0]?.trim() || '2.9%'
-  const perTxFee = rateParts[1]?.trim() ? `+ ${rateParts[1].trim()}` : '+ $0.30'
+  const rateParts = offer?.rate ? offer.rate.split('+') : []
+  const baseRate = rateParts[0]?.trim() || ''
+  const perTxFee = rateParts[1]?.trim() ? `+ ${rateParts[1].trim()}` : ''
 
-  const handleAcceptTerms = () => {
-    setAccepted(true)
-    addToast(
-      'Processing Agreement Accepted',
-      'Your rate schedule is locked in with PGX Gateway.',
-      'success'
-    )
+  const handleAcceptTerms = async () => {
+    setSubmitting(true)
+    try {
+      await acceptOffer()
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -51,17 +54,43 @@ export default function OfferTab() {
               )}
             </h2>
             <p className="text-xs text-slate-300">
-              Customized interchange schedule, volume ceiling, and settlement timing.
+              {isAvailable
+                ? 'Customized interchange schedule, volume ceiling, and settlement timing.'
+                : 'Commercial schedule is prepared upon underwriter review of business documentation.'}
             </p>
           </div>
         </div>
 
         <div className="sm:self-center">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-            <Sparkles className="h-3.5 w-3.5" /> Tier 1 Direct Gateway Rates
-          </span>
+          {isAvailable ? (
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+              <Sparkles className="h-3.5 w-3.5" /> Tier 1 Direct Gateway Rates
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
+              <Clock className="h-3.5 w-3.5 animate-pulse" /> Awaiting Underwriting Offer
+            </span>
+          )}
         </div>
       </div>
+
+      {/* If offer not sent: Display 24-hr reminder banner */}
+      {!isAvailable && (
+        <div className="p-5 rounded-3xl bg-[#060b20]/90 border border-amber-500/40 shadow-[0_0_25px_rgba(245,158,11,0.2)] backdrop-blur-xl flex flex-col sm:flex-row items-center gap-4 text-amber-200">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
+            <Clock className="h-6 w-6" />
+          </div>
+          <div className="space-y-1 text-center sm:text-left flex-1">
+            <h3 className="text-base sm:text-lg font-bold text-white">Offer Not Yet Sent</h3>
+            <p className="text-sm font-semibold text-amber-200/95 leading-relaxed">
+              Please check back every 24hrs to see if offer is available and accept to proceed.
+            </p>
+            <p className="text-xs text-slate-400">
+              Our underwriting desk will generate your customized interchange rates, settlement terms, and processing ceiling once your application is reviewed.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 4 Core Commercial Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -71,8 +100,12 @@ export default function OfferTab() {
             Interchange Fee Rate
           </div>
           <div className="my-3">
-            <div className="text-3xl font-black text-white">{baseRate}</div>
-            <div className="text-xs text-cyan-300 font-semibold mt-0.5">{perTxFee} per transaction</div>
+            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? baseRate : '—'}
+            </div>
+            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+              {isAvailable ? `${perTxFee} per transaction` : 'Pending underwriter review'}
+            </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
             Visa / Mastercard / Amex / Crypto
@@ -86,7 +119,9 @@ export default function OfferTab() {
           </div>
           <div className="my-3">
             <div className="text-xs text-slate-400">Approved Ceiling</div>
-            <div className="text-2xl font-black text-white">{offer.volume}</div>
+            <div className={`text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.volume || 'Up to $250,000') : '—'}
+            </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
             Scalable upon 90-day review
@@ -99,15 +134,15 @@ export default function OfferTab() {
             Settlement Schedule
           </div>
           <div className="my-3">
-            <div className="text-3xl font-black text-white">
-              {offer.settlement?.split('(')[0]?.trim() || 'Daily'}
+            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.settlement?.split('(')[0]?.trim() || 'Daily') : '—'}
             </div>
-            <div className="text-xs text-cyan-300 font-semibold mt-0.5">
-              {offer.settlement?.includes('(') ? offer.settlement.slice(offer.settlement.indexOf('(')) : '(Next Day)'}
+            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.settlement?.includes('(') ? offer.settlement.slice(offer.settlement.indexOf('(')) : '(Next Day)') : 'Pending review'}
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
-            Direct bank wire / ACH transfer
+            Direct bank wire / ACH / USDT
           </div>
         </div>
 
@@ -117,11 +152,11 @@ export default function OfferTab() {
             Rolling Reserve
           </div>
           <div className="my-3">
-            <div className="text-3xl font-black text-white">
-              {offer.reserve?.split('(')[0]?.trim() || '5%'}
+            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.reserve?.split('(')[0]?.trim() || '5%') : '—'}
             </div>
-            <div className="text-xs text-cyan-300 font-semibold mt-0.5">
-              {offer.reserve?.includes('(') ? offer.reserve.slice(offer.reserve.indexOf('(')) : '(90 Days)'}
+            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.reserve?.includes('(') ? offer.reserve.slice(offer.reserve.indexOf('(')) : '(90 Days)') : 'Pending review'}
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
@@ -165,27 +200,39 @@ export default function OfferTab() {
             <span>Master Merchant Agreement & Underwriting Terms are legally binding upon live processing.</span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAcceptTerms}
-            className={`px-8 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(217,70,239,0.6)] ${
-              accepted
-                ? 'bg-emerald-500/20 border border-emerald-400 text-emerald-300'
-                : 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white hover:shadow-[0_0_25px_rgba(217,70,239,0.85)]'
-            }`}
-          >
-            {accepted ? (
-              <>
-                <Check className="h-4 w-4 stroke-[3]" />
-                <span>Terms Confirmed & Active</span>
-              </>
-            ) : (
-              <>
-                <span>Confirm & Lock In Processing Rates</span>
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </button>
+          {isAvailable ? (
+            <button
+              type="button"
+              disabled={isAccepted || submitting}
+              onClick={handleAcceptTerms}
+              className={`px-8 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(217,70,239,0.6)] ${
+                isAccepted
+                  ? 'bg-emerald-500/20 border border-emerald-400 text-emerald-300 cursor-default'
+                  : 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white hover:shadow-[0_0_25px_rgba(217,70,239,0.85)]'
+              }`}
+            >
+              {isAccepted ? (
+                <>
+                  <Check className="h-4 w-4 stroke-[3]" />
+                  <span>Terms Confirmed & Active</span>
+                </>
+              ) : (
+                <>
+                  <span>{submitting ? 'Confirming...' : 'Accept to Proceed & Lock In Rates'}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="px-6 py-2.5 rounded-full text-xs font-semibold bg-slate-900 border border-slate-700/60 text-slate-400 flex items-center gap-2 cursor-not-allowed opacity-75"
+            >
+              <Clock className="h-3.5 w-3.5 text-amber-400/80" />
+              <span>Awaiting Offer to Proceed</span>
+            </button>
+          )}
         </div>
       </div>
 
