@@ -64,10 +64,8 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Hologram Card (right aligned) */}
-                <div className="hidden md:flex justify-end pr-8">
-                  <div className="scale-85 origin-right">
-                    <HologramCard />
-                  </div>
+                <div className="hidden md:flex justify-end pr-4">
+                  <HologramCard size="sm" />
                 </div>
               </div>
 

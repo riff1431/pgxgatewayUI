@@ -1,65 +1,46 @@
-export default function HologramCard({ className = '' }: { className?: string }) {
+interface HologramCardProps {
+  className?: string
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export default function HologramCard({ className = '', size = 'md' }: HologramCardProps) {
+  const sizeClasses = {
+    sm: 'max-w-[260px] sm:max-w-[300px]',
+    md: 'max-w-[340px] sm:max-w-[390px] lg:max-w-[430px]',
+    lg: 'max-w-[460px] sm:max-w-[540px] lg:max-w-[620px]',
+  }
+
   return (
-    <div className={`relative flex items-center justify-center select-none ${className}`}>
-      {/* Background Holographic Cosmic Glow */}
-      <div className="absolute w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-cyan-500/25 via-blue-600/30 to-fuchsia-600/35 blur-3xl -z-10 pointer-events-none" />
+    <div className={`relative flex items-center justify-center select-none group ${className}`}>
+      {/* Background Cosmic Deep Neon Glows */}
+      <div className="absolute w-[90%] h-[90%] rounded-full bg-cyan-500/25 blur-3xl -z-10 group-hover:bg-cyan-500/35 transition-all duration-700 pointer-events-none" />
+      <div className="absolute w-[80%] h-[80%] rounded-full bg-fuchsia-600/25 blur-3xl -z-10 group-hover:bg-fuchsia-600/40 transition-all duration-700 pointer-events-none" />
+      <div className="absolute -bottom-6 w-3/4 h-12 bg-cyan-400/30 blur-2xl rounded-full pointer-events-none" />
 
-      {/* Hologram Planetary Orb */}
-      <div className="relative w-52 h-52 sm:w-64 sm:h-64 rounded-full border-2 border-cyan-400/50 bg-radial from-cyan-950/50 via-[#071330] to-transparent shadow-[0_0_60px_rgba(0,240,255,0.45)] flex items-center justify-center overflow-hidden">
-        {/* Wireframe latitude/longitude rings */}
-        <div className="absolute inset-1 rounded-full border border-cyan-400/30 border-dashed animate-[spin_50s_linear_infinite]" />
-        <div className="absolute w-full h-[65%] border-y-2 border-cyan-300/35 rounded-[100%] rotate-12" />
-        <div className="absolute h-full w-[65%] border-x-2 border-cyan-300/35 rounded-[100%] -rotate-12" />
-        <div className="absolute w-[80%] h-[35%] border-y border-cyan-200/25 rounded-[100%] rotate-45" />
-
-        {/* Planet Surface Radiant Glow Flare */}
-        <div className="absolute -top-6 -right-6 w-28 h-28 bg-cyan-300/40 rounded-full blur-2xl" />
-        <div className="absolute bottom-2 left-4 w-20 h-20 bg-fuchsia-500/30 rounded-full blur-xl" />
-      </div>
-
-      {/* Tilted Holographic PGX Gateway Card */}
+      {/* Cyberpunk Hologram Frame with Perspective Tilt */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-[42%] -translate-y-[45%] w-60 sm:w-72 h-36 sm:h-42 rounded-2xl p-4 sm:p-5 text-white shadow-2xl transition-transform duration-500 hover:rotate-[-8deg] hover:scale-105"
-        style={{
-          transform: 'perspective(1200px) rotateX(18deg) rotateY(-20deg) rotateZ(-12deg)',
-          background: 'linear-gradient(135deg, #0d1a45 0%, #15113d 50%, #200d3d 100%)',
-          border: '2px solid rgba(217, 70, 239, 0.9)',
-          boxShadow: '0 0 30px rgba(217, 70, 239, 0.55), 0 25px 50px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(0, 240, 255, 0.3)'
-        }}
+        className={`relative w-full ${sizeClasses[size]} rounded-3xl p-1 bg-gradient-to-br from-cyan-400/60 via-purple-500/40 to-fuchsia-500/60 shadow-[0_0_35px_rgba(0,240,255,0.35),0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-xl transition-all duration-700 group-hover:shadow-[0_0_55px_rgba(217,70,239,0.55),0_30px_70px_rgba(0,0,0,0.9)] group-hover:scale-[1.02]`}
       >
-        {/* Top: EMV Chip & Brand Logo */}
-        <div className="flex items-start justify-between">
-          {/* Gold EMV Chip */}
-          <div className="w-9 h-7 sm:w-10 sm:h-8 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-amber-600 border border-amber-200/90 shadow-md relative overflow-hidden flex items-center justify-center">
-            <div className="w-full h-[1px] bg-amber-800/70 absolute" />
-            <div className="h-full w-[1px] bg-amber-800/70 absolute" />
-            <div className="w-5 h-4 rounded-xs border border-amber-900/60" />
-          </div>
+        <div className="relative rounded-[1.35rem] overflow-hidden bg-[#03081b]">
+          {/* Authentic 3D Holographic Card + Earth Globe Illustration */}
+          <img
+            src="/hologram-card-3d.png"
+            alt="PGX Gateway 3D Holographic Card & Global Earth Network"
+            className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
 
-          {/* Logo on Card */}
-          <div className="text-right">
-            <div className="text-base sm:text-lg font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              PGX
-            </div>
-            <div className="text-[9px] font-bold tracking-[0.22em] text-cyan-300 -mt-1 drop-shadow-[0_0_6px_rgba(0,240,255,0.8)]">
-              GATEWAY
-            </div>
-          </div>
-        </div>
+          {/* Subtle Ambient Vignette & Glare Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#03081b]/75 via-transparent to-cyan-500/10 pointer-events-none" />
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-cyan-400/20 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-8 -left-8 w-28 h-28 bg-fuchsia-500/20 rounded-full blur-xl pointer-events-none" />
 
-        {/* Bottom Elements: Decorative Stripes & Contactless Waves */}
-        <div className="mt-8 sm:mt-11 flex items-end justify-between">
-          {/* Decorative neon bars */}
-          <div className="space-y-1.5">
-            <div className="w-16 sm:w-20 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.9)]" />
-            <div className="w-10 sm:w-14 h-1.5 rounded-full bg-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.9)]" />
-          </div>
-
-          {/* Contactless waves ))) */}
-          <div className="flex items-center space-x-1 text-fuchsia-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.95)]">
-            <span className="text-base font-black opacity-75">)</span>
-            <span className="text-lg font-black opacity-90">)</span>
-            <span className="text-xl font-black">)</span>
+          {/* Interactive Live Processing Status Indicator Pill */}
+          <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 px-3 py-1.5 rounded-full bg-[#050b22]/90 border border-cyan-400/70 backdrop-blur-md flex items-center gap-2 shadow-[0_0_12px_rgba(0,240,255,0.4)]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.9)]" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-200 tracking-wide">
+              Global Processing Active
+            </span>
           </div>
         </div>
       </div>
