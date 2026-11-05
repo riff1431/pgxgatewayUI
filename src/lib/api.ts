@@ -33,6 +33,8 @@ export interface ApiMerchant {
     settlement: string
     reserve: string
     isAvailable: boolean
+    accepted?: boolean
+    acceptedAt?: string
   }
 }
 
@@ -255,8 +257,24 @@ export const api = {
         settlement: string
         reserve: string
         isAvailable: boolean
+        accepted?: boolean
+        acceptedAt?: string
       }>('/merchants/offer', {
         method: 'GET',
+      })
+    },
+
+    acceptOffer: async () => {
+      return request<{
+        rate: string
+        volume: string
+        settlement: string
+        reserve: string
+        isAvailable: boolean
+        accepted: boolean
+        acceptedAt?: string
+      }>('/merchants/offer/accept', {
+        method: 'POST',
       })
     },
   },
