@@ -102,11 +102,17 @@ export interface SystemConfigData {
 
 export interface MerchantMessageItem {
   _id: string
-  merchantId: string
+  merchantId: string | { _id: string; fullName?: string; legalName?: string; businessEmail?: string; phone?: string }
+  senderRole?: 'merchant' | 'admin' | 'system'
+  senderName?: string
   title: string
   content: string
-  type: 'system' | 'offer' | 'document' | 'general' | 'compliance'
+  type: 'system' | 'offer' | 'document' | 'general' | 'compliance' | 'support'
+  labels?: string[]
+  priority?: 'low' | 'normal' | 'high' | 'urgent'
   isRead: boolean
+  readAt?: string | null
+  replyTo?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -189,7 +195,14 @@ export const adminApi = {
   // Two-Way Direct Messaging with Merchants
   sendMessageToMerchant: async (
     merchantId: string,
-    payload: { title: string; content: string; type?: string }
+    payload: {
+      title: string
+      content: string
+      type?: string
+      priority?: string
+      labels?: string[]
+      replyTo?: string
+    }
   ) => {
     return adminRequest<MerchantMessageItem>(`/admin/merchants/${merchantId}/message`, {
       method: 'POST',
@@ -199,6 +212,16 @@ export const adminApi = {
 
   getMerchantMessages: async (merchantId: string) => {
     return adminRequest<MerchantMessageItem[]>(`/admin/merchants/${merchantId}/messages`, {
+      method: 'GET',
+    })
+  },
+
+  getAllMessages: async (params?: { type?: string; unreadOnly?: boolean }) => {
+    const query = new URLSearchParams()
+    if (params?.type && params.type !== 'all') query.set('type', params.type)
+    if (params?.unreadOnly) query.set('unreadOnly', 'true')
+    const qs = query.toString() ? `?${query.toString()}` : ''
+    return adminRequest<MerchantMessageItem[]>(`/admin/messages/all${qs}`, {
       method: 'GET',
     })
   },

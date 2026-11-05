@@ -13,7 +13,14 @@ import {
   subscribeToApplicationUpdate,
   subscribeToOfferUpdate,
   subscribeToNotifications,
+  subscribeToMessageRead,
+  subscribeToLabelsUpdated,
 } from '@/lib/socket'
+import {
+  playMessageSound,
+  isSoundEnabled,
+  setSoundEnabled as persistSoundEnabled,
+} from '@/lib/sound'
 
 export interface ToastMessage {
   id: string
@@ -39,6 +46,10 @@ interface AuthContextType {
   unreadCount: number
   notifications: ApiNotification[]
   toasts: ToastMessage[]
+  soundEnabled: boolean
+  setSoundEnabled: (enabled: boolean) => void
+  toggleSound: () => void
+  testSound: () => void
   addToast: (title: string, description?: string, type?: ToastMessage['type']) => void
   removeToast: (id: string) => void
   register: (payload: {
@@ -56,7 +67,18 @@ interface AuthContextType {
   refreshMessages: () => Promise<void>
   updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string }) => Promise<void>
   changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>
+  markOneAsRead: (id: string) => Promise<void>
   markAllAsRead: () => Promise<void>
+  toggleMessageLabel: (id: string, label: string, action?: 'add' | 'remove' | 'toggle') => Promise<void>
+  deleteMessage: (id: string) => Promise<void>
+  sendMessage: (payload: {
+    title: string
+    content: string
+    type?: string
+    priority?: string
+    labels?: string[]
+    replyTo?: string
+  }) => Promise<ApiNotification | null>
 }
 
 const defaultOffer = {
@@ -78,9 +100,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
   const [currentStep, setCurrentStep] = useState<number>(merchant?.currentStep || 1)
   const [offer, setOffer] = useState(merchant?.offer || defaultOffer)
-  const [unreadCount, setUnreadCount] = useState<number>(2)
+  const [unreadCount, setUnreadCount] = useState<number>(0)
   const [notifications, setNotifications] = useState<ApiNotification[]>([])
   const [toasts, setToasts] = useState<ToastMessage[]>([])
+  const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => isSoundEnabled())
+
+  const setSoundEnabled = useCallback((enabled: boolean) => {
+    persistSoundEnabled(enabled)
+    setSoundEnabledState(enabled)
+  }, [])
+
+  const toggleSound = useCallback(() => {
+    const next = !soundEnabled
+    persistSoundEnabled(next)
+    setSoundEnabledState(next)
+    if (next) {
+      playMessageSound('incoming')
+    }
+  }, [soundEnabled])
+
+  const testSound = useCallback(() => {
+    playMessageSound('incoming')
+  }, [])
 
   const addToast = useCallback(
     (title: string, description?: string, type: ToastMessage['type'] = 'info') => {
@@ -116,7 +157,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshStatus = useCallback(async () => {
     if (!token) return
     try {
-      // Refresh full merchant profile so step completion checks work
       await refreshMerchant()
       const offerRes = await api.merchants.getOffer()
       if (offerRes.data) {
@@ -156,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[WebSocket Event] Application updated:', data)
       setApplicationStatus(data.applicationStatus)
       if (data.currentStep) setCurrentStep(data.currentStep)
+      playMessageSound('urgent')
       addToast(
         'Application Status Updated',
         `Your status is now "${data.applicationStatus.replace('_', ' ').toUpperCase()}".`,
@@ -168,24 +209,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.offer) {
         setOffer(data.offer as typeof defaultOffer)
       }
+      playMessageSound('incoming')
       addToast('New Processing Offer Available', 'Your rates have been updated.', 'info')
     })
 
+    // Real-time incoming notification / message handler
     const unsubNotif = subscribeToNotifications((data) => {
-      console.log('[WebSocket Event] New notification received:', data)
-      setUnreadCount(data.unreadCount)
+      console.log('[WebSocket Event] New message or notification:', data)
+      if (typeof data.unreadCount === 'number') {
+        setUnreadCount(data.unreadCount)
+      }
       const notif = data.notification as ApiNotification
       if (notif) {
-        setNotifications((prev) => [notif, ...prev])
-        addToast(notif.title || 'New Notification', notif.content, 'info')
+        // Trigger rich futuristic chime
+        if (notif.priority === 'urgent') {
+          playMessageSound('urgent')
+        } else {
+          playMessageSound('incoming')
+        }
+
+        setNotifications((prev) => {
+          // Avoid duplicate insertion
+          if (prev.some((n) => n._id === notif._id)) {
+            return prev.map((n) => (n._id === notif._id ? notif : n))
+          }
+          return [notif, ...prev]
+        })
+        addToast(notif.title || 'New Message Received', notif.content, 'info')
       }
+    })
+
+    // Real-time read receipt handler
+    const unsubRead = subscribeToMessageRead((data) => {
+      console.log('[WebSocket Event] Message marked read:', data)
+      if (typeof data.unreadCount === 'number') {
+        setUnreadCount(data.unreadCount)
+      }
+      if (data.all) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      } else if (data.id) {
+        setNotifications((prev) =>
+          prev.map((n) => (n._id === data.id ? { ...n, isRead: true, readAt: data.readAt } : n))
+        )
+      }
+    })
+
+    // Real-time label updates handler
+    const unsubLabels = subscribeToLabelsUpdated((data) => {
+      console.log('[WebSocket Event] Message labels updated:', data)
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === data.id ? { ...n, labels: data.labels } : n))
+      )
     })
 
     // Fetch initial status & messages asynchronously
     let isSubscribed = true
     const loadInitialData = async () => {
       try {
-        // Refresh full merchant profile for accurate step-completion checks
         const meRes = await api.auth.getMe()
         if (isSubscribed && meRes.data) {
           setMerchant(meRes.data)
@@ -213,6 +293,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       unsubApp()
       unsubOffer()
       unsubNotif()
+      unsubRead()
+      unsubLabels()
     }
   }, [token, addToast, refreshStatus, refreshMessages])
 
@@ -287,11 +369,102 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     addToast('Security Updated', 'Your password has been changed successfully.', 'success')
   }
 
+  // Mark single message as read
+  const markOneAsRead = async (id: string) => {
+    try {
+      // Optimistic UI update
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n))
+      )
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+      playMessageSound('read')
+
+      await api.dashboard.markAsRead(id)
+    } catch (err) {
+      console.warn('Failed to mark message as read:', err)
+      void refreshMessages()
+    }
+  }
+
+  // Mark all messages as read
   const markAllAsRead = async () => {
-    await api.dashboard.markAllAsRead()
-    setUnreadCount(0)
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
-    addToast('Inbox Updated', 'All notifications marked as read.', 'info')
+    try {
+      setUnreadCount(0)
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      playMessageSound('read')
+      await api.dashboard.markAllAsRead()
+      addToast('Inbox Updated', 'All messages marked as read.', 'info')
+    } catch (err) {
+      console.warn('Failed to mark all read:', err)
+      void refreshMessages()
+    }
+  }
+
+  // Toggle label on a message
+  const toggleMessageLabel = async (id: string, label: string, action: 'add' | 'remove' | 'toggle' = 'toggle') => {
+    try {
+      setNotifications((prev) =>
+        prev.map((msg) => {
+          if (msg._id !== id) return msg
+          const current = msg.labels || []
+          const exists = current.includes(label)
+          let updated: string[] = []
+          if (action === 'add' || (action === 'toggle' && !exists)) {
+            updated = exists ? current : [...current, label]
+          } else {
+            updated = current.filter((l) => l !== label)
+          }
+          return { ...msg, labels: updated }
+        })
+      )
+
+      await api.dashboard.toggleLabel(id, label, action)
+    } catch (err) {
+      console.warn('Failed to update label:', err)
+      void refreshMessages()
+    }
+  }
+
+  // Delete / Dismiss message
+  const deleteMessage = async (id: string) => {
+    try {
+      const target = notifications.find((n) => n._id === id)
+      setNotifications((prev) => prev.filter((n) => n._id !== id))
+      if (target && !target.isRead) {
+        setUnreadCount((prev) => Math.max(0, prev - 1))
+      }
+      await api.dashboard.deleteMessage(id)
+      addToast('Message Dismissed', 'Message removed from your inbox.', 'info')
+    } catch (err) {
+      console.warn('Failed to delete message:', err)
+      void refreshMessages()
+    }
+  }
+
+  // Send message to Underwriting / Admin Desk
+  const sendMessage = async (payload: {
+    title: string
+    content: string
+    type?: string
+    priority?: string
+    labels?: string[]
+    replyTo?: string
+  }): Promise<ApiNotification | null> => {
+    try {
+      playMessageSound('outgoing')
+      const res = await api.dashboard.sendMessage(payload)
+      if (res.data) {
+        const newMsg = res.data
+        setNotifications((prev) => [newMsg, ...prev])
+        addToast('Message Dispatched', 'Sent directly to the underwriting desk.', 'success')
+        return newMsg
+      }
+      return null
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to dispatch message.'
+      addToast('Dispatch Error', msg, 'error')
+      throw err
+    }
   }
 
   return (
@@ -307,6 +480,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         unreadCount,
         notifications,
         toasts,
+        soundEnabled,
+        setSoundEnabled,
+        toggleSound,
+        testSound,
         addToast,
         removeToast,
         register,
@@ -317,7 +494,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshMessages,
         updateProfile,
         changePassword,
+        markOneAsRead,
         markAllAsRead,
+        toggleMessageLabel,
+        deleteMessage,
+        sendMessage,
       }}
     >
       {children}

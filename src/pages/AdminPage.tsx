@@ -69,6 +69,8 @@ export default function AdminPage() {
   const [messageTitle, setMessageTitle] = useState('')
   const [messageContent, setMessageContent] = useState('')
   const [messageType, setMessageType] = useState<'general' | 'document' | 'offer' | 'system'>('general')
+  const [messagePriority, setMessagePriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal')
+  const [messageLabels, setMessageLabels] = useState<string>('Underwriting')
   const [messageSending, setMessageSending] = useState(false)
   const [merchantHistory, setMerchantHistory] = useState<MerchantMessageItem[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -195,10 +197,13 @@ export default function AdminPage() {
 
     setMessageSending(true)
     try {
+      const labelsArray = messageLabels.split(',').map((l) => l.trim()).filter(Boolean)
       const res = await adminApi.sendMessageToMerchant(messagingApp._id, {
         title: messageTitle.trim() || 'Notice from Underwriting Desk',
         content: messageContent.trim(),
         type: messageType,
+        priority: messagePriority,
+        labels: labelsArray.length > 0 ? labelsArray : ['Underwriting'],
       })
       if (res.data) {
         setMerchantHistory((prev) => [res.data, ...prev])
@@ -1187,7 +1192,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleSendMessage} className="space-y-4">
               
-              {/* Category & Title */}
+              {/* Category, Priority & Labels */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 block font-semibold">Message Category</label>
@@ -1203,17 +1208,43 @@ export default function AdminPage() {
                   </select>
                 </div>
 
-                <div className="sm:col-span-2 space-y-1">
-                  <label className="text-[10px] text-slate-400 block font-semibold">Subject / Title</label>
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 block font-semibold">Priority Level</label>
+                  <select
+                    value={messagePriority}
+                    onChange={(e) => setMessagePriority(e.target.value as typeof messagePriority)}
+                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                    <option value="urgent">🚨 Urgent</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-400 block font-semibold">Labels (Comma-separated)</label>
                   <input
                     type="text"
-                    required
-                    value={messageTitle}
-                    onChange={(e) => setMessageTitle(e.target.value)}
-                    placeholder="e.g. Underwriting Inquiry"
+                    value={messageLabels}
+                    onChange={(e) => setMessageLabels(e.target.value)}
+                    placeholder="e.g. Underwriting, Rates, KYC"
                     className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
+              </div>
+
+              {/* Title / Subject */}
+              <div className="space-y-1">
+                <label className="text-[10px] text-slate-400 block font-semibold">Subject / Title</label>
+                <input
+                  type="text"
+                  required
+                  value={messageTitle}
+                  onChange={(e) => setMessageTitle(e.target.value)}
+                  placeholder="e.g. Underwriting Inquiry"
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
               </div>
 
               {/* Message Content */}
@@ -1281,10 +1312,20 @@ export default function AdminPage() {
                         </span>
                       </div>
                       <p className="text-[11px] text-slate-300 leading-relaxed">{item.content}</p>
-                      <div className="flex items-center gap-2 pt-0.5 text-[9px] text-slate-400">
+                      <div className="flex items-center gap-2 pt-0.5 text-[9px] text-slate-400 flex-wrap">
                         <span className="capitalize px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono">
                           {item.type}
                         </span>
+                        {item.priority === 'urgent' && (
+                          <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">
+                            🚨 Urgent
+                          </span>
+                        )}
+                        {item.labels && item.labels.map((lbl) => (
+                          <span key={lbl} className="px-1.5 py-0.5 rounded bg-slate-800 text-fuchsia-300 font-medium">
+                            #{lbl}
+                          </span>
+                        ))}
                         <span>{item.isRead ? '✓ Read by merchant' : '• Unread'}</span>
                       </div>
                     </div>

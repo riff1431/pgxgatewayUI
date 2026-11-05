@@ -39,11 +39,18 @@ export interface ApiMerchant {
 export interface ApiNotification {
   _id: string
   merchantId: string
+  senderRole?: 'merchant' | 'admin' | 'system'
+  senderName?: string
   title: string
   content: string
-  type: 'system' | 'offer' | 'compliance' | 'security'
+  type: 'system' | 'offer' | 'compliance' | 'security' | 'document' | 'general' | 'support'
+  labels?: string[]
+  priority?: 'low' | 'normal' | 'high' | 'urgent'
   isRead: boolean
+  readAt?: string | null
+  replyTo?: string | null
   createdAt: string
+  updatedAt?: string
 }
 
 // Token storage helpers
@@ -256,9 +263,35 @@ export const api = {
 
   // Dashboard & Messages
   dashboard: {
-    getMessages: async () => {
-      return request<ApiNotification[]>('/dashboard/messages', {
+    getMessages: async (params?: {
+      search?: string
+      label?: string
+      type?: string
+      unreadOnly?: boolean
+    }) => {
+      const query = new URLSearchParams()
+      if (params?.search) query.set('search', params.search)
+      if (params?.label && params.label !== 'all') query.set('label', params.label)
+      if (params?.type && params.type !== 'all') query.set('type', params.type)
+      if (params?.unreadOnly) query.set('unreadOnly', 'true')
+      const qs = query.toString() ? `?${query.toString()}` : ''
+
+      return request<ApiNotification[]>(`/dashboard/messages${qs}`, {
         method: 'GET',
+      })
+    },
+
+    sendMessage: async (payload: {
+      title: string
+      content: string
+      type?: string
+      priority?: string
+      labels?: string[]
+      replyTo?: string
+    }) => {
+      return request<ApiNotification>('/dashboard/messages', {
+        method: 'POST',
+        body: JSON.stringify(payload),
       })
     },
 
@@ -274,7 +307,25 @@ export const api = {
       })
     },
 
-    createSupportTicket: async (payload: { subject: string; message: string }) => {
+    toggleLabel: async (id: string, label: string, action: 'add' | 'remove' | 'toggle' = 'toggle') => {
+      return request<ApiNotification>(`/dashboard/messages/${id}/labels`, {
+        method: 'PATCH',
+        body: JSON.stringify({ label, action }),
+      })
+    },
+
+    deleteMessage: async (id: string) => {
+      return request<{ message: string; unreadCount: number }>(`/dashboard/messages/${id}`, {
+        method: 'DELETE',
+      })
+    },
+
+    createSupportTicket: async (payload: {
+      subject: string
+      message: string
+      priority?: string
+      labels?: string[]
+    }) => {
       return request<{ ticketId: string; subject: string; message: string; status: string }>(
         '/dashboard/support',
         {
