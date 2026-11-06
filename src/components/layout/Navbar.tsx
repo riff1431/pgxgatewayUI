@@ -58,10 +58,10 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`relative px-3 py-2 rounded-xl text-xs lg:text-sm font-semibold transition-all flex items-center gap-2 group ${
+                className={`relative px-3 py-2 text-xs lg:text-sm font-semibold transition-all flex items-center gap-2 group ${
                   isActive
-                    ? 'text-cyan-300 bg-cyan-500/10 shadow-[0_0_12px_rgba(0,240,255,0.25)] border border-cyan-400/50'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-850/60'
+                    ? 'text-cyan-300 font-bold'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <Icon className={`h-4 w-4 transition-colors ${isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-300'}`} />
@@ -159,10 +159,10 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all ${
+                  className={`px-3 py-2 text-sm font-semibold flex items-center gap-2.5 transition-all ${
                     isActive
-                      ? 'text-cyan-300 bg-cyan-500/15 border border-cyan-400/60'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                      ? 'text-cyan-300 font-bold bg-cyan-500/10'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                   }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
