@@ -96,8 +96,16 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 to="/dashboard"
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#081335] border border-cyan-400/60 text-xs font-bold text-white shadow-[0_0_12px_rgba(0,240,255,0.3)] hover:border-cyan-300 transition-all"
               >
-                <div className="w-5 h-5 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center">
-                  <User className="h-3 w-3" />
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-400/40 shadow-[0_0_6px_rgba(0,240,255,0.3)] shrink-0">
+                  {merchant?.avatarUrl ? (
+                    <img
+                      src={merchant.avatarUrl}
+                      alt={merchantName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-3 w-3" />
+                  )}
                 </div>
                 <span>{merchantName}</span>
                 <ChevronDown className="h-3 w-3 text-slate-400" />

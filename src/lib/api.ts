@@ -12,6 +12,7 @@ export interface ApiMerchant {
   phone: string
   whatsapp?: string
   telegram?: string
+  avatarUrl?: string
   legalName?: string
   industry?: string
   website?: string
@@ -176,6 +177,7 @@ export const api = {
       phone?: string
       whatsapp?: string
       telegram?: string
+      avatarUrl?: string
     }) => {
       const res = await request<ApiMerchant>('/auth/profile', {
         method: 'PATCH',
@@ -276,6 +278,30 @@ export const api = {
       }>('/merchants/offer/accept', {
         method: 'POST',
       })
+    },
+
+    uploadAvatar: async (file: File) => {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const res = await request<ApiMerchant>('/merchants/avatar', {
+        method: 'POST',
+        body: formData,
+      })
+      if (res.data) {
+        setStoredMerchant(res.data)
+      }
+      return res
+    },
+
+    setAvatarUrl: async (avatarUrl: string) => {
+      const res = await request<ApiMerchant>('/merchants/avatar', {
+        method: 'PATCH',
+        body: JSON.stringify({ avatarUrl }),
+      })
+      if (res.data) {
+        setStoredMerchant(res.data)
+      }
+      return res
     },
   },
 

@@ -54,13 +54,26 @@ export default function DashboardPage() {
             <div className="space-y-6 animate-fade-in">
               {/* Welcome Header + Hologram Card Visual */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 relative">
-                <div className="space-y-1">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
-                    Welcome, {displayName}
-                  </h1>
-                  <p className="text-sm sm:text-base text-slate-300">
-                    Track your application and view your processing offer.
-                  </p>
+                <div className="flex items-center gap-4">
+                  {merchant?.avatarUrl ? (
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-blue-500 shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-[#050a1d]">
+                        <img
+                          src={merchant.avatarUrl}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="space-y-1">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
+                      Welcome, {displayName}
+                    </h1>
+                    <p className="text-sm sm:text-base text-slate-300">
+                      Track your application and view your processing offer.
+                    </p>
+                  </div>
                 </div>
 
                 {/* Hologram Card (right aligned) */}

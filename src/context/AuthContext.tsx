@@ -70,7 +70,9 @@ interface AuthContextType {
   refreshMerchant: () => Promise<void>
   refreshMessages: () => Promise<void>
   acceptOffer: () => Promise<void>
-  updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string }) => Promise<void>
+  uploadAvatar: (file: File) => Promise<string>
+  setAvatarUrl: (avatarUrl: string) => Promise<void>
+  updateProfile: (payload: { fullName?: string; phone?: string; whatsapp?: string; telegram?: string; avatarUrl?: string }) => Promise<void>
   changePassword: (payload: { currentPassword: string; newPassword: string }) => Promise<void>
   markOneAsRead: (id: string) => Promise<void>
   markAllAsRead: () => Promise<void>
@@ -206,12 +208,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initSocketConnection(token)
 
-    const unsubApp = subscribeToApplicationUpdate((data) => {
+    const unsubApp = subscribeToApplicationUpdate((data: { applicationStatus: string; currentStep: number; offer?: unknown; avatarUrl?: string }) => {
       console.log('[WebSocket Event] Application updated:', data)
       setApplicationStatus(data.applicationStatus)
       if (data.currentStep) setCurrentStep(data.currentStep)
       if (data.offer) {
         setOffer(data.offer as OfferData)
+      }
+      if (data.avatarUrl !== undefined) {
+        setMerchant((prev) => (prev ? { ...prev, avatarUrl: data.avatarUrl } : null))
       }
       playMessageSound('urgent')
       addToast(
@@ -388,6 +393,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     phone?: string
     whatsapp?: string
     telegram?: string
+    avatarUrl?: string
   }) => {
     const res = await api.auth.updateProfile(payload)
     if (res.data) {
@@ -395,6 +401,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       addToast('Profile Updated', 'Your profile details have been saved.', 'success')
     }
   }
+
+  const uploadAvatar = useCallback(async (file: File): Promise<string> => {
+    try {
+      const res = await api.merchants.uploadAvatar(file)
+      if (res.data) {
+        setMerchant(res.data)
+      }
+      addToast('Avatar Updated', 'Your profile photo has been uploaded successfully.', 'success')
+      return res.data?.avatarUrl || ''
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to upload avatar image.'
+      addToast('Upload Error', msg, 'error')
+      throw err
+    }
+  }, [addToast])
+
+  const setAvatarUrl = useCallback(async (avatarUrl: string): Promise<void> => {
+    try {
+      const res = await api.merchants.setAvatarUrl(avatarUrl)
+      if (res.data) {
+        setMerchant(res.data)
+      }
+      addToast('Avatar Updated', 'Your profile avatar has been updated.', 'success')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to set avatar.'
+      addToast('Avatar Error', msg, 'error')
+      throw err
+    }
+  }, [addToast])
 
   const changePassword = async (payload: { currentPassword: string; newPassword: string }) => {
     await api.auth.changePassword(payload)
@@ -525,6 +560,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshMerchant,
         refreshMessages,
         acceptOffer,
+        uploadAvatar,
+        setAvatarUrl,
         updateProfile,
         changePassword,
         markOneAsRead,

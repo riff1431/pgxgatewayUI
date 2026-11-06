@@ -7,7 +7,8 @@ import {
   LogOut, 
   MessageSquare, 
   Settings, 
-  Tag 
+  Tag,
+  User 
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
@@ -20,7 +21,7 @@ interface SidebarProps {
 export default function Sidebar({ className = '', activeTab: controlledTab, onTabChange }: SidebarProps) {
   const [internalTab, setInternalTab] = useState('dashboard')
   const navigate = useNavigate()
-  const { unreadCount, logout, offer } = useAuth()
+  const { merchant, unreadCount, logout, offer } = useAuth()
   const hasNewOffer = Boolean(offer?.isAvailable && !offer?.accepted)
 
   const currentTab = controlledTab !== undefined ? controlledTab : internalTab
@@ -52,6 +53,31 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
       {/* Outer Glowing Neon Container */}
       <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.12)] p-4 sm:p-5 flex flex-col justify-between h-full backdrop-blur-xl space-y-4">
         
+        {/* Merchant Identity Pill */}
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-[#091332] border border-cyan-500/30 shadow-[0_0_12px_rgba(0,240,255,0.15)]">
+          <div className="w-9 h-9 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 to-fuchsia-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[#040819] flex items-center justify-center">
+              {merchant?.avatarUrl ? (
+                <img
+                  src={merchant.avatarUrl}
+                  alt={merchant.fullName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="h-4 w-4 text-cyan-300" />
+              )}
+            </div>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold text-white truncate">
+              {merchant?.fullName || 'Merchant Account'}
+            </div>
+            <div className="text-[10px] text-cyan-300 truncate">
+              {merchant?.legalName || 'PGX Direct Gateway'}
+            </div>
+          </div>
+        </div>
+
         {/* Navigation Items List */}
         <div className="space-y-2">
           {navItems.map((item) => {

@@ -132,6 +132,7 @@ const QUICK_TEMPLATES = [
 
 export default function MessagesTab() {
   const {
+    merchant,
     notifications,
     unreadCount,
     markOneAsRead,
@@ -497,28 +498,34 @@ export default function MessagesTab() {
               >
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
                   
-                  {/* Category / Sender Icon */}
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border ${
-                      isOffer
-                        ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300'
-                        : isCompliance
-                        ? 'bg-amber-500/15 border-amber-400 text-amber-300'
-                        : isSupport
-                        ? 'bg-blue-500/15 border-blue-400 text-blue-300'
-                        : 'bg-cyan-500/15 border-cyan-400 text-cyan-300'
-                    }`}
-                  >
-                    {isOffer ? (
-                      <Tag className="h-5 w-5" />
-                    ) : isCompliance ? (
-                      <ShieldAlert className="h-5 w-5" />
-                    ) : isSupport ? (
-                      <Headphones className="h-5 w-5" />
-                    ) : (
-                      <Bell className="h-5 w-5" />
-                    )}
-                  </div>
+                  {/* Category / Sender Icon or Avatar */}
+                  {isFromMerchant && merchant?.avatarUrl ? (
+                    <div className="w-10 h-10 rounded-xl overflow-hidden border border-cyan-400 shrink-0 mt-0.5 shadow-[0_0_10px_rgba(0,240,255,0.3)] bg-[#050a1d]">
+                      <img src={merchant.avatarUrl} alt={merchant.fullName} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border ${
+                        isOffer
+                          ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300'
+                          : isCompliance
+                          ? 'bg-amber-500/15 border-amber-400 text-amber-300'
+                          : isSupport
+                          ? 'bg-blue-500/15 border-blue-400 text-blue-300'
+                          : 'bg-cyan-500/15 border-cyan-400 text-cyan-300'
+                      }`}
+                    >
+                      {isOffer ? (
+                        <Tag className="h-5 w-5" />
+                      ) : isCompliance ? (
+                        <ShieldAlert className="h-5 w-5" />
+                      ) : isSupport ? (
+                        <Headphones className="h-5 w-5" />
+                      ) : (
+                        <Bell className="h-5 w-5" />
+                      )}
+                    </div>
+                  )}
 
                   {/* Message Core Body */}
                   <div className="space-y-1.5 flex-1 min-w-0">
@@ -644,6 +651,11 @@ export default function MessagesTab() {
             <div className="flex items-start justify-between pb-4 border-b border-cyan-500/20">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
+                  {selectedMessage.senderRole === 'merchant' && merchant?.avatarUrl && (
+                    <div className="w-5 h-5 rounded-full overflow-hidden border border-cyan-400 shrink-0">
+                      <img src={merchant.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                    </div>
+                  )}
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-cyan-300 font-mono">
                     {selectedMessage.senderRole === 'merchant' ? 'You' : selectedMessage.senderName || 'PGX Underwriting'}
                   </span>

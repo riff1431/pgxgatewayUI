@@ -13,9 +13,11 @@ import {
   User,
   Loader2,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Camera,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import AvatarUploader from '@/components/dashboard/AvatarUploader'
 
 export default function SettingsTab() {
   const { merchant, updateProfile, changePassword, addToast } = useAuth()
@@ -119,6 +121,17 @@ export default function SettingsTab() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Account Avatar & Digital Identity (Drag & Drop + Pre-Made Presets) */}
+      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
+        <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
+          <Camera className="h-5 w-5 text-cyan-400" />
+          <h3 className="text-base font-bold text-white tracking-tight">
+            Account Avatar & Visual Identity
+          </h3>
+        </div>
+        <AvatarUploader />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
