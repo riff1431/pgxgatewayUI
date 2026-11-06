@@ -10,8 +10,7 @@ import {
   Copy, 
   Check, 
   Play, 
-  Cpu, 
-  Network, 
+  Workflow, Network, 
   Lock, 
   Server, 
   CreditCard
@@ -145,7 +144,7 @@ export function CheckoutWidget() {
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-16 text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-teal-400/50 bg-[#071626]/80 shadow-[0_0_15px_rgba(20,184,166,0.3)] backdrop-blur-md">
-          <Cpu className="h-4 w-4 text-teal-300" />
+          <Workflow className="h-4 w-4 text-teal-300" />
           <span className="text-xs font-bold text-teal-300 uppercase tracking-wider">
             Architecture & Pipeline
           </span>
@@ -412,7 +411,7 @@ export function CheckoutWidget() {
             }`}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider">Phase 3</span>
-                {simStep >= 3 ? <CheckCircle2 className="h-4 w-4 text-teal-400" /> : <Cpu className="h-4 w-4 text-slate-600" />}
+                {simStep >= 3 ? <CheckCircle2 className="h-4 w-4 text-teal-400" /> : <ShieldCheck className="h-4 w-4 text-slate-600" />}
               </div>
               <h4 className="text-xs font-bold">3DS2 Frictionless</h4>
               <p className="text-[11px] text-slate-400 mt-1">

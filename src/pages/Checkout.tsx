@@ -6,8 +6,7 @@ import {
   CreditCard, 
   Lock, 
   ShieldCheck, 
-  Sparkles, 
-  Wallet 
+  Coins, Wallet 
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -81,7 +80,7 @@ export default function Checkout() {
                 className="gap-2 h-auto py-2.5 flex-col items-center justify-center text-xs"
                 onClick={() => setMethod('wallet')}
               >
-                <Sparkles className="h-4 w-4" />
+                <Coins className="h-4 w-4" />
                 <span>Crypto</span>
               </Button>
             </div>

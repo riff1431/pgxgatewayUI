@@ -8,8 +8,7 @@ import {
   CreditCard, 
   Repeat, 
   ArrowRight, 
-  CheckCircle2, 
-  Sparkles, 
+  CheckCircle2,
   Sliders, 
   TrendingUp, 
   Terminal,
@@ -208,7 +207,7 @@ export default function SolutionsPage() {
           
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-cyan-400/50 bg-[#071330]/80 shadow-[0_0_15px_rgba(0,240,255,0.3)] backdrop-blur-md">
-              <Sparkles className="h-4 w-4 text-cyan-300" />
+              <Layers className="h-4 w-4 text-cyan-300" />
               <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
                 Full-Stack Payment Orchestration
               </span>

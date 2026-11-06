@@ -8,10 +8,9 @@ import {
   Copy, 
   CreditCard, 
   Globe2, 
-  Lock, 
-  Rocket, 
-  ShieldCheck, 
-  Sparkles, 
+  Lock,
+  ShieldCheck,
+  Layers,
   Terminal, 
   Zap 
 } from 'lucide-react'
@@ -89,7 +88,7 @@ const session = await pgx.checkouts.create({
                 to="/register"
                 className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-extrabold text-sm sm:text-base border border-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.7)] hover:shadow-[0_0_35px_rgba(217,70,239,0.9)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
               >
-                <Rocket className="h-5 w-5 text-white" />
+                <ArrowRight className="h-5 w-5 text-white group-hover:translate-x-1 transition-transform" />
                 <span>Apply as Merchant</span>
                 <ArrowRight className="h-4 w-4 text-white" />
               </Link>
@@ -217,7 +216,7 @@ const session = await pgx.checkouts.create({
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-fuchsia-500/40 bg-purple-600/10 text-fuchsia-300 text-xs font-bold shadow-[0_0_10px_rgba(217,70,239,0.3)]">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Layers className="h-3.5 w-3.5" />
             <span>Built For Scale & Reliability</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">

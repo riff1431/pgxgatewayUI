@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Tag, Check, ShieldCheck, X, Clock, Sparkles } from 'lucide-react'
+import { Tag, Check, ShieldCheck, X, Clock, Zap } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export default function ProcessingOfferCard({ className = '' }: { className?: string }) {
@@ -49,7 +49,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               </span>
             ) : (
               <span className="px-3.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex items-center gap-1.5 animate-pulse">
-                <Sparkles className="h-3 w-3" />
+                <Zap className="h-3 w-3" />
                 Offer Available
               </span>
             )

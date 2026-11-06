@@ -4,7 +4,6 @@ import {
   ShieldCheck,
   Tag,
   ArrowRight,
-  Sparkles,
   Check,
   FileCheck,
   Clock
@@ -64,7 +63,7 @@ export default function OfferTab() {
         <div className="sm:self-center">
           {isAvailable ? (
             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-              <Sparkles className="h-3.5 w-3.5" /> Tier 1 Direct Gateway Rates
+              <ShieldCheck className="h-3.5 w-3.5" /> Tier 1 Direct Gateway Rates
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.3)]">

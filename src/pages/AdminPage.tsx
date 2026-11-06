@@ -24,7 +24,6 @@ import {
   Globe,
   Check,
   Tag,
-  Sparkles,
   UploadCloud,
   Image as ImageIcon,
   Trash2,
@@ -846,7 +845,7 @@ export default function AdminPage() {
                   <span>Platform Logo Image</span>
                 </label>
                 <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" /> Cloudinary Storage
+                  <ShieldCheck className="h-3 w-3" /> Cloudinary Storage
                 </span>
               </div>
 
@@ -1345,7 +1344,7 @@ export default function AdminPage() {
               {selectedApp.offer?.isAvailable ? (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                     <div>
                       <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
                       <div className="text-[11px] text-emerald-200/80">

@@ -11,10 +11,10 @@ import {
   Dices, 
   Layers, 
   CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
+  ArrowRight,
   FileCheck,
-  Search
+  Search,
+  Building2
 } from 'lucide-react'
 import IndustriesBar from '@/components/brand/IndustriesBar'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
@@ -232,7 +232,7 @@ export default function IndustriesPage() {
           
           <div className="lg:col-span-8 space-y-5">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-fuchsia-400/50 bg-[#160a28]/80 shadow-[0_0_15px_rgba(217,70,239,0.3)] backdrop-blur-md">
-              <Sparkles className="h-4 w-4 text-fuchsia-300" />
+              <Building2 className="h-4 w-4 text-fuchsia-300" />
               <span className="text-xs font-bold text-fuchsia-300 uppercase tracking-wider">
                 Uncapped Approvals & Dedicated Banking
               </span>

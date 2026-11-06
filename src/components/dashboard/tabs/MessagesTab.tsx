@@ -17,7 +17,6 @@ import {
   MessageSquare,
   AlertTriangle,
   Trash2,
-  Sparkles,
   ShieldCheck,
   Plus
 } from 'lucide-react'
@@ -362,7 +361,7 @@ export default function MessagesTab() {
               title="Test Notification Chime"
               className="p-2.5 rounded-2xl border border-cyan-500/30 bg-[#091332] text-slate-300 hover:text-cyan-300 text-xs font-semibold hover:border-cyan-400/60 transition-all cursor-pointer"
             >
-              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <Volume2 className="h-4 w-4 text-cyan-400" />
             </button>
           )}
 
