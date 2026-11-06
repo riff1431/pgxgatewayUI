@@ -76,15 +76,6 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
 
         {/* Right CTA / Auth Area */}
         <div className="flex items-center gap-3">
-          {/* Checkout Demo Pill */}
-          <Link
-            to="/checkout"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/35 bg-[#081230]/70 text-cyan-300 hover:text-cyan-200 hover:border-cyan-400 text-xs font-semibold shadow-[0_0_10px_rgba(0,240,255,0.2)] transition-all"
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-            <span>Checkout Demo</span>
-          </Link>
-
           {isAuthenticated ? (
             /* User Authenticated Dropdown / Profile Pill */
             <div className="flex items-center gap-2">
@@ -180,13 +171,6 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
             >
               <ArrowRight className="h-4 w-4" />
               <span>Start Merchant Application</span>
-            </Link>
-            <Link
-              to="/checkout"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#09112a] text-cyan-300 text-xs font-bold border border-cyan-500/40"
-            >
-              <span>Explore Checkout Demo</span>
             </Link>
           </div>
         </div>
