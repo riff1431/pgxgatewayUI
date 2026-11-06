@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { Layers, Zap, ShieldCheck } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
 import HologramCard from '@/components/brand/HologramCard'
@@ -13,8 +13,12 @@ import { useAuth } from '@/context/AuthContext'
 
 export default function RegistrationPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
   const navigate = useNavigate()
   const { isAuthenticated, merchant, addToast, refreshMerchant } = useAuth()
+
+  // Detect dedicated sign in mode via route (/login or ?mode=signin)
+  const isSignInRoute = location.pathname === '/login' || searchParams.get('mode') === 'signin'
 
   // Determine dynamic completion state of each step
   const isStep1Complete = Boolean(isAuthenticated && merchant && merchant.businessEmail)
@@ -41,6 +45,7 @@ export default function RegistrationPage() {
 
   // If user tries to access a step they haven't unlocked yet, redirect them back to their max allowed step
   useEffect(() => {
+    if (isSignInRoute) return
     if (step > maxAllowedStep) {
       setSearchParams({ step: String(maxAllowedStep) }, { replace: true })
       const requiredStep = !isStep1Complete ? 1 : 2
@@ -50,7 +55,14 @@ export default function RegistrationPage() {
         'warning'
       )
     }
-  }, [step, maxAllowedStep, isStep1Complete, setSearchParams, addToast])
+  }, [step, maxAllowedStep, isStep1Complete, setSearchParams, addToast, isSignInRoute])
+
+  // If user is already authenticated and visits /login, redirect directly to dashboard
+  useEffect(() => {
+    if (isAuthenticated && (location.pathname === '/login' || searchParams.get('mode') === 'signin')) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, location.pathname, searchParams, navigate])
 
   // If merchant has already fully submitted their application, redirect to dashboard
   useEffect(() => {
@@ -108,13 +120,15 @@ export default function RegistrationPage() {
           {/* Main Title & Tagline */}
           <div>
             <div className="text-[11px] font-black tracking-[0.25em] text-cyan-400 uppercase">
-              MERCHANT
+              {isSignInRoute ? 'MERCHANT PORTAL' : 'MERCHANT'}
             </div>
             <h1 className="text-3xl sm:text-4xl font-black italic tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 drop-shadow-[0_2px_10px_rgba(255,255,255,0.3)]">
-              REGISTRATION
+              {isSignInRoute ? 'SIGN IN' : 'REGISTRATION'}
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Get a customized payment processing solution for your business with PGX Gateway.
+              {isSignInRoute
+                ? 'Sign in to access your merchant portal, view underwriting status, and manage payment processing.'
+                : 'Get a customized payment processing solution for your business with PGX Gateway.'}
             </p>
           </div>
 
@@ -164,16 +178,18 @@ export default function RegistrationPage() {
         <div className="lg:col-span-6 w-full">
           <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.35),inset_0_0_15px_rgba(0,240,255,0.1)] p-5 sm:p-7 backdrop-blur-xl">
             
-            {/* Top Stepper */}
-            <RegistrationStepper 
-              currentStep={step} 
-              maxAllowedStep={maxAllowedStep}
-              completedSteps={completedSteps}
-              onStepClick={handleStepClick} 
-            />
+            {/* Top Stepper (Hidden on dedicated Sign In route) */}
+            {!isSignInRoute && (
+              <RegistrationStepper 
+                currentStep={step} 
+                maxAllowedStep={maxAllowedStep}
+                completedSteps={completedSteps}
+                onStepClick={handleStepClick} 
+              />
+            )}
 
             {/* Step Contents */}
-            <div className="mt-4">
+            <div className={!isSignInRoute ? "mt-4" : ""}>
               {step === 1 && (
                 <Step1Account 
                   onNext={handleNext} 

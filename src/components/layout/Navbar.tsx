@@ -107,7 +107,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
             /* Guest Actions */
             <div className="flex items-center gap-2">
               <Link
-                to="/register"
+                to="/login"
                 className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white bg-[#070e28] border border-slate-700 hover:border-cyan-500/50 transition-all flex items-center gap-1.5"
               >
                 <User className="h-3.5 w-3.5 text-cyan-400" />
@@ -164,14 +164,35 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
           </div>
 
           <div className="pt-2 border-t border-slate-800 flex flex-col gap-2">
-            <Link
-              to="/register"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)]"
-            >
-              <ArrowRight className="h-4 w-4" />
-              <span>Start Merchant Application</span>
-            </Link>
+            {!isAuthenticated ? (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#070e28] border border-cyan-500/30 text-white text-xs font-semibold hover:border-cyan-400 transition-all"
+                >
+                  <User className="h-4 w-4 text-cyan-400" />
+                  <span>Sign In to Merchant Portal</span>
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)]"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  <span>Start Merchant Application</span>
+                </Link>
+              </>
+            ) : (
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#081335] border border-cyan-400/60 text-white text-xs font-bold"
+              >
+                <User className="h-4 w-4 text-cyan-400" />
+                <span>Go to Dashboard ({merchantName})</span>
+              </Link>
+            )}
           </div>
         </div>
       )}

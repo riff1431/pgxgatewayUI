@@ -156,6 +156,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link to="/login" className="hover:text-teal-300 transition-colors">
+                  Merchant Sign In
+                </Link>
+              </li>
+              <li>
                 <Link to="/dashboard" className="hover:text-teal-300 transition-colors">
                   Merchant Portal
                 </Link>

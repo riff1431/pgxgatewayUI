@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { 
   Building2, 
   Eye, 
@@ -31,9 +32,18 @@ interface FormErrors {
 }
 
 export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const isSignInRoute = location.pathname === '/login' || searchParams.get('mode') === 'signin'
+
   const { register, login, updateProfile, logout, merchant, isAuthenticated } = useAuth()
   
-  const [isSignInMode, setIsSignInMode] = useState(false)
+  const [isSignInMode, setIsSignInMode] = useState(isSignInRoute)
+
+  useEffect(() => {
+    setIsSignInMode(isSignInRoute)
+  }, [isSignInRoute])
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
@@ -199,7 +209,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           businessEmail: formData.businessEmail.trim(),
           password: formData.password,
         })
-        await onNext()
+        navigate('/dashboard', { replace: true })
         return
       }
 
@@ -240,6 +250,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
   }
 
   const handleSwitchToSignInWithEmail = () => {
+    navigate('/login')
     setIsSignInMode(true)
     setGlobalError(null)
     setErrors({})
@@ -257,9 +268,11 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
             <User className="h-6 w-6" />
           </div>
           <div>
-            <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
-              Step 1 of 3
-            </div>
+            {!isSignInMode && (
+              <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
+                Step 1 of 3
+              </div>
+            )}
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
               {isSignInMode ? 'Merchant Sign In' : 'Account & Contact Information'}
             </h2>
@@ -292,7 +305,11 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
           <button
             type="button"
             onClick={() => {
-              setIsSignInMode(!isSignInMode)
+              if (isSignInMode) {
+                navigate('/register')
+              } else {
+                navigate('/login')
+              }
               setGlobalError(null)
               setErrors({})
             }}
@@ -606,10 +623,18 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
       <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => {
+            if (isSignInMode) {
+              navigate('/')
+            } else if (onBack) {
+              onBack()
+            } else {
+              navigate('/')
+            }
+          }}
           className="px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)]"
         >
-          <span>&larr;</span> Back
+          <span>&larr;</span> {isSignInMode ? 'Back to Home' : 'Back'}
         </button>
 
         <button
@@ -626,7 +651,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
             <>
               <span>
                 {isSignInMode
-                  ? 'Sign In & Continue'
+                  ? 'Sign In to Portal'
                   : isAuthenticated
                   ? 'Continue to Step 2'
                   : 'Complete Step 1 & Proceed'}
