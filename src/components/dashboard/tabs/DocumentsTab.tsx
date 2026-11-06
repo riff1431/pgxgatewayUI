@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Calendar,
   ShieldCheck,
+  X,
   type LucideIcon
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -37,6 +38,8 @@ export default function DocumentsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [activeUploadId, setActiveUploadId] = useState<DocRow['id'] | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [previewDoc, setPreviewDoc] = useState<DocRow | null>(null)
+  const [imgLoading, setImgLoading] = useState(true)
 
   const buildDocsFromMerchant = (): DocRow[] => [
     {
@@ -282,17 +285,18 @@ export default function DocumentsTab() {
                   {/* Right: Actions */}
                   <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
                     {doc.fileUrl && (
-                      <a
-                        href={doc.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3.5 py-1.5 rounded-full text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-400/60 hover:border-cyan-400 transition-all flex items-center gap-1.5 shadow-[0_0_8px_rgba(0,240,255,0.25)]"
-                        title="Open document in secure viewer"
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImgLoading(true)
+                          setPreviewDoc(doc)
+                        }}
+                        className="px-3.5 py-1.5 rounded-full text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-400/60 hover:border-cyan-400 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.25)]"
+                        title="Inspect document preview"
                       >
                         <Eye className="h-3.5 w-3.5" />
                         <span>View Document</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                      </button>
                     )}
 
                     <button
@@ -374,15 +378,17 @@ export default function DocumentsTab() {
                           📄 {doc.fileName} ({doc.fileSize || 'Attached'})
                         </span>
                         {doc.fileUrl && (
-                          <a
-                            href={doc.fileUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-cyan-400 underline hover:text-cyan-200 text-xs"
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImgLoading(true)
+                              setPreviewDoc(doc)
+                            }}
+                            className="inline-flex items-center gap-1 text-cyan-400 underline hover:text-cyan-200 text-xs cursor-pointer"
                           >
-                            <span>Open CDN Link</span>
-                            <ExternalLink className="h-3.5 w-3.5" />
-                          </a>
+                            <span>Inspect Preview</span>
+                            <Eye className="h-3 w-3" />
+                          </button>
                         )}
                       </div>
                     )}
@@ -391,15 +397,17 @@ export default function DocumentsTab() {
 
                 <div className="flex items-center gap-2 self-start md:self-center shrink-0">
                   {hasFile && doc.fileUrl && (
-                    <a
-                      href={doc.fileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 transition-all flex items-center gap-1.5"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImgLoading(true)
+                        setPreviewDoc(doc)
+                      }}
+                      className="px-4 py-2.5 rounded-full text-xs font-semibold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="h-3.5 w-3.5" />
                       <span>View</span>
-                    </a>
+                    </button>
                   )}
 
                   <button
@@ -430,6 +438,104 @@ export default function DocumentsTab() {
           })}
         </div>
       </div>
+
+      {/* DOCUMENT PREVIEW MODAL */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-3xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-5 sm:p-6 space-y-4 max-h-[90vh] flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
+                  <previewDoc.icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                    <span>{previewDoc.title}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300">
+                      Cloudinary Stored
+                    </span>
+                  </h3>
+                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                    <span>{previewDoc.fileName}</span>
+                    {previewDoc.fileSize && <span>• {previewDoc.fileSize}</span>}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPreviewDoc(null)}
+                className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition-colors cursor-pointer"
+                title="Close viewer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Document Viewer Body */}
+            <div className="flex-1 overflow-auto rounded-2xl bg-[#040817] border border-cyan-500/20 p-4 flex items-center justify-center relative min-h-[350px]">
+              {previewDoc.fileUrl ? (
+                <>
+                  {imgLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-[#040817]/80 z-10">
+                      <div className="flex flex-col items-center gap-2 text-cyan-400 text-xs">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <span>Streaming document from Cloudinary...</span>
+                      </div>
+                    </div>
+                  )}
+                  <img
+                    src={previewDoc.fileUrl}
+                    alt={previewDoc.title}
+                    onLoad={() => setImgLoading(false)}
+                    onError={() => setImgLoading(false)}
+                    className="max-h-[55vh] max-w-full object-contain rounded-xl border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.25)]"
+                  />
+                </>
+              ) : (
+                <div className="text-center space-y-2 text-slate-400">
+                  <AlertCircle className="h-8 w-8 text-amber-400 mx-auto" />
+                  <p className="text-sm font-semibold text-white">Preview unavailable</p>
+                  <p className="text-xs text-slate-400">No active URL found for this document record.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 shrink-0">
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                <span>256-Bit SSL Encrypted Cloud Vault</span>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                {previewDoc.fileUrl && (
+                  <a
+                    href={previewDoc.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/60 hover:border-cyan-400 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5"
+                  >
+                    <span>Open in New Tab</span>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewDoc(null)}
+                  className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.5)] cursor-pointer"
+                >
+                  Close Viewer
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   )
