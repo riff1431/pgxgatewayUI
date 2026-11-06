@@ -10,10 +10,50 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
   const isAccepted = Boolean(offer?.accepted)
 
-  // Split rate string if possible (e.g., "2.9% + $0.30")
+  // Split rate string (e.g. "2.1% + $0.20")
   const rateParts = offer?.rate ? offer.rate.split('+') : []
-  const baseRate = rateParts[0]?.trim() || ''
-  const perTxFee = rateParts[1]?.trim() ? `+ ${rateParts[1].trim()}` : ''
+  const baseRate = rateParts[0]?.trim() || (isAvailable ? '2.1%' : '—')
+  const perTxFee = rateParts[1]?.trim() ? `+ $${rateParts[1].replace(/[$]/g, '').trim()}` : (isAvailable ? '+ $0.20' : '—')
+
+  // Clean Volume (e.g. "$250,000 / month", "Up to $250,000", "$250,000")
+  const rawVolume = offer?.volume || ''
+  const cleanVol = rawVolume.replace(/up\s*to/i, '').trim()
+  const volParts = cleanVol.split('/')
+  const volumeAmount = volParts[0]?.trim() || (isAvailable ? '$250,000' : '—')
+  const volumePeriod = volParts[1]?.trim() ? `/${volParts[1].trim()}` : (isAvailable ? '/ month' : '—')
+
+  // Clean Settlement (e.g. "Daily T+2", "Daily T+2 (Next Day)", "Daily")
+  const rawSettlement = offer?.settlement || ''
+  let settlementMain = isAvailable ? 'Daily' : '—'
+  let settlementSub = isAvailable ? 'T+2 (Next Day)' : '—'
+  if (rawSettlement) {
+    if (rawSettlement.toLowerCase().includes('daily')) {
+      settlementMain = 'Daily'
+      const rest = rawSettlement.replace(/daily/i, '').replace(/[()]/g, '').trim()
+      settlementSub = rest ? rest : 'T+2 (Next Day)'
+    } else {
+      const parts = rawSettlement.split('(')
+      settlementMain = parts[0]?.trim() || rawSettlement
+      settlementSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : 'Rolling'
+    }
+  }
+
+  // Clean Reserve (e.g. "5% Rolling (90 days)", "5% Rolling", "5%")
+  const rawReserve = offer?.reserve || ''
+  let reserveMain = isAvailable ? '5%' : '—'
+  let reserveSub = isAvailable ? 'Rolling (90d)' : '—'
+  if (rawReserve) {
+    const pctMatch = rawReserve.match(/^(\d+(\.\d+)?%)/)
+    if (pctMatch) {
+      reserveMain = pctMatch[1]
+      const rest = rawReserve.replace(pctMatch[1], '').replace(/[()]/g, '').trim()
+      reserveSub = rest || 'Rolling (90d)'
+    } else {
+      const parts = rawReserve.split('(')
+      reserveMain = parts[0]?.trim() || rawReserve
+      reserveSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : 'Rolling'
+    }
+  }
 
   const handleAcceptOffer = async () => {
     setAccepting(true)
@@ -27,15 +67,15 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
 
   return (
     <>
-      <div className={`rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.1)] p-5 sm:p-6 backdrop-blur-xl flex flex-col justify-between ${className}`}>
+      <div className={`rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.1)] p-4 sm:p-5 lg:p-6 backdrop-blur-xl flex flex-col justify-between ${className}`}>
         
         {/* Card Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-cyan-500/20">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+        <div className="flex flex-wrap items-center justify-between pb-3.5 border-b border-cyan-500/20 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
               <Tag className="h-4 w-4" />
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight truncate">
               Processing Offer
             </h3>
           </div>
@@ -43,76 +83,76 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           {/* Status Badge */}
           {isAvailable ? (
             isAccepted ? (
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/80 shadow-[0_0_10px_rgba(0,240,255,0.4)] flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/80 shadow-[0_0_10px_rgba(0,240,255,0.4)] flex items-center gap-1.5 shrink-0">
                 <Check className="h-3 w-3 stroke-[3]" />
                 Terms Accepted
               </span>
             ) : (
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex items-center gap-1.5 animate-pulse">
+              <span className="px-3 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex items-center gap-1.5 animate-pulse shrink-0">
                 <Zap className="h-3 w-3" />
                 Offer Available
               </span>
             )
           ) : (
-            <span className="px-3.5 py-1 rounded-full text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-400/70 shadow-[0_0_10px_rgba(245,158,11,0.25)] flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-400/70 shadow-[0_0_10px_rgba(245,158,11,0.25)] flex items-center gap-1.5 shrink-0">
               <Clock className="h-3 w-3 animate-pulse" />
               Awaiting Offer
             </span>
           )}
         </div>
 
-        {/* Metrics Row (4 Columns) - Left blank if offer is not sent */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-5 text-center divide-x-0 sm:divide-x divide-slate-800">
+        {/* Metrics Row (4 Responsive Chambers - perfectly adaptable to any screen width) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 py-4">
           
-          {/* Rate */}
-          <div className="px-2">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          {/* Rate Chamber */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
+            <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
               Rate
             </div>
-            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? baseRate : '—'}
             </div>
-            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
+            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
               {isAvailable ? perTxFee : '—'}
             </div>
           </div>
 
-          {/* Volume */}
-          <div className="px-2">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          {/* Volume Chamber */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
+            <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
               Volume
             </div>
-            <div className={`text-[11px] font-medium mt-0.5 ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
-              {isAvailable ? 'Up to' : '—'}
+            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? volumeAmount : '—'}
             </div>
-            <div className={`text-lg sm:text-xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.volume?.replace('Up to', '').trim() || '$250,000') : '—'}
+            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+              {isAvailable ? volumePeriod : '—'}
             </div>
           </div>
 
-          {/* Settlement */}
-          <div className="px-2">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          {/* Settlement Chamber */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
+            <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
               Settlement
             </div>
-            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.settlement?.split('(')[0]?.trim() || 'Daily') : '—'}
+            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? settlementMain : '—'}
             </div>
-            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.settlement?.includes('(') ? offer.settlement.slice(offer.settlement.indexOf('(')) : '(Next Day)') : '—'}
+            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+              {isAvailable ? settlementSub : '—'}
             </div>
           </div>
 
-          {/* Reserve */}
-          <div className="px-2">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+          {/* Reserve Chamber */}
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
+            <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
               Reserve
             </div>
-            <div className={`text-xl sm:text-2xl font-black mt-1 ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.reserve?.split('(')[0]?.trim() || '5%') : '—'}
+            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? reserveMain : '—'}
             </div>
-            <div className={`text-[11px] font-medium ${isAvailable ? 'text-slate-400' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.reserve?.includes('(') ? offer.reserve.slice(offer.reserve.indexOf('(')) : '(90 Days)') : '—'}
+            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+              {isAvailable ? reserveSub : '—'}
             </div>
           </div>
 
@@ -136,7 +176,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <button
               type="button"
               onClick={() => setShowModal(true)}
-              className="w-full py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_28px_rgba(217,70,239,0.9)] hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_28px_rgba(217,70,239,0.9)] hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>{isAccepted ? 'View Accepted Offer Terms' : 'View Offer & Accept to Proceed'}</span>
               <span>&rarr;</span>
@@ -145,7 +185,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             <button
               type="button"
               disabled
-              className="w-full py-2.5 rounded-full bg-slate-900/80 border border-slate-700/60 text-slate-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+              className="w-full py-2.5 px-4 rounded-full bg-slate-900/80 border border-slate-700/60 text-slate-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
             >
               <Clock className="h-4 w-4 text-amber-400/80" />
               <span>Offer Pending Underwriter Review</span>
@@ -158,7 +198,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
       {/* Offer Modal */}
       {showModal && isAvailable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-6 space-y-5">
+          <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-5 sm:p-6 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-6 w-6 text-fuchsia-400" />
