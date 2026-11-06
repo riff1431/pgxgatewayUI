@@ -24,9 +24,9 @@ export interface ApiMerchant {
   currentStep: number
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected' | 'additional_info_required'
   agreedToTerms?: boolean
-  businessRegDoc?: { name: string; url: string; size: string }
-  directorIdDoc?: { name: string; url: string; size: string }
-  processingStatementDoc?: { name: string; url: string; size: string }
+  businessRegDoc?: { name: string; url: string; size: string; path?: string; uploadedAt?: string }
+  directorIdDoc?: { name: string; url: string; size: string; path?: string; uploadedAt?: string }
+  processingStatementDoc?: { name: string; url: string; size: string; path?: string; uploadedAt?: string }
   offer?: {
     rate: string
     volume: string
