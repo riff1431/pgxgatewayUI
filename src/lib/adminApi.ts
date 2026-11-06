@@ -25,8 +25,12 @@ async function adminRequest<T = unknown>(
   const token = getStoredAdminToken()
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
+  }
+
+  // Do not set Content-Type if sending FormData (browser automatically sets multipart boundary)
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json'
   }
 
   if (token) {
@@ -207,10 +211,24 @@ export const adminApi = {
     })
   },
 
+  uploadBrandingAsset: async (file: File, folder = 'pgxgateway/branding') => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+
+    return adminRequest<{
+      url: string
+      publicId: string
+      format: string
+      bytes: number
+      name: string
+    }>('/admin/upload-branding', {
+      method: 'POST',
+      body: formData,
+    })
+  },
+
   getPublicConfig: async () => {
-    const API_BASE =
-      import.meta.env.VITE_API_URL ||
-      (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1' : 'http://localhost:5000/api/v1')
     try {
       const res = await fetch(`${API_BASE}/admin/config/public`)
       const json = await res.json()

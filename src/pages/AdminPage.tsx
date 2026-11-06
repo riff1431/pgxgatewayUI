@@ -25,6 +25,9 @@ import {
   Check,
   Tag,
   Sparkles,
+  UploadCloud,
+  Image as ImageIcon,
+  Trash2,
 } from 'lucide-react'
 import {
   adminApi,
@@ -65,6 +68,8 @@ export default function AdminPage() {
     supportWhatsapp: '+1 (800) 749-4283',
   })
   const [brandingSaving, setBrandingSaving] = useState(false)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [faviconUploading, setFaviconUploading] = useState(false)
 
   // Direct Merchant Messaging State
   const [messagingApp, setMessagingApp] = useState<ApplicationItem | null>(null)
@@ -172,6 +177,58 @@ export default function AdminPage() {
       showToast('Error', msg, 'error')
     } finally {
       setBrandingSaving(false)
+    }
+  }
+
+  // Handle Direct Logo Upload to Cloudinary
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('File Too Large', 'Please upload a logo image smaller than 10MB.', 'error')
+      return
+    }
+
+    setLogoUploading(true)
+    try {
+      const res = await adminApi.uploadBrandingAsset(file, 'pgxgateway/branding/logos')
+      if (res.data?.url) {
+        setBrandingForm((prev) => ({ ...prev, logoUrl: res.data!.url }))
+        showToast('Logo Uploaded', 'Stored on Cloudinary. Click "Save Settings" to publish.', 'success')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Logo upload failed'
+      showToast('Upload Error', msg, 'error')
+    } finally {
+      setLogoUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  // Handle Direct Favicon Upload to Cloudinary
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('File Too Large', 'Please upload a favicon smaller than 5MB.', 'error')
+      return
+    }
+
+    setFaviconUploading(true)
+    try {
+      const res = await adminApi.uploadBrandingAsset(file, 'pgxgateway/branding/favicons')
+      if (res.data?.url) {
+        setBrandingForm((prev) => ({ ...prev, faviconUrl: res.data!.url }))
+        showToast('Favicon Uploaded', 'Stored on Cloudinary. Click "Save Settings" to publish.', 'success')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Favicon upload failed'
+      showToast('Upload Error', msg, 'error')
+    } finally {
+      setFaviconUploading(false)
+      e.target.value = ''
     }
   }
 
@@ -781,43 +838,205 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Custom Logo Image URL */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
-                <span>Custom Logo Image URL</span>
-                <span className="text-[10px] text-slate-400">PNG / SVG / WebP (Cloudinary or Direct URL)</span>
-              </label>
-              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
-                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                  <Building2 className="h-4 w-4" />
+            {/* Custom Logo Image with Cloudinary Upload */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <Building2 className="h-4 w-4 text-cyan-400" />
+                  <span>Platform Logo Image</span>
+                </label>
+                <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" /> Cloudinary Storage
+                </span>
+              </div>
+
+              {/* Upload Drop / Action Area */}
+              <div className="p-3.5 rounded-2xl border border-cyan-500/35 bg-[#060c24] space-y-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* Thumbnail preview */}
+                    <div className="w-14 h-14 rounded-xl border border-cyan-400/40 bg-[#040817] flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+                      {brandingForm.logoUrl ? (
+                        <img
+                          src={brandingForm.logoUrl}
+                          alt="Logo Preview"
+                          className="max-h-full max-w-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <ImageIcon className="h-6 w-6 text-slate-500" />
+                      )}
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-semibold text-white">
+                        {brandingForm.logoUrl ? 'Custom Cloudinary Logo' : 'Default SVG Logo'}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        PNG, JPG, WebP, SVG (Max 10MB)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <input
+                      type="file"
+                      id="logo-upload-input"
+                      className="hidden"
+                      accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif"
+                      onChange={handleLogoUpload}
+                      disabled={logoUploading}
+                    />
+
+                    <label
+                      htmlFor="logo-upload-input"
+                      className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                        logoUploading
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(0,240,255,0.45)] hover:shadow-[0_0_22px_rgba(0,240,255,0.7)] hover:scale-[1.02]'
+                      }`}
+                    >
+                      {logoUploading ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="h-4 w-4" />
+                          <span>Upload Logo</span>
+                        </>
+                      )}
+                    </label>
+
+                    {brandingForm.logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setBrandingForm({ ...brandingForm, logoUrl: '' })}
+                        className="px-3 py-2.5 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Reset to default logo"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Reset</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <input
-                  type="url"
-                  value={brandingForm.logoUrl || ''}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, logoUrl: e.target.value })}
-                  placeholder="https://res.cloudinary.com/.../your-logo.png (Leave blank for default vector logo)"
-                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-                />
+
+                {/* Direct URL input fallback */}
+                <div className="flex rounded-xl border border-cyan-500/30 bg-[#040817] overflow-hidden focus-within:border-cyan-400 transition-all">
+                  <div className="w-9 bg-[#081230] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <Building2 className="h-3.5 w-3.5" />
+                  </div>
+                  <input
+                    type="url"
+                    value={brandingForm.logoUrl || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, logoUrl: e.target.value })}
+                    placeholder="Direct Cloudinary URL will appear here or paste custom URL"
+                    className="w-full bg-transparent px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Custom Favicon URL */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
-                <span>Browser Tab Favicon URL</span>
+            {/* Custom Favicon with Cloudinary Upload */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                  <span>Browser Tab Favicon</span>
+                </label>
                 <span className="text-[10px] text-slate-400">.ico / .svg / .png (Browser tab icon)</span>
-              </label>
-              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
-                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                  <ShieldCheck className="h-4 w-4" />
+              </div>
+
+              <div className="p-3.5 rounded-2xl border border-cyan-500/35 bg-[#060c24] space-y-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* Favicon preview */}
+                    <div className="w-12 h-12 rounded-xl border border-cyan-400/40 bg-[#040817] flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+                      {brandingForm.faviconUrl ? (
+                        <img
+                          src={brandingForm.faviconUrl}
+                          alt="Favicon Preview"
+                          className="w-6 h-6 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <ShieldCheck className="h-5 w-5 text-slate-500" />
+                      )}
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <p className="text-xs font-semibold text-white truncate max-w-[200px]">
+                        {brandingForm.faviconUrl || '/favicon.svg'}
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        Accepted: .ico, .svg, .png (Max 5MB)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <input
+                      type="file"
+                      id="favicon-upload-input"
+                      className="hidden"
+                      accept="image/x-icon,image/svg+xml,image/png,image/vnd.microsoft.icon"
+                      onChange={handleFaviconUpload}
+                      disabled={faviconUploading}
+                    />
+
+                    <label
+                      htmlFor="favicon-upload-input"
+                      className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                        faviconUploading
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(217,70,239,0.4)] hover:shadow-[0_0_22px_rgba(217,70,239,0.65)] hover:scale-[1.02]'
+                      }`}
+                    >
+                      {faviconUploading ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud className="h-4 w-4" />
+                          <span>Upload Favicon</span>
+                        </>
+                      )}
+                    </label>
+
+                    {brandingForm.faviconUrl && brandingForm.faviconUrl !== '/favicon.svg' && (
+                      <button
+                        type="button"
+                        onClick={() => setBrandingForm({ ...brandingForm, faviconUrl: '/favicon.svg' })}
+                        className="px-3 py-2.5 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        title="Reset to default favicon"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Reset</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <input
-                  type="text"
-                  value={brandingForm.faviconUrl || ''}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, faviconUrl: e.target.value })}
-                  placeholder="/favicon.svg or https://.../favicon.ico"
-                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-                />
+
+                <div className="flex rounded-xl border border-cyan-500/30 bg-[#040817] overflow-hidden focus-within:border-cyan-400 transition-all">
+                  <div className="w-9 bg-[#081230] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                  </div>
+                  <input
+                    type="text"
+                    value={brandingForm.faviconUrl || ''}
+                    onChange={(e) => setBrandingForm({ ...brandingForm, faviconUrl: e.target.value })}
+                    placeholder="/favicon.svg or Cloudinary URL"
+                    className="w-full bg-transparent px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
 
