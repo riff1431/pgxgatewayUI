@@ -52,15 +52,19 @@ export default function SuperAdminPage() {
   const [provisionLoading, setProvisionLoading] = useState(false)
   const [provisionError, setProvisionError] = useState<string | null>(null)
 
-  // Newly Provisioned Credentials Card
+  // Newly Provisioned / Reset Credentials Card Banner
   const [provisionedReceipt, setProvisionedReceipt] = useState<{
     name: string
     email: string
     password: string
     resellerId: string
     feeRate: number
+    title?: string
   } | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  // View Credentials / Access Vault Modal State
+  const [viewAccessReseller, setViewAccessReseller] = useState<ResellerTenant | null>(null)
 
   // Reset Password Modal State
   const [resetModalReseller, setResetModalReseller] = useState<ResellerTenant | null>(null)
@@ -198,6 +202,7 @@ export default function SuperAdminPage() {
           password: formPassword,
           resellerId: res.data.resellerId,
           feeRate: formFeeRate,
+          title: 'New Reseller Provisioned Successfully!',
         })
         setShowProvisionModal(false)
         fetchResellers()
@@ -235,13 +240,27 @@ export default function SuperAdminPage() {
     setResetLoading(true)
     try {
       await adminApi.resetResellerPassword(resetModalReseller.resellerId, resetNewPassword)
+      
+      // Update top banner receipt so Super Admin can immediately copy the new credentials
+      setProvisionedReceipt({
+        name: resetModalReseller.name,
+        email: resetModalReseller.email,
+        password: resetNewPassword,
+        resellerId: resetModalReseller.resellerId,
+        feeRate: resetModalReseller.feeSettings?.merchantFeeRate || 12.0,
+        title: `Password Reset for ${resetModalReseller.name}`,
+      })
+
       showToast(
         'Password Reset',
-        `Password updated for ${resetModalReseller.name}.`,
+        `Password updated for ${resetModalReseller.name}. Credentials card updated above.`,
         'success'
       )
       setResetModalReseller(null)
       setResetNewPassword('')
+      if (viewAccessReseller) {
+        setViewAccessReseller(null)
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to reset password'
       showToast('Error', msg, 'error')
@@ -255,6 +274,21 @@ export default function SuperAdminPage() {
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 2500)
     showToast('Copied', 'Copied to clipboard.', 'success')
+  }
+
+  // Copy Complete Client Invite Text
+  const handleCopyResellerInvite = (reseller: ResellerTenant) => {
+    const rate = reseller.feeSettings?.merchantFeeRate || 12.0
+    const msg = `PGX Gateway Reseller Portal Credentials:
+Portal URL: ${window.location.origin}/admin
+Company / Partner: ${reseller.name}
+Login Email: ${reseller.email}
+Reseller ID: ${reseller.resellerId}
+Assigned Fee Rate: ${rate}%
+Status: ${reseller.status.toUpperCase()}`
+
+    copyToClipboard(msg, `invite_${reseller.resellerId}`)
+    showToast('Copied', `Login invite details for ${reseller.name} copied!`, 'success')
   }
 
   // LOGIN SCREEN
@@ -521,55 +555,55 @@ export default function SuperAdminPage() {
       {/* TAB 2: CONNECTED RESELLERS */}
       {activeTab === 'resellers' && (
         <div className="space-y-6 animate-fade-in">
-          {/* Newly Provisioned Credentials Card */}
+          {/* Credentials Card Banner (Appears on Provisioning or Password Reset) */}
           {provisionedReceipt && (
-            <div className="p-6 rounded-3xl bg-emerald-950/40 border-2 border-emerald-400/80 shadow-[0_0_30px_rgba(52,211,153,0.3)] backdrop-blur-xl space-y-4 animate-scale-in">
+            <div className="p-6 rounded-3xl bg-emerald-950/50 border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(52,211,153,0.35)] backdrop-blur-xl space-y-4 animate-scale-in">
               <div className="flex items-center justify-between pb-3 border-b border-emerald-500/30">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                <div className="flex items-center gap-2.5">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
                   <div>
                     <h3 className="text-sm font-bold text-white">
-                      New Reseller Provisioned Successfully!
+                      {provisionedReceipt.title || 'Client Administrative Credentials Ready'}
                     </h3>
                     <p className="text-[11px] text-emerald-300">
-                      Send these administrative login credentials directly to your client.
+                      Copy and forward these access credentials to your reseller client.
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setProvisionedReceipt(null)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
+                <div className="p-3 rounded-xl bg-black/50 border border-emerald-500/30">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Company / Partner</div>
-                  <div className="font-bold text-white font-mono mt-0.5">{provisionedReceipt.name}</div>
-                  <div className="text-[10px] text-slate-400 font-mono">{provisionedReceipt.resellerId}</div>
+                  <div className="font-bold text-white font-mono mt-0.5 truncate">{provisionedReceipt.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono truncate">{provisionedReceipt.resellerId}</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
+                <div className="p-3 rounded-xl bg-black/50 border border-emerald-500/30">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Login Email</div>
-                  <div className="font-bold text-emerald-300 font-mono mt-0.5">{provisionedReceipt.email}</div>
+                  <div className="font-bold text-emerald-300 font-mono mt-0.5 truncate">{provisionedReceipt.email}</div>
                   <div className="text-[10px] text-slate-400">Portal: /admin</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
-                  <div className="text-[10px] font-bold uppercase text-slate-400">Initial Password</div>
-                  <div className="font-bold text-amber-300 font-mono mt-0.5">{provisionedReceipt.password}</div>
-                  <div className="text-[10px] text-slate-400">Client can change anytime</div>
+                <div className="p-3 rounded-xl bg-black/50 border border-emerald-500/30">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Password</div>
+                  <div className="font-bold text-amber-300 font-mono mt-0.5 truncate">{provisionedReceipt.password}</div>
+                  <div className="text-[10px] text-slate-400">Client can change in /admin</div>
                 </div>
 
-                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 flex flex-col justify-center">
+                <div className="p-3 rounded-xl bg-black/50 border border-emerald-500/30 flex flex-col justify-center">
                   <button
                     onClick={() => {
-                      const msg = `PGX Gateway Reseller Portal Credentials:\nPortal URL: ${window.location.origin}/admin\nLogin Email: ${provisionedReceipt.email}\nInitial Password: ${provisionedReceipt.password}\nAssigned Fee Rate: ${provisionedReceipt.feeRate}%`
+                      const msg = `PGX Gateway Reseller Portal Credentials:\nPortal URL: ${window.location.origin}/admin\nCompany: ${provisionedReceipt.name}\nLogin Email: ${provisionedReceipt.email}\nInitial Password: ${provisionedReceipt.password}\nAssigned Fee Rate: ${provisionedReceipt.feeRate}%`
                       copyToClipboard(msg, 'receipt_full')
                     }}
-                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20"
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20 transition-all text-xs"
                   >
                     {copiedKey === 'receipt_full' ? (
                       <>
@@ -592,13 +626,13 @@ export default function SuperAdminPage() {
           <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl overflow-hidden">
             <div className="p-5 border-b border-amber-500/20 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-amber-400" />
+                <Building2 className="h-5 w-5 text-amber-400 shrink-0" />
                 <div>
                   <h3 className="text-base font-bold text-white tracking-tight">
                     Provisioned Reseller Tenants & Connected Stripe Accounts
                   </h3>
                   <p className="text-[11px] text-slate-400">
-                    Each reseller operates their isolated Stripe gateway with independent sub-merchants.
+                    Each reseller operates their isolated Stripe gateway with independent sub-merchants. Scroll horizontally if needed.
                   </p>
                 </div>
               </div>
@@ -613,20 +647,21 @@ export default function SuperAdminPage() {
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            {/* Responsive Table Wrapper with Horizontal Scrollbar */}
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent">
+              <table className="w-full text-left text-xs border-collapse min-w-[1150px]">
                 <thead>
-                  <tr className="border-b border-amber-500/20 bg-[#09153d]/50 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="p-4">Partner / Company</th>
-                    <th className="p-4">Login Email</th>
-                    <th className="p-4">Stripe Gateway</th>
-                    <th className="p-4">Merchant Fee Rate</th>
-                    <th className="p-4 text-amber-300">Super Admin (9%)</th>
-                    <th className="p-4 text-fuchsia-300">Reseller Margin</th>
-                    <th className="p-4 text-right">Volume</th>
-                    <th className="p-4 text-right text-amber-300">9% Fees Earned</th>
-                    <th className="p-4 text-center">Status</th>
-                    <th className="p-4 text-right">Actions</th>
+                  <tr className="border-b border-amber-500/20 bg-[#09153d]/70 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Partner / Company</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[200px]">Login Email</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Stripe Gateway</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px]">Merchant Fee Rate</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px] text-amber-300">Super Admin (9%)</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px] text-fuchsia-300">Reseller Margin</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px] text-right">Volume</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px] text-right text-amber-300">9% Fees Earned</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[100px] text-center">Status</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px] text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-amber-500/15">
@@ -644,42 +679,44 @@ export default function SuperAdminPage() {
 
                       return (
                         <tr key={reseller.resellerId} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="p-4 font-mono font-bold text-white">
-                            <div>{reseller.name || 'Unnamed Partner'}</div>
-                            <div className="text-[10px] text-slate-400 font-normal">{reseller.resellerId}</div>
+                          <td className="px-4 py-3.5 whitespace-nowrap font-mono font-bold text-white">
+                            <div className="font-sans font-bold">{reseller.name || 'Unnamed Partner'}</div>
+                            <div className="text-[10px] text-slate-400 font-mono font-normal">{reseller.resellerId}</div>
                           </td>
-                          <td className="p-4 font-mono text-slate-300">
+                          <td className="px-4 py-3.5 whitespace-nowrap font-mono text-slate-300">
                             {reseller.email || 'N/A'}
                           </td>
-                          <td className="p-4">
+                          <td className="px-4 py-3.5 whitespace-nowrap">
                             {reseller.stripe?.isConfigured ? (
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80">
-                                Linked ({reseller.stripe.mode})
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-sm whitespace-nowrap">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                                <span>Linked ({reseller.stripe.mode?.toUpperCase() || 'TEST'})</span>
                               </span>
                             ) : (
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/50">
-                                Pending Keys
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/60 shadow-sm whitespace-nowrap">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                                <span>Pending Keys</span>
                               </span>
                             )}
                           </td>
-                          <td className="p-4 font-bold text-cyan-300 font-mono">
+                          <td className="px-4 py-3.5 whitespace-nowrap font-bold text-cyan-300 font-mono">
                             {rate.toFixed(1)}%
                           </td>
-                          <td className="p-4 font-bold text-amber-300 font-mono">
-                            9.0% (Hardwired)
+                          <td className="px-4 py-3.5 whitespace-nowrap font-bold text-amber-300 font-mono">
+                            9.0% <span className="text-[10px] text-amber-400/80 font-normal">(Hardwired)</span>
                           </td>
-                          <td className="p-4 font-bold text-fuchsia-300 font-mono">
-                            {margin}% Spread
+                          <td className="px-4 py-3.5 whitespace-nowrap font-bold text-fuchsia-300 font-mono">
+                            +{margin}% Spread
                           </td>
-                          <td className="p-4 text-right font-black text-white font-mono">
+                          <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-white font-mono">
                             ${(reseller.totalVolumeProcessed || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="p-4 text-right font-black text-amber-300 font-mono">
+                          <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-amber-300 font-mono">
                             ${(reseller.totalPlatformFeesEarned || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                           </td>
-                          <td className="p-4 text-center">
+                          <td className="px-4 py-3.5 whitespace-nowrap text-center">
                             <span
-                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${
                                 reseller.status === 'active'
                                   ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-400/80'
                                   : 'text-red-300 bg-red-500/10 border border-red-400/80'
@@ -688,30 +725,59 @@ export default function SuperAdminPage() {
                               {reseller.status === 'active' ? 'Active' : 'Suspended'}
                             </span>
                           </td>
-                          <td className="p-4 text-right">
+                          <td className="px-4 py-3.5 whitespace-nowrap text-right">
                             <div className="flex items-center justify-end gap-1.5">
+                              {/* 1. Copy Client Login Invite */}
+                              <button
+                                type="button"
+                                onClick={() => handleCopyResellerInvite(reseller)}
+                                title="Copy Client Login Info & Portal Link"
+                                className="p-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/70 border border-emerald-500/50 text-emerald-300 transition-all cursor-pointer shadow-sm"
+                              >
+                                {copiedKey === `invite_${reseller.resellerId}` ? (
+                                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                ) : (
+                                  <Copy className="h-3.5 w-3.5 text-emerald-300" />
+                                )}
+                              </button>
+
+                              {/* 2. View Complete Credentials Vault */}
+                              <button
+                                type="button"
+                                onClick={() => setViewAccessReseller(reseller)}
+                                title="View Full Credentials & Invite Vault"
+                                className="p-1.5 rounded-lg bg-cyan-950/50 hover:bg-cyan-900/70 border border-cyan-500/50 text-cyan-300 transition-all cursor-pointer shadow-sm"
+                              >
+                                <ShieldCheck className="h-3.5 w-3.5 text-cyan-300" />
+                              </button>
+
                               {!isRoot && (
                                 <>
+                                  {/* 3. Reset Password */}
                                   <button
-                                    onClick={() => handleToggleStatus(reseller)}
-                                    title={reseller.status === 'active' ? 'Suspend Reseller' : 'Activate Reseller'}
-                                    className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer ${
-                                      reseller.status === 'active'
-                                        ? 'bg-red-950/40 border-red-500/40 text-red-300 hover:bg-red-900/60'
-                                        : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
-                                    }`}
-                                  >
-                                    <Ban className="h-3.5 w-3.5" />
-                                  </button>
-                                  <button
+                                    type="button"
                                     onClick={() => {
                                       setResetModalReseller(reseller)
                                       setResetNewPassword(generateStrongPassword())
                                     }}
                                     title="Reset Password"
-                                    className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                                    className="p-1.5 rounded-lg bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/50 text-amber-300 transition-all cursor-pointer shadow-sm"
                                   >
                                     <KeyRound className="h-3.5 w-3.5" />
+                                  </button>
+
+                                  {/* 4. Suspend / Activate Toggle */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleStatus(reseller)}
+                                    title={reseller.status === 'active' ? 'Suspend Reseller' : 'Activate Reseller'}
+                                    className={`p-1.5 rounded-lg border text-xs transition-all cursor-pointer shadow-sm ${
+                                      reseller.status === 'active'
+                                        ? 'bg-red-950/50 border-red-500/50 text-red-300 hover:bg-red-900/70'
+                                        : 'bg-emerald-950/50 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/70'
+                                    }`}
+                                  >
+                                    <Ban className="h-3.5 w-3.5" />
                                   </button>
                                 </>
                               )}
@@ -735,7 +801,121 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* PROVISION NEW RESELLER MODAL */}
+      {/* MODAL 1: VIEW RESELLER ACCESS VAULT */}
+      {viewAccessReseller && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-cyan-400/80 shadow-[0_0_50px_rgba(0,240,255,0.3)] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-cyan-400" />
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Reseller Access & Credentials Vault
+                </h3>
+              </div>
+              <button
+                onClick={() => setViewAccessReseller(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300">
+              Complete administrative access information for <strong className="text-white">{viewAccessReseller.name}</strong>.
+            </p>
+
+            <div className="space-y-2.5 text-xs">
+              {/* Portal URL */}
+              <div className="p-3 rounded-2xl bg-black/50 border border-slate-700/60 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Portal Login URL</div>
+                  <div className="font-mono text-cyan-300 font-bold mt-0.5">{window.location.origin}/admin</div>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(`${window.location.origin}/admin`, 'vault_url')}
+                  className="px-3 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedKey === 'vault_url' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              {/* Login Email */}
+              <div className="p-3 rounded-2xl bg-black/50 border border-slate-700/60 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Login Email</div>
+                  <div className="font-mono text-white font-bold mt-0.5">{viewAccessReseller.email || 'N/A'}</div>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(viewAccessReseller.email || '', 'vault_email')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedKey === 'vault_email' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              {/* Tenant ID */}
+              <div className="p-3 rounded-2xl bg-black/50 border border-slate-700/60 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Tenant / Reseller ID</div>
+                  <div className="font-mono text-amber-300 font-bold mt-0.5">{viewAccessReseller.resellerId}</div>
+                </div>
+                <button
+                  onClick={() => copyToClipboard(viewAccessReseller.resellerId, 'vault_id')}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  {copiedKey === 'vault_id' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  <span>Copy</span>
+                </button>
+              </div>
+
+              {/* Fee Structure */}
+              <div className="p-3 rounded-2xl bg-black/50 border border-slate-700/60 grid grid-cols-2 gap-2">
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Merchant Rate</div>
+                  <div className="font-mono text-cyan-300 font-bold mt-0.5">
+                    {(viewAccessReseller.feeSettings?.merchantFeeRate || 12).toFixed(1)}%
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Platform Split</div>
+                  <div className="font-mono text-amber-300 font-bold mt-0.5">
+                    9.0% Admin / +{((viewAccessReseller.feeSettings?.merchantFeeRate || 12) - 9).toFixed(1)}% Reseller
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+              <button
+                type="button"
+                onClick={() => handleCopyResellerInvite(viewAccessReseller)}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20 text-xs"
+              >
+                <Copy className="h-4 w-4 text-black" />
+                <span>Copy Full Client Invitation</span>
+              </button>
+
+              {viewAccessReseller.resellerId !== 'admin_root' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetModalReseller(viewAccessReseller)
+                    setResetNewPassword(generateStrongPassword())
+                  }}
+                  className="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center justify-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <KeyRound className="h-4 w-4 text-black" />
+                  <span>Generate New Password</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: PROVISION NEW RESELLER MODAL */}
       {showProvisionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
@@ -870,9 +1050,9 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* RESET PASSWORD MODAL */}
+      {/* MODAL 3: RESET PASSWORD MODAL */}
       {resetModalReseller && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
           <div className="w-full max-w-md p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2">
