@@ -23,6 +23,8 @@ import {
   Users,
   Search,
   ArrowRightLeft,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import {
   adminApi,
@@ -87,6 +89,7 @@ export default function SuperAdminPage() {
   // Super Admin Login Form State
   const [loginEmail, setLoginEmail] = useState('superadmin@pgxgateway.com')
   const [loginPassword, setLoginPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
 
@@ -97,6 +100,17 @@ export default function SuperAdminPage() {
     setToastMessage({ title, desc, type })
     setTimeout(() => setToastMessage(null), 4000)
   }
+
+  useEffect(() => {
+    const handleAuthFailed = () => {
+      setToken(null)
+      setAnalytics(null)
+      setLoginPassword('')
+      showToast('Session Expired', 'Super Admin session expired. Please sign in again.', 'error')
+    }
+    window.addEventListener('pgx_superadmin_auth_failed', handleAuthFailed)
+    return () => window.removeEventListener('pgx_superadmin_auth_failed', handleAuthFailed)
+  }, [])
 
   const fetchSuperAdminData = useCallback(async () => {
     if (!token) return
@@ -206,6 +220,8 @@ export default function SuperAdminPage() {
   const handleLogout = () => {
     removeStoredSuperAdminToken()
     setToken(null)
+    setAnalytics(null)
+    setLoginPassword('')
     showToast('Signed Out', 'Super Admin session terminated securely.', 'success')
   }
 
@@ -389,14 +405,24 @@ Status: ${reseller.status.toUpperCase()}`
 
             <div className="space-y-1.5">
               <label className="font-semibold text-slate-200">Master Secret Password</label>
-              <input
-                type="password"
-                required
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
-              />
+              <div className="relative flex items-center">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl pl-3.5 pr-10 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 p-1 text-slate-400 hover:text-amber-300 transition-colors cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <button

@@ -25,6 +25,8 @@ import {
   Tag,
   Copy,
   Link as LinkIcon,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import {
   adminApi,
@@ -93,6 +95,7 @@ export default function AdminPage() {
   // Login Form State
   const [loginEmail, setLoginEmail] = useState('admin@pgxgateway.com')
   const [loginPassword, setLoginPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState<string | null>(null)
 
@@ -103,6 +106,17 @@ export default function AdminPage() {
     setToastMessage({ title, desc, type })
     setTimeout(() => setToastMessage(null), 4500)
   }
+
+  useEffect(() => {
+    const handleAuthFailed = () => {
+      setToken(null)
+      setAdminUser(null)
+      setLoginPassword('')
+      showToast('Session Expired', 'Please sign in again with your credentials.', 'error')
+    }
+    window.addEventListener('pgx_admin_auth_failed', handleAuthFailed)
+    return () => window.removeEventListener('pgx_admin_auth_failed', handleAuthFailed)
+  }, [])
 
   // Fetch Dashboard Data
   const fetchData = useCallback(async () => {
@@ -225,7 +239,8 @@ export default function AdminPage() {
     removeStoredAdminToken()
     setToken(null)
     setAdminUser(null)
-    showToast('Signed Out', 'Admin session terminated', 'success')
+    setLoginPassword('')
+    showToast('Signed Out', 'Admin session terminated securely.', 'success')
   }
 
   // Open Review Drawer
@@ -392,13 +407,21 @@ export default function AdminPage() {
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Enter admin password"
                   className="w-full bg-transparent px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="px-3 bg-transparent text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer flex items-center justify-center"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 

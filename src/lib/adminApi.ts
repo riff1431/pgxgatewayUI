@@ -53,11 +53,19 @@ export function removeStoredSuperAdminToken(): void {
   localStorage.removeItem(SUPER_ADMIN_TOKEN_KEY)
 }
 
+export function clearAllAdminSessions(): void {
+  removeStoredAdminToken()
+  removeStoredSuperAdminToken()
+}
+
 async function adminRequest<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; message?: string; token?: string; [key: string]: unknown }> {
-  const token = getStoredSuperAdminToken() || getStoredAdminToken()
+  const isSuperPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/super-admin')
+  const token = isSuperPath
+    ? getStoredSuperAdminToken()
+    : (typeof window !== 'undefined' ? getStoredAdminToken() : (getStoredSuperAdminToken() || getStoredAdminToken()))
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -82,6 +90,19 @@ async function adminRequest<T = unknown>(
   const json = await response.json().catch(() => ({}))
 
   if (!response.ok) {
+    if (response.status === 401) {
+      if (isSuperPath) {
+        removeStoredSuperAdminToken()
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pgx_superadmin_auth_failed'))
+        }
+      } else {
+        removeStoredAdminToken()
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('pgx_admin_auth_failed'))
+        }
+      }
+    }
     throw new Error(json.message || `Admin request failed with status ${response.status}`)
   }
 
@@ -266,6 +287,9 @@ export const adminApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+    if (res.admin && (res.admin as { role: string }).role === 'super_admin') {
+      throw new Error('This portal is for Resellers. Please login at /super-admin')
+    }
     if (res.token) {
       setStoredAdminToken(res.token)
     }
@@ -280,6 +304,9 @@ export const adminApi = {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+    if (res.admin && (res.admin as { role: string }).role !== 'super_admin') {
+      throw new Error('Access Denied. Only Super Administrators can access this command center.')
+    }
     if (res.token) {
       setStoredSuperAdminToken(res.token)
     }
