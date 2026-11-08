@@ -489,6 +489,23 @@ export const adminApi = {
     )
   },
 
+  updateResellerFeeStructure: async (
+    resellerId: string,
+    payload: {
+      basePlatformFee: number
+      merchantFeeRate: number
+      payoutTerms?: string
+    }
+  ) => {
+    return adminRequest<{ message: string; data: ResellerTenant }>(
+      `/admin/super-resellers/${resellerId}/fees`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      }
+    )
+  },
+
   reassignMerchantReseller: async (merchantId: string, targetResellerId: string) => {
     return adminRequest<{ message: string; data: unknown }>(
       `/admin/super-merchants/${merchantId}/reassign`,

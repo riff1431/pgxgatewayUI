@@ -25,6 +25,9 @@ import {
   ArrowRightLeft,
   Eye,
   EyeOff,
+  Sliders,
+  Calculator,
+  Coins,
 } from 'lucide-react'
 import {
   adminApi,
@@ -80,6 +83,14 @@ export default function SuperAdminPage() {
 
   // View Credentials / Access Vault Modal State
   const [viewAccessReseller, setViewAccessReseller] = useState<ResellerTenant | null>(null)
+
+  // Dynamic Fee Adjustment Modal State
+  const [adjustingReseller, setAdjustingReseller] = useState<ResellerTenant | null>(null)
+  const [editBasePlatformFee, setEditBasePlatformFee] = useState<number>(9.0)
+  const [editMerchantFeeRate, setEditMerchantFeeRate] = useState<number>(12.0)
+  const [editPayoutTerms, setEditPayoutTerms] = useState<string>('Weekly Wire / Crypto Transfer')
+  const [feeSaving, setFeeSaving] = useState(false)
+  const [feeError, setFeeError] = useState<string | null>(null)
 
   // Reset Password Modal State
   const [resetModalReseller, setResetModalReseller] = useState<ResellerTenant | null>(null)
@@ -299,6 +310,42 @@ export default function SuperAdminPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to update reseller status'
       showToast('Error', msg, 'error')
+    }
+  }
+
+  const handleOpenAdjustFeeModal = (reseller: ResellerTenant) => {
+    setAdjustingReseller(reseller)
+    setEditBasePlatformFee(reseller.feeSettings?.basePlatformFee ?? 9.0)
+    setEditMerchantFeeRate(reseller.feeSettings?.merchantFeeRate ?? 12.0)
+    setEditPayoutTerms(reseller.payoutTerms || 'Weekly Wire / Crypto Transfer')
+    setFeeError(null)
+  }
+
+  const handleSaveFeeStructure = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!adjustingReseller) return
+    if (editMerchantFeeRate < editBasePlatformFee) {
+      setFeeError(`Merchant fee rate cannot be set lower than your platform cut (${editBasePlatformFee.toFixed(1)}%).`)
+      return
+    }
+    setFeeSaving(true)
+    setFeeError(null)
+    try {
+      const res = await adminApi.updateResellerFeeStructure(adjustingReseller.resellerId, {
+        basePlatformFee: editBasePlatformFee,
+        merchantFeeRate: editMerchantFeeRate,
+        payoutTerms: editPayoutTerms,
+      })
+      showToast('Fee Structure Updated', res.message || 'Commercial terms saved successfully.', 'success')
+      setAdjustingReseller(null)
+      fetchResellers()
+      fetchSuperAdminData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update fee structure'
+      setFeeError(msg)
+      showToast('Update Failed', msg, 'error')
+    } finally {
+      setFeeSaving(false)
     }
   }
 
@@ -768,7 +815,7 @@ Status: ${reseller.status.toUpperCase()}`
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[200px]">Login Email</th>
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Stripe Gateway</th>
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px]">Merchant Fee Rate</th>
-                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px] text-amber-300">Super Admin (9%)</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px] text-amber-300">Super Admin Cut</th>
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px] text-fuchsia-300">Reseller Margin</th>
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px] text-right">Volume</th>
                     <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px] text-right text-amber-300">9% Fees Earned</th>
@@ -786,7 +833,8 @@ Status: ${reseller.status.toUpperCase()}`
                   ) : (
                     resellersList.map((reseller) => {
                       const rate = reseller.feeSettings?.merchantFeeRate || 12.0
-                      const margin = (rate - 9.0).toFixed(1)
+                      const baseFee = reseller.feeSettings?.basePlatformFee ?? 9.0
+                      const margin = (rate - baseFee).toFixed(1)
                       const isRoot = reseller.resellerId === 'admin_root'
 
                       return (
@@ -815,7 +863,11 @@ Status: ${reseller.status.toUpperCase()}`
                             {rate.toFixed(1)}%
                           </td>
                           <td className="px-4 py-3.5 whitespace-nowrap font-bold text-amber-300 font-mono">
-                            9.0% <span className="text-[10px] text-amber-400/80 font-normal">(Hardwired)</span>
+                            {baseFee.toFixed(1)}% {baseFee !== 9.0 ? (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-500/40 font-sans ml-1">Custom</span>
+                            ) : (
+                              <span className="text-[10px] text-amber-400/80 font-normal">(Standard)</span>
+                            )}
                           </td>
                           <td className="px-4 py-3.5 whitespace-nowrap font-bold text-fuchsia-300 font-mono">
                             +{margin}% Spread
@@ -851,6 +903,16 @@ Status: ${reseller.status.toUpperCase()}`
                                 ) : (
                                   <Copy className="h-3.5 w-3.5 text-emerald-300" />
                                 )}
+                              </button>
+
+                              {/* Adjust Fee Structure & Spread */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenAdjustFeeModal(reseller)}
+                                title="Adjust Commercial Fee Structure & Spread"
+                                className="p-1.5 rounded-lg bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/50 text-amber-300 transition-all cursor-pointer shadow-sm"
+                              >
+                                <Sliders className="h-3.5 w-3.5 text-amber-400" />
                               </button>
 
                               {/* 2. View Complete Credentials Vault */}
@@ -1322,6 +1384,177 @@ Status: ${reseller.status.toUpperCase()}`
                     <>
                       <Check className="h-4 w-4 text-black stroke-[2.5]" />
                       <span>Confirm & Provision</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: ADJUST PARTNER COMMERCIAL TERMS & FEE STRUCTURE */}
+      {adjustingReseller && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-5 my-8">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                  <Sliders className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Adjust Commercial Terms & Fee Structure
+                  </h3>
+                  <p className="text-[11px] text-amber-300/80 font-mono">
+                    Partner: {adjustingReseller.name} ({adjustingReseller.resellerId})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAdjustingReseller(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {feeError && (
+              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-200 text-xs flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+                <span>{feeError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveFeeStructure} className="space-y-4">
+              {/* Rate Controls (2-column) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 1. Super Admin Platform Cut */}
+                <div className="space-y-1.5 p-3.5 rounded-2xl bg-amber-950/20 border border-amber-500/30">
+                  <label className="text-xs font-bold text-amber-300 flex items-center justify-between">
+                    <span>Super Admin Cut (%)</span>
+                    <span className="text-[10px] text-amber-400/70 font-mono">Wholesale Royalty</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="50"
+                      required
+                      value={editBasePlatformFee}
+                      onChange={(e) => setEditBasePlatformFee(parseFloat(e.target.value) || 0)}
+                      className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white font-mono font-bold text-sm focus:outline-none focus:border-amber-400"
+                    />
+                    <span className="absolute right-3 text-xs font-mono text-amber-400">%</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400">
+                    Platform royalty retained by you on every transaction.
+                  </p>
+                </div>
+
+                {/* 2. Merchant Retail Fee Rate */}
+                <div className="space-y-1.5 p-3.5 rounded-2xl bg-cyan-950/20 border border-cyan-500/30">
+                  <label className="text-xs font-bold text-cyan-300 flex items-center justify-between">
+                    <span>Merchant Fee Rate (%)</span>
+                    <span className="text-[10px] text-cyan-400/70 font-mono">Sub-Merchant Retail</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <input
+                      type="number"
+                      step="0.1"
+                      min={editBasePlatformFee}
+                      max="50"
+                      required
+                      value={editMerchantFeeRate}
+                      onChange={(e) => setEditMerchantFeeRate(parseFloat(e.target.value) || 0)}
+                      className="w-full bg-[#05091d] border border-cyan-500/40 rounded-xl px-3 py-2 text-white font-mono font-bold text-sm focus:outline-none focus:border-cyan-400"
+                    />
+                    <span className="absolute right-3 text-xs font-mono text-cyan-400">%</span>
+                  </div>
+                  <p className="text-[10px] text-slate-400">
+                    Total transaction fee charged to sub-merchants.
+                  </p>
+                </div>
+              </div>
+
+              {/* Dynamic Spread Metric Badge */}
+              <div className="p-3 rounded-2xl bg-purple-950/30 border border-purple-500/40 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Coins className="h-4 w-4 text-fuchsia-400" />
+                  <span className="text-xs font-bold text-white">Computed Reseller Margin Spread:</span>
+                </div>
+                <div className="text-sm font-black text-fuchsia-300 font-mono">
+                  +{Math.max(0, editMerchantFeeRate - editBasePlatformFee).toFixed(1)}% Spread
+                </div>
+              </div>
+
+              {/* Live Multi-Tier Revenue Split Matrix */}
+              <div className="rounded-2xl bg-[#030718] border border-amber-500/20 p-3.5 space-y-2">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Calculator className="h-3.5 w-3.5 text-amber-400" />
+                  <span>Projected Monthly Income Split by Volume</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-[10px] border-b border-slate-800 pb-1.5 font-bold text-slate-400 uppercase font-mono">
+                  <div>Volume</div>
+                  <div className="text-amber-300">You ({editBasePlatformFee.toFixed(1)}%)</div>
+                  <div className="text-fuchsia-300">Partner (+{Math.max(0, editMerchantFeeRate - editBasePlatformFee).toFixed(1)}%)</div>
+                  <div className="text-right text-cyan-300">Merchants Net</div>
+                </div>
+                {[100000, 500000, 750000].map((vol) => {
+                  const spread = Math.max(0, editMerchantFeeRate - editBasePlatformFee)
+                  const sa = (vol * editBasePlatformFee) / 100
+                  const res = (vol * spread) / 100
+                  const net = vol - (vol * editMerchantFeeRate) / 100
+                  return (
+                    <div key={vol} className="grid grid-cols-4 gap-2 text-xs font-mono py-1 border-b border-slate-800/40">
+                      <div className="font-bold text-white">${(vol / 1000).toFixed(0)}k</div>
+                      <div className="font-bold text-amber-300">${sa.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      <div className="font-bold text-fuchsia-300">${res.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      <div className="font-bold text-slate-300 text-right">${net.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Payout Settlement Terms Input */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-300 uppercase">
+                  Settlement & Payout Schedule
+                </label>
+                <input
+                  type="text"
+                  value={editPayoutTerms}
+                  onChange={(e) => setEditPayoutTerms(e.target.value)}
+                  placeholder="e.g. Weekly Wire / Crypto USDT Transfer"
+                  className="w-full bg-[#05091d] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              {/* Modal Action Buttons */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAdjustingReseller(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={feeSaving || editMerchantFeeRate < editBasePlatformFee}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold text-xs shadow-[0_0_20px_rgba(251,191,36,0.5)] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {feeSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-black" />
+                      <span>Saving Terms...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 text-black stroke-[3]" />
+                      <span>Save Commercial Terms</span>
                     </>
                   )}
                 </button>

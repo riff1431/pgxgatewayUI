@@ -28,6 +28,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
   const [webhookSecret, setWebhookSecret] = useState('')
   const [mode, setMode] = useState<'test' | 'live'>('test')
   const [merchantFeeRate, setMerchantFeeRate] = useState<number>(12.0)
+  const [basePlatformFee, setBasePlatformFee] = useState<number>(9.0)
   const [showSecret, setShowSecret] = useState(false)
   const [showWebhook, setShowWebhook] = useState(false)
   const [copiedWebhook, setCopiedWebhook] = useState(false)
@@ -49,6 +50,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
           setWebhookSecret(res.data.stripe.webhookSecretMasked || '')
           setMode(res.data.stripe.mode || 'test')
           setMerchantFeeRate(res.data.feeSettings?.merchantFeeRate || 12.0)
+          setBasePlatformFee(res.data.feeSettings?.basePlatformFee || 9.0)
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to load Stripe configuration'
@@ -65,8 +67,8 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (merchantFeeRate < 9.0) {
-      onShowToast('Invalid Fee Rate', 'Merchant fee rate cannot be set lower than the 9.0% hardwired base fee.', 'error')
+    if (merchantFeeRate < basePlatformFee) {
+      onShowToast('Invalid Fee Rate', `Merchant fee rate cannot be set lower than your base platform fee (${basePlatformFee.toFixed(1)}%).`, 'error')
       return
     }
 
@@ -92,7 +94,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
   }
 
   // Real-time calculations
-  const platformRate = 9.0 // Fixed constant
+  const platformRate = basePlatformFee
   const resellerMargin = Math.max(0, merchantFeeRate - platformRate)
   const merchantNetRate = Math.max(0, 100 - merchantFeeRate)
 
@@ -284,7 +286,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
                   <div className="text-[10px] text-slate-300">Hardwired platform commission per transaction</div>
                 </div>
               </div>
-              <div className="text-lg font-black text-amber-300 font-mono">9.0%</div>
+              <div className="text-lg font-black text-amber-300 font-mono">{basePlatformFee.toFixed(1)}%</div>
             </div>
 
             {/* Merchant Fee Rate Input / Slider */}
@@ -296,7 +298,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
 
               <input
                 type="range"
-                min="9.0"
+                min={basePlatformFee.toString()}
                 max="25.0"
                 step="0.1"
                 value={merchantFeeRate}
@@ -305,7 +307,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
               />
 
               <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                <span>Min: 9.0%</span>
+                <span>Min: {basePlatformFee.toFixed(1)}%</span>
                 <span>Standard: 12.0%</span>
                 <span>Max: 25.0%</span>
               </div>
@@ -323,8 +325,8 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
               </div>
 
               <div className="flex justify-between text-amber-300">
-                <span>- Super Admin 9% Fee:</span>
-                <span className="font-bold font-mono">-$9.00</span>
+                <span>- Platform Base Fee ({basePlatformFee.toFixed(1)}%):</span>
+                <span className="font-bold font-mono">-${basePlatformFee.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-fuchsia-300">
