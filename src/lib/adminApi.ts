@@ -17,6 +17,28 @@ export function setStoredAdminToken(token: string): void {
 
 export function removeStoredAdminToken(): void {
   localStorage.removeItem(ADMIN_TOKEN_KEY)
+  localStorage.removeItem('pgx_admin_user_info')
+}
+
+export interface AdminUserInfo {
+  email: string
+  role: string
+  name?: string
+  resellerId?: string
+}
+
+export function getStoredAdminUser(): AdminUserInfo | null {
+  const data = localStorage.getItem('pgx_admin_user_info')
+  if (!data) return null
+  try {
+    return JSON.parse(data)
+  } catch {
+    return null
+  }
+}
+
+export function setStoredAdminUser(user: AdminUserInfo): void {
+  localStorage.setItem('pgx_admin_user_info', JSON.stringify(user))
 }
 
 export function getStoredSuperAdminToken(): string | null {
@@ -76,6 +98,7 @@ export interface AdminStats {
 export interface ApplicationItem {
   _id: string
   refId?: string
+  resellerId?: string
   fullName: string
   businessEmail: string
   phone: string
@@ -245,6 +268,9 @@ export const adminApi = {
     })
     if (res.token) {
       setStoredAdminToken(res.token)
+    }
+    if (res.admin) {
+      setStoredAdminUser(res.admin as AdminUserInfo)
     }
     return res
   },
@@ -432,6 +458,16 @@ export const adminApi = {
       {
         method: 'POST',
         body: JSON.stringify({ newPassword }),
+      }
+    )
+  },
+
+  reassignMerchantReseller: async (merchantId: string, targetResellerId: string) => {
+    return adminRequest<{ message: string; data: unknown }>(
+      `/admin/super-merchants/${merchantId}/reassign`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ targetResellerId }),
       }
     )
   },

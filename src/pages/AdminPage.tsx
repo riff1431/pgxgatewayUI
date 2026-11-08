@@ -20,30 +20,26 @@ import {
   X,
   AlertCircle,
   MessageSquare,
-  Palette,
   Send,
-  Phone,
-  Globe,
   Check,
   Tag,
-  UploadCloud,
-  Image as ImageIcon,
-  Trash2,
+  Copy,
+  Link as LinkIcon,
 } from 'lucide-react'
 import {
   adminApi,
   getStoredAdminToken,
   removeStoredAdminToken,
+  getStoredAdminUser,
+  type AdminUserInfo,
   type AdminStats,
   type ApplicationItem,
-  type SystemConfigData,
-  type MerchantMessageItem,
+    type MerchantMessageItem,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
 import StripeGatewayTab from '@/components/admin/StripeGatewayTab'
 import TransactionsTab from '@/components/admin/TransactionsTab'
 import { CreditCard, Receipt } from 'lucide-react'
-import { useBranding } from '@/context/BrandingContext'
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredAdminToken())
@@ -58,22 +54,21 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'approved' | 'rejected'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { updateLocalBranding } = useBranding()
-  const [adminSection, setAdminSection] = useState<'applications' | 'branding' | 'stripe' | 'transactions'>('applications')
+  const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(() => getStoredAdminUser())
+  const [adminSection, setAdminSection] = useState<'applications' | 'stripe' | 'transactions'>('applications')
+  const [copiedReferral, setCopiedReferral] = useState(false)
 
-  // White-Label & Branding Form State
-  const [brandingForm, setBrandingForm] = useState<SystemConfigData>({
-    siteName: 'PGX Gateway',
-    logoUrl: '',
-    faviconUrl: '/favicon.svg',
-    supportEmail: 'support@pgxgateway.com',
-    supportPhone: '+1 (800) 749-4283',
-    supportTelegram: '@pgxsupport',
-    supportWhatsapp: '+1 (800) 749-4283',
-  })
-  const [brandingSaving, setBrandingSaving] = useState(false)
-  const [logoUploading, setLogoUploading] = useState(false)
-  const [faviconUploading, setFaviconUploading] = useState(false)
+  const resellerId = adminUser?.resellerId || 'admin_root'
+  const referralLink = typeof window !== 'undefined'
+    ? `${window.location.origin}/register?reseller=${resellerId}`
+    : `https://pgxgateway.com/register?reseller=${resellerId}`
+
+  const handleCopyReferralLink = () => {
+    navigator.clipboard.writeText(referralLink)
+    setCopiedReferral(true)
+    showToast('Referral Link Copied', 'Share this link with your merchants to auto-bind them to your gateway.', 'success')
+    setTimeout(() => setCopiedReferral(false), 3000)
+  }
 
   // Direct Merchant Messaging State
   const [messagingApp, setMessagingApp] = useState<ApplicationItem | null>(null)
@@ -114,14 +109,12 @@ export default function AdminPage() {
     if (!token) return
     setLoading(true)
     try {
-      const [statsRes, appsRes, configRes] = await Promise.all([
+      const [statsRes, appsRes] = await Promise.all([
         adminApi.getStats(),
         adminApi.getApplications({ status: statusFilter, search: searchQuery }),
-        adminApi.getSystemConfig(),
       ])
       if (statsRes.data) setStats(statsRes.data)
       if (appsRes.data) setApplications(appsRes.data)
-      if (configRes.data) setBrandingForm(configRes.data)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to fetch admin data'
       showToast('Error', msg, 'error')
@@ -136,15 +129,13 @@ export default function AdminPage() {
       if (!token) return
       setLoading(true)
       try {
-        const [statsRes, appsRes, configRes] = await Promise.all([
+        const [statsRes, appsRes] = await Promise.all([
           adminApi.getStats(),
           adminApi.getApplications({ status: statusFilter, search: searchQuery }),
-          adminApi.getSystemConfig(),
         ])
         if (isSubscribed) {
           if (statsRes.data) setStats(statsRes.data)
           if (appsRes.data) setApplications(appsRes.data)
-          if (configRes.data) setBrandingForm(configRes.data)
         }
       } catch (err: unknown) {
         if (isSubscribed) {
@@ -164,77 +155,6 @@ export default function AdminPage() {
       isSubscribed = false
     }
   }, [token, statusFilter, searchQuery])
-
-  // Save White-Label Branding Settings
-  const handleSaveBranding = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setBrandingSaving(true)
-    try {
-      const res = await adminApi.updateSystemConfig(brandingForm)
-      if (res.data) {
-        setBrandingForm(res.data)
-        updateLocalBranding(res.data)
-        showToast('Branding Saved', 'Logo, favicon, website name & contact details updated.', 'success')
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save branding settings'
-      showToast('Error', msg, 'error')
-    } finally {
-      setBrandingSaving(false)
-    }
-  }
-
-  // Handle Direct Logo Upload to Cloudinary
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 10 * 1024 * 1024) {
-      showToast('File Too Large', 'Please upload a logo image smaller than 10MB.', 'error')
-      return
-    }
-
-    setLogoUploading(true)
-    try {
-      const res = await adminApi.uploadBrandingAsset(file, 'pgxgateway/branding/logos')
-      if (res.data?.url) {
-        setBrandingForm((prev) => ({ ...prev, logoUrl: res.data!.url }))
-        showToast('Logo Uploaded', 'Stored on Cloudinary. Click "Save Settings" to publish.', 'success')
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Logo upload failed'
-      showToast('Upload Error', msg, 'error')
-    } finally {
-      setLogoUploading(false)
-      e.target.value = ''
-    }
-  }
-
-  // Handle Direct Favicon Upload to Cloudinary
-  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('File Too Large', 'Please upload a favicon smaller than 5MB.', 'error')
-      return
-    }
-
-    setFaviconUploading(true)
-    try {
-      const res = await adminApi.uploadBrandingAsset(file, 'pgxgateway/branding/favicons')
-      if (res.data?.url) {
-        setBrandingForm((prev) => ({ ...prev, faviconUrl: res.data!.url }))
-        showToast('Favicon Uploaded', 'Stored on Cloudinary. Click "Save Settings" to publish.', 'success')
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Favicon upload failed'
-      showToast('Upload Error', msg, 'error')
-    } finally {
-      setFaviconUploading(false)
-      e.target.value = ''
-    }
-  }
 
   // Open Direct Message Modal
   const openMessageModal = async (app: ApplicationItem) => {
@@ -290,7 +210,8 @@ export default function AdminPage() {
       const res = await adminApi.login({ email: loginEmail, password: loginPassword })
       if (res.token) {
         setToken(res.token)
-        showToast('Admin Authenticated', 'Welcome to the Underwriting Desk', 'success')
+        setAdminUser(getStoredAdminUser())
+        showToast('Admin Authenticated', 'Welcome to Reseller Gateway Control', 'success')
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Authentication failed'
@@ -303,6 +224,7 @@ export default function AdminPage() {
   const handleLogout = () => {
     removeStoredAdminToken()
     setToken(null)
+    setAdminUser(null)
     showToast('Signed Out', 'Admin session terminated', 'success')
   }
 
@@ -531,11 +453,16 @@ export default function AdminPage() {
           <Logo size="sm" />
           <span className="text-slate-600 font-light">/</span>
           <div>
-            <div className="text-[11px] font-black tracking-widest text-cyan-400 uppercase">
-              Underwriting Desk
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono tracking-widest text-cyan-400 uppercase font-bold">
+                RESELLER GATEWAY CONTROL
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                Tenant: {resellerId}
+              </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Merchant Applications & Approvals
+              Merchant Applications & Underwriting Desk
             </h1>
           </div>
         </div>
@@ -574,6 +501,57 @@ export default function AdminPage() {
 
 
 
+      {/* Sub-Merchant Onboarding Referral Link Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-950/60 via-[#0d1238] to-purple-950/60 border border-purple-500/40 p-4 sm:p-5 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/50">
+                <LinkIcon className="h-3 w-3" />
+                <span>MERCHANT ONBOARDING REFERRAL</span>
+              </span>
+              <span className="text-xs text-slate-400 font-mono">
+                Assigned Tenant: <strong className="text-white">{resellerId}</strong>
+              </span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold text-white">
+              Direct Your Sub-Merchants to Register Under Your Gateway
+            </h3>
+            <p className="text-xs text-slate-300">
+              Share this unique link with clients. Any merchant registering via this link is automatically routed to your Underwriting Desk and Stripe payment gateway.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:w-80">
+              <input
+                type="text"
+                readOnly
+                value={referralLink}
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-950/80 border border-purple-500/30 font-mono text-xs text-purple-200 select-all focus:outline-none focus:border-purple-400"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyReferralLink}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all shrink-0"
+            >
+              {copiedReferral ? (
+                <>
+                  <Check className="h-3.5 w-3.5 text-emerald-300" />
+                  <span>Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Copy Link</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Admin Section Tabs Navigation */}
       <div className="flex items-center gap-3 border-b border-cyan-500/20 pb-3">
         <button
@@ -590,19 +568,6 @@ export default function AdminPage() {
           <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono">
             {applications.length}
           </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setAdminSection('branding')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            adminSection === 'branding'
-              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Palette className="h-4 w-4" />
-          <span>White-Label & Branding</span>
         </button>
 
         <button
@@ -868,419 +833,14 @@ export default function AdminPage() {
     </div>
   )}
 
-  {/* SECTION 2: WHITE-LABEL & BRANDING CONFIGURATION */}
-  {adminSection === 'branding' && (
-    <div className="space-y-6 animate-fade-in">
-      <div className="p-5 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl">
-        <div className="flex items-center gap-3 pb-3 border-b border-cyan-500/20">
-          <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)]">
-            <Palette className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-black text-white">White-Label & System Branding Settings</h2>
-            <p className="text-xs text-slate-400">
-              Customize your platform name, logo image, browser favicon, and compliance contact details in real-time.
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSaveBranding} className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Form Fields (8 Cols) */}
-          <div className="lg:col-span-7 space-y-5">
-            
-            {/* Website / Platform Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
-                <span>Platform Brand Name / Website Title</span>
-                <span className="text-[10px] text-cyan-400 font-mono">Dynamic Header & Titlebar</span>
-              </label>
-              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 focus-within:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
-                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                  <Globe className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={brandingForm.siteName}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, siteName: e.target.value })}
-                  placeholder="e.g. PGX Gateway or Your Brand Name"
-                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Custom Logo Image with Cloudinary Upload */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-cyan-400" />
-                  <span>Platform Logo Image</span>
-                </label>
-                <span className="text-[10px] text-cyan-400 font-mono flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" /> Cloudinary Storage
-                </span>
-              </div>
-
-              {/* Upload Drop / Action Area */}
-              <div className="p-3.5 rounded-2xl border border-cyan-500/35 bg-[#060c24] space-y-3">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {/* Thumbnail preview */}
-                    <div className="w-14 h-14 rounded-xl border border-cyan-400/40 bg-[#040817] flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-[0_0_12px_rgba(0,240,255,0.2)]">
-                      {brandingForm.logoUrl ? (
-                        <img
-                          src={brandingForm.logoUrl}
-                          alt="Logo Preview"
-                          className="max-h-full max-w-full object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none'
-                          }}
-                        />
-                      ) : (
-                        <ImageIcon className="h-6 w-6 text-slate-500" />
-                      )}
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-semibold text-white">
-                        {brandingForm.logoUrl ? 'Custom Cloudinary Logo' : 'Default SVG Logo'}
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        PNG, JPG, WebP, SVG (Max 10MB)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <input
-                      type="file"
-                      id="logo-upload-input"
-                      className="hidden"
-                      accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif"
-                      onChange={handleLogoUpload}
-                      disabled={logoUploading}
-                    />
-
-                    <label
-                      htmlFor="logo-upload-input"
-                      className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                        logoUploading
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(0,240,255,0.45)] hover:shadow-[0_0_22px_rgba(0,240,255,0.7)] hover:scale-[1.02]'
-                      }`}
-                    >
-                      {logoUploading ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          <span>Uploading...</span>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="h-4 w-4" />
-                          <span>Upload Logo</span>
-                        </>
-                      )}
-                    </label>
-
-                    {brandingForm.logoUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setBrandingForm({ ...brandingForm, logoUrl: '' })}
-                        className="px-3 py-2.5 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                        title="Reset to default logo"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Reset</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Direct URL input fallback */}
-                <div className="flex rounded-xl border border-cyan-500/30 bg-[#040817] overflow-hidden focus-within:border-cyan-400 transition-all">
-                  <div className="w-9 bg-[#081230] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                    <Building2 className="h-3.5 w-3.5" />
-                  </div>
-                  <input
-                    type="url"
-                    value={brandingForm.logoUrl || ''}
-                    onChange={(e) => setBrandingForm({ ...brandingForm, logoUrl: e.target.value })}
-                    placeholder="Direct Cloudinary URL will appear here or paste custom URL"
-                    className="w-full bg-transparent px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Favicon with Cloudinary Upload */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                  <span>Browser Tab Favicon</span>
-                </label>
-                <span className="text-[10px] text-slate-400">.ico / .svg / .png (Browser tab icon)</span>
-              </div>
-
-              <div className="p-3.5 rounded-2xl border border-cyan-500/35 bg-[#060c24] space-y-3">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {/* Favicon preview */}
-                    <div className="w-12 h-12 rounded-xl border border-cyan-400/40 bg-[#040817] flex items-center justify-center p-1.5 shrink-0 overflow-hidden shadow-[0_0_12px_rgba(0,240,255,0.2)]">
-                      {brandingForm.faviconUrl ? (
-                        <img
-                          src={brandingForm.faviconUrl}
-                          alt="Favicon Preview"
-                          className="w-6 h-6 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none'
-                          }}
-                        />
-                      ) : (
-                        <ShieldCheck className="h-5 w-5 text-slate-500" />
-                      )}
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <p className="text-xs font-semibold text-white truncate max-w-[200px]">
-                        {brandingForm.faviconUrl || '/favicon.svg'}
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        Accepted: .ico, .svg, .png (Max 5MB)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <input
-                      type="file"
-                      id="favicon-upload-input"
-                      className="hidden"
-                      accept="image/x-icon,image/svg+xml,image/png,image/vnd.microsoft.icon"
-                      onChange={handleFaviconUpload}
-                      disabled={faviconUploading}
-                    />
-
-                    <label
-                      htmlFor="favicon-upload-input"
-                      className={`flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
-                        faviconUploading
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-purple-600 via-fuchsia-600 to-cyan-500 text-white shadow-[0_0_16px_rgba(217,70,239,0.4)] hover:shadow-[0_0_22px_rgba(217,70,239,0.65)] hover:scale-[1.02]'
-                      }`}
-                    >
-                      {faviconUploading ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          <span>Uploading...</span>
-                        </>
-                      ) : (
-                        <>
-                          <UploadCloud className="h-4 w-4" />
-                          <span>Upload Favicon</span>
-                        </>
-                      )}
-                    </label>
-
-                    {brandingForm.faviconUrl && brandingForm.faviconUrl !== '/favicon.svg' && (
-                      <button
-                        type="button"
-                        onClick={() => setBrandingForm({ ...brandingForm, faviconUrl: '/favicon.svg' })}
-                        className="px-3 py-2.5 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 text-xs flex items-center gap-1.5 transition-all cursor-pointer"
-                        title="Reset to default favicon"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Reset</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex rounded-xl border border-cyan-500/30 bg-[#040817] overflow-hidden focus-within:border-cyan-400 transition-all">
-                  <div className="w-9 bg-[#081230] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                  </div>
-                  <input
-                    type="text"
-                    value={brandingForm.faviconUrl || ''}
-                    onChange={(e) => setBrandingForm({ ...brandingForm, faviconUrl: e.target.value })}
-                    placeholder="/favicon.svg or Cloudinary URL"
-                    className="w-full bg-transparent px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Support Email & Support Phone */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-200">Support Email</label>
-                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 transition-all">
-                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                    <Mail className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="email"
-                    value={brandingForm.supportEmail || ''}
-                    onChange={(e) => setBrandingForm({ ...brandingForm, supportEmail: e.target.value })}
-                    placeholder="support@yourbrand.com"
-                    className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-200">Support Phone / Hot Line</label>
-                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 transition-all">
-                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
-                    <Phone className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={brandingForm.supportPhone || ''}
-                    onChange={(e) => setBrandingForm({ ...brandingForm, supportPhone: e.target.value })}
-                    placeholder="+1 (800) 000-0000"
-                    className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Telegram & WhatsApp Handles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-200">Official Telegram Handle</label>
-                <input
-                  type="text"
-                  value={brandingForm.supportTelegram || ''}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, supportTelegram: e.target.value })}
-                  placeholder="@yourbrandsupport"
-                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-200">Official WhatsApp Contact</label>
-                <input
-                  type="text"
-                  value={brandingForm.supportWhatsapp || ''}
-                  onChange={(e) => setBrandingForm({ ...brandingForm, supportWhatsapp: e.target.value })}
-                  placeholder="+1 (800) 000-0000"
-                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-                />
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="pt-3">
-              <button
-                type="submit"
-                disabled={brandingSaving}
-                className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-extrabold text-sm border border-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_30px_rgba(217,70,239,0.9)] transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {brandingSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Saving Branding Changes...</span>
-                  </>
-                ) : (
-                  <>
-                    <Check className="h-4 w-4 stroke-[2.5]" />
-                    <span>Save System & Branding Settings</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-          </div>
-
-          {/* Real-Time Live Brand Preview (5 Cols) */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="p-5 rounded-2xl bg-[#030617] border border-cyan-500/40 shadow-xl space-y-4">
-              <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center justify-between">
-                <span>Live Real-Time Brand Preview</span>
-                <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  WYSIWYG
-                </span>
-              </div>
-
-              {/* Simulated Browser Navbar Preview */}
-              <div className="p-3 rounded-xl bg-[#05091a] border border-slate-700 space-y-2">
-                <div className="flex items-center gap-1.5 pb-2 border-b border-slate-800">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                  <div className="ml-2 flex items-center gap-1.5 px-3 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-mono truncate max-w-[200px]">
-                    {brandingForm.faviconUrl ? (
-                      <img src={brandingForm.faviconUrl} alt="Favicon" className="w-3 h-3 object-contain" />
-                    ) : (
-                      <ShieldCheck className="h-3 w-3 text-cyan-400" />
-                    )}
-                    <span>{brandingForm.siteName || 'PGX Gateway'}</span>
-                  </div>
-                </div>
-
-                {/* Navbar Visual */}
-                <div className="pt-1 flex items-center justify-between">
-                  {brandingForm.logoUrl ? (
-                    <img
-                      src={brandingForm.logoUrl}
-                      alt={brandingForm.siteName}
-                      className="h-7 w-auto object-contain drop-shadow-[0_0_8px_rgba(0,240,255,0.4)]"
-                      onError={(e) => {
-                        // Fallback indicator
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  ) : (
-                    <div className="text-sm font-black italic tracking-wide text-white">
-                      <span>{brandingForm.siteName?.split(' ')[0] || 'PGX'}</span>
-                      <span className="text-fuchsia-400">/</span>
-                      <div className="text-[8px] font-bold tracking-[0.2em] text-cyan-400 uppercase -mt-0.5">
-                        {brandingForm.siteName?.split(' ').slice(1).join(' ') || 'GATEWAY'}
-                      </div>
-                    </div>
-                  )}
-
-                  <span className="text-[10px] text-slate-400 font-mono">
-                    {brandingForm.supportEmail || 'support@pgxgateway.com'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Favicon Box */}
-              <div className="p-3 rounded-xl bg-[#05091a] border border-cyan-500/20 flex items-center justify-between text-xs">
-                <div>
-                  <div className="font-bold text-white">Browser Tab Icon (Favicon)</div>
-                  <div className="text-[10px] text-slate-400">Loaded in browser header dynamically</div>
-                </div>
-                <div className="w-8 h-8 rounded-lg bg-slate-900 border border-cyan-400/50 flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,0.4)]">
-                  {brandingForm.faviconUrl ? (
-                    <img src={brandingForm.faviconUrl} alt="Favicon" className="w-5 h-5 object-contain" />
-                  ) : (
-                    <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                  )}
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </form>
-      </div>
-    </div>
-  )}
-
-      {/* SECTION 3: STRIPE & RESELLER GATEWAY SETTINGS */}
+  {/* SECTION 2: STRIPE & RESELLER GATEWAY SETTINGS */}
       {adminSection === 'stripe' && (
         <StripeGatewayTab onShowToast={showToast} />
       )}
 
       {/* SECTION 4: REAL-TIME TRANSACTION LEDGER */}
       {adminSection === 'transactions' && (
-        <TransactionsTab onShowToast={showToast} />
+        <TransactionsTab onShowToast={showToast} isSuperAdmin={false} />
       )}
 
       {/* Review & Decision Modal */}

@@ -17,9 +17,10 @@ import { adminApi, type TransactionItem } from '@/lib/adminApi'
 
 interface TransactionsTabProps {
   onShowToast: (title: string, desc: string, type?: 'success' | 'error') => void
+  isSuperAdmin?: boolean
 }
 
-export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
+export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: TransactionsTabProps) {
   const [transactions, setTransactions] = useState<TransactionItem[]>([])
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed'>('all')
@@ -60,6 +61,7 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
   const totalPlatformFees = transactions.reduce((acc, t) => acc + (t.status === 'succeeded' ? t.platformFeeAmount : 0), 0)
   const totalResellerProfit = transactions.reduce((acc, t) => acc + (t.status === 'succeeded' ? t.resellerProfitAmount : 0), 0)
   const totalMerchantNet = transactions.reduce((acc, t) => acc + (t.status === 'succeeded' ? t.merchantNetAmount : 0), 0)
+  const succeededCount = transactions.filter((t) => t.status === 'succeeded').length
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -68,41 +70,60 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
         {/* Gross Volume */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Gross Volume</div>
+            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              {isSuperAdmin ? 'Global Gross Volume' : 'Gateway Volume'}
+            </div>
             <div className="text-xl sm:text-2xl font-black text-white mt-1">
               ${totalGross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">{transactions.length} records</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
             <DollarSign className="h-5 w-5" />
           </div>
         </div>
 
-        {/* Super Admin 9% Fee */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-950/40 to-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.25)] flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-semibold text-amber-300 uppercase tracking-wider">Super Admin 9% Cut</div>
-            <div className="text-xl sm:text-2xl font-black text-amber-300 mt-1">
-              ${totalPlatformFees.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {/* Card 2: Conditional between Super Admin 9% Fee vs Succeeded Txn Count */}
+        {isSuperAdmin ? (
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-950/40 to-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.25)] flex items-center justify-between">
+            <div>
+              <div className="text-[10px] font-semibold text-amber-300 uppercase tracking-wider">Super Admin 9% Cut</div>
+              <div className="text-xl sm:text-2xl font-black text-amber-300 mt-1">
+                ${totalPlatformFees.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </div>
+              <div className="text-[10px] text-amber-300/80 mt-0.5">Hardwired Platform Fee</div>
             </div>
-            <div className="text-[10px] text-amber-300/80 mt-0.5">Hardwired Platform Fee</div>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
+              <TrendingUp className="h-5 w-5" />
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300">
-            <TrendingUp className="h-5 w-5" />
+        ) : (
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)] flex items-center justify-between">
+            <div>
+              <div className="text-[10px] font-semibold text-emerald-300 uppercase tracking-wider">Succeeded Sales</div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-300 mt-1">
+                {succeededCount}
+              </div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Completed Payments</div>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/50 flex items-center justify-center text-emerald-300 shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Reseller Profit */}
+        {/* Reseller Profit Margin */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-fuchsia-400/60 shadow-[0_0_18px_rgba(217,70,239,0.25)] flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-semibold text-fuchsia-300 uppercase tracking-wider">Reseller Margin</div>
+            <div className="text-[10px] font-semibold text-fuchsia-300 uppercase tracking-wider">
+              {isSuperAdmin ? 'Resellers Total Margin' : 'Your Profit Margin'}
+            </div>
             <div className="text-xl sm:text-2xl font-black text-fuchsia-300 mt-1">
               ${totalResellerProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-fuchsia-400/80 mt-0.5">Admin Spread Profit</div>
+            <div className="text-[10px] text-fuchsia-400/80 mt-0.5">Spread Income</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300 shrink-0">
             <Sparkles className="h-5 w-5" />
           </div>
         </div>
@@ -116,7 +137,7 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
             </div>
             <div className="text-[10px] text-emerald-400/80 mt-0.5">Net Owed to Merchants</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shrink-0">
             <CheckCircle2 className="h-5 w-5" />
           </div>
         </div>
@@ -129,7 +150,7 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
           <div className="flex items-center gap-2">
             <Receipt className="h-5 w-5 text-cyan-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Dynamic Transaction Ledger & Fee Split
+              {isSuperAdmin ? 'Master Platform Transaction Ledger' : 'Reseller Transaction Ledger'}
             </h3>
             <span className="text-xs font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-full ml-1">
               {transactions.length} Records
@@ -179,37 +200,41 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
           </div>
         </div>
 
-        {/* Transactions Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+        {/* Transactions Table with Horizontal Scrolling */}
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
+          <table className="w-full text-left border-collapse text-xs min-w-[950px]">
             <thead>
               <tr className="border-b border-cyan-500/20 bg-[#09153d]/50 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
-                <th className="p-4">Date / Time</th>
-                <th className="p-4">Transaction ID</th>
-                <th className="p-4">Merchant Ref ID</th>
-                <th className="p-4">Customer / Order</th>
-                <th className="p-4 text-right">Gross Sale</th>
-                <th className="p-4 text-right text-amber-300">9% Admin Fee</th>
-                <th className="p-4 text-right text-fuchsia-300">Reseller Profit</th>
-                <th className="p-4 text-right text-emerald-400">Merchant Net</th>
-                <th className="p-4 text-center">Status</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">Date / Time</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">Transaction ID</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">Merchant Ref ID</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">Customer / Order</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right">Gross Sale</th>
+                {isSuperAdmin && (
+                  <th className="px-4 py-3.5 whitespace-nowrap text-right text-amber-300">9% Admin Fee</th>
+                )}
+                <th className="px-4 py-3.5 whitespace-nowrap text-right text-fuchsia-300">
+                  {isSuperAdmin ? 'Reseller Profit' : 'Your Profit'}
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right text-emerald-400">Merchant Net</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cyan-500/15">
               {loading && transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-slate-400">
+                  <td colSpan={isSuperAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-cyan-400 mb-2" />
                     <span>Loading transaction ledger...</span>
                   </td>
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-12 text-center space-y-2">
+                  <td colSpan={isSuperAdmin ? 9 : 8} className="p-12 text-center space-y-2">
                     <Receipt className="h-10 w-10 text-slate-600 mx-auto" />
                     <div className="text-slate-300 font-bold text-sm">No transactions found</div>
                     <div className="text-slate-500 text-xs max-w-sm mx-auto">
-                      Transactions processed via the single Stripe gateway will automatically appear here with their 9% platform cut and reseller spread.
+                      Transactions processed via connected Stripe gateways will automatically appear here.
                     </div>
                   </td>
                 </tr>
@@ -222,86 +247,83 @@ export default function TransactionsTab({ onShowToast }: TransactionsTabProps) {
                   return (
                     <tr key={txn._id} className="hover:bg-slate-800/30 transition-colors">
                       {/* Date */}
-                      <td className="p-4 text-slate-300 whitespace-nowrap">
-                        <div className="font-semibold">{new Date(txn.createdAt).toLocaleDateString()}</div>
-                        <div className="text-[10px] text-slate-500 font-mono">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                        <div>{new Date(txn.createdAt).toLocaleDateString()}</div>
+                        <div className="text-[10px] text-slate-500">
                           {new Date(txn.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </td>
 
                       {/* Transaction ID */}
-                      <td className="p-4">
-                        <div className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold">
-                          <span>{txn.transactionId}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(txn.transactionId, txn._id)}
-                            className="p-1 rounded text-slate-400 hover:text-white cursor-pointer"
-                          >
-                            {copiedId === txn._id ? (
-                              <Check className="h-3 w-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </button>
-                        </div>
-                        {txn.stripeSessionId && (
-                          <div className="text-[9px] text-slate-500 font-mono truncate max-w-[120px]" title={txn.stripeSessionId}>
-                            {txn.stripeSessionId}
-                          </div>
-                        )}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(txn.transactionId, txn.transactionId)}
+                          className="flex items-center gap-1 font-mono text-cyan-300 hover:text-white transition-colors cursor-pointer group"
+                          title="Click to copy Transaction ID"
+                        >
+                          <span className="truncate max-w-[120px]">{txn.transactionId}</span>
+                          {copiedId === txn.transactionId ? (
+                            <Check className="h-3 w-3 text-emerald-400 shrink-0" />
+                          ) : (
+                            <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 shrink-0" />
+                          )}
+                        </button>
                       </td>
 
                       {/* Merchant Ref ID */}
-                      <td className="p-4">
-                        <span className="font-mono text-[11px] font-bold text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <span className="font-mono px-2 py-0.5 rounded-md bg-purple-500/10 border border-fuchsia-400/40 text-fuchsia-300 font-semibold text-[11px]">
                           {txn.merchantRefId}
                         </span>
                       </td>
 
-                      {/* Customer Info */}
-                      <td className="p-4 text-slate-300">
-                        <div className="truncate max-w-[150px] font-medium">{txn.customerEmail || 'Guest Customer'}</div>
-                        {txn.orderId && <div className="text-[10px] text-slate-500 font-mono">#{txn.orderId}</div>}
+                      {/* Customer / Order */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="text-white font-medium truncate max-w-[150px]">{txn.customerEmail || 'Guest'}</div>
+                        <div className="text-[10px] text-slate-400 truncate max-w-[150px]">
+                          {txn.orderId || 'Direct Payment'}
+                        </div>
                       </td>
 
-                      {/* Gross Amount */}
-                      <td className="p-4 text-right font-black text-white whitespace-nowrap">
+                      {/* Gross Sale */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-white font-mono">
                         ${txn.grossAmount.toFixed(2)}
                       </td>
 
-                      {/* Super Admin 9% Fee */}
-                      <td className="p-4 text-right font-bold text-amber-300 font-mono whitespace-nowrap">
-                        -${txn.platformFeeAmount.toFixed(2)}
-                      </td>
+                      {/* Super Admin 9% Fee (Only visible to Super Admin) */}
+                      {isSuperAdmin && (
+                        <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-amber-300 font-mono">
+                          ${txn.platformFeeAmount.toFixed(2)}
+                        </td>
+                      )}
 
-                      {/* Reseller Profit */}
-                      <td className="p-4 text-right font-bold text-fuchsia-300 font-mono whitespace-nowrap">
+                      {/* Reseller Profit Spread */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-fuchsia-300 font-mono">
                         +${txn.resellerProfitAmount.toFixed(2)}
                       </td>
 
                       {/* Merchant Net */}
-                      <td className="p-4 text-right font-black text-emerald-400 font-mono whitespace-nowrap">
+                      <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-emerald-400 font-mono">
                         ${txn.merchantNetAmount.toFixed(2)}
                       </td>
 
                       {/* Status */}
-                      <td className="p-4 text-center whitespace-nowrap">
-                        {isSucceeded && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_8px_rgba(16,185,129,0.3)] inline-flex items-center gap-1">
-                            <CheckCircle2 className="h-3 w-3" /> Succeeded
-                          </span>
-                        )}
-                        {isPending && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/80 shadow-[0_0_8px_rgba(251,191,36,0.3)] inline-flex items-center gap-1">
-                            <Clock className="h-3 w-3" /> Pending
-                          </span>
-                        )}
-                        {isFailed && (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-red-300 bg-red-500/10 border border-red-400/80 shadow-[0_0_8px_rgba(239,68,68,0.3)] inline-flex items-center gap-1">
-                            <XCircle className="h-3 w-3" /> Failed
-                          </span>
-                        )}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            isSucceeded
+                              ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-400/80'
+                              : isPending
+                              ? 'bg-amber-500/10 text-amber-300 border border-amber-400/50'
+                              : 'bg-red-500/10 text-red-300 border border-red-400/50'
+                          }`}
+                        >
+                          {isSucceeded && <CheckCircle2 className="h-3 w-3" />}
+                          {isPending && <Clock className="h-3 w-3" />}
+                          {isFailed && <XCircle className="h-3 w-3" />}
+                          <span className="capitalize">{txn.status}</span>
+                        </span>
                       </td>
                     </tr>
                   )

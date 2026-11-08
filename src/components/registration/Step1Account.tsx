@@ -321,6 +321,19 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
       </div>
 
       {/* Global error alert banner */}
+      {/* Partner Onboarding Badge */
+      (searchParams.get('reseller') || searchParams.get('ref')) && (
+        <div className="mb-4 p-3 rounded-2xl bg-cyan-950/60 border border-cyan-400/60 text-cyan-200 text-xs flex items-center gap-2.5 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+          <ShieldCheck className="h-4 w-4 text-cyan-400 shrink-0" />
+          <div>
+            <div className="font-bold text-white">Partner Onboarding Program</div>
+            <div className="text-[11px] text-cyan-300 font-mono">
+              Registering under Authorized Partner: <strong>{searchParams.get('reseller') || searchParams.get('ref')}</strong>
+            </div>
+          </div>
+        </div>
+      )}
+
       {globalError && (
         <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/50 flex items-start justify-between gap-2.5 text-xs text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
           <div className="flex items-center gap-2">

@@ -19,6 +19,10 @@ import {
   KeyRound,
   X,
   CheckCircle2,
+  Palette,
+  Users,
+  Search,
+  ArrowRightLeft,
 } from 'lucide-react'
 import {
   adminApi,
@@ -27,7 +31,9 @@ import {
   removeStoredSuperAdminToken,
   type SuperAdminAnalytics,
   type ResellerTenant,
+  type ApplicationItem,
 } from '@/lib/adminApi'
+import BrandingTab from '@/components/admin/BrandingTab'
 import Logo from '@/components/brand/Logo'
 import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
 import TransactionsTab from '@/components/admin/TransactionsTab'
@@ -36,7 +42,14 @@ export default function SuperAdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredSuperAdminToken())
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'transactions'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'merchants' | 'branding' | 'transactions'>('overview')
+
+  // Super Admin Merchant Routing State
+  const [superMerchants, setSuperMerchants] = useState<ApplicationItem[]>([])
+  const [superMerchantsLoading, setSuperMerchantsLoading] = useState(false)
+  const [reassigningMerchantId, setReassigningMerchantId] = useState<string | null>(null)
+  const [selectedTargetResellers, setSelectedTargetResellers] = useState<Record<string, string>>({})
+  const [merchantSearch, setMerchantSearch] = useState('')
 
   // Resellers Management State
   const [resellersList, setResellersList] = useState<ResellerTenant[]>([])
@@ -117,12 +130,52 @@ export default function SuperAdminPage() {
     }
   }, [token])
 
+  const fetchSuperMerchants = useCallback(async () => {
+    setSuperMerchantsLoading(true)
+    try {
+      const res = await adminApi.getApplications()
+      if (res.data) setSuperMerchants(res.data)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to fetch merchants'
+      showToast('Error', msg, 'error')
+    } finally {
+      setSuperMerchantsLoading(false)
+    }
+  }, [])
+
+  const handleReassignMerchant = async (merchantId: string) => {
+    const targetResellerId = selectedTargetResellers[merchantId]
+    if (!targetResellerId) {
+      showToast('Select Reseller', 'Please select a destination reseller tenant.', 'error')
+      return
+    }
+    setReassigningMerchantId(merchantId)
+    try {
+      await adminApi.reassignMerchantReseller(merchantId, targetResellerId)
+      showToast(
+        'Merchant Reassigned',
+        `Merchant transferred to ${targetResellerId === 'admin_root' ? 'Primary Root Gateway' : targetResellerId}`,
+        'success'
+      )
+      await fetchSuperMerchants()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Reassignment failed'
+      showToast('Transfer Error', msg, 'error')
+    } finally {
+      setReassigningMerchantId(null)
+    }
+  }
+
   useEffect(() => {
     fetchSuperAdminData()
     if (activeTab === 'resellers') {
       fetchResellers()
     }
-  }, [fetchSuperAdminData, fetchResellers, activeTab])
+    if (activeTab === 'merchants') {
+      fetchSuperMerchants()
+      fetchResellers()
+    }
+  }, [fetchSuperAdminData, fetchResellers, fetchSuperMerchants, activeTab])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -419,6 +472,10 @@ Status: ${reseller.status.toUpperCase()}`
             onClick={() => {
               fetchSuperAdminData()
               if (activeTab === 'resellers') fetchResellers()
+              if (activeTab === 'merchants') {
+                fetchSuperMerchants()
+                fetchResellers()
+              }
               showToast('Refreshed', 'Telemetry synced.', 'success')
             }}
             disabled={loading || resellersLoading}
@@ -475,6 +532,35 @@ Status: ${reseller.status.toUpperCase()}`
           <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono text-white">
             {resellersList.length || analytics?.resellers?.length || 1}
           </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('merchants')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            activeTab === 'merchants'
+              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Users className="h-4 w-4" />
+          <span>Merchant Routing & Tenants</span>
+          <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono text-white">
+            {superMerchants.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('branding')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            activeTab === 'branding'
+              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Palette className="h-4 w-4" />
+          <span>White-Label & System Branding</span>
         </button>
 
         <button
@@ -794,10 +880,179 @@ Status: ${reseller.status.toUpperCase()}`
         </div>
       )}
 
+      {/* TAB 3: SUB-MERCHANT ROUTING & TENANT REASSIGNMENT DESK */}
+      {activeTab === 'merchants' && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                  <Users className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Platform Sub-Merchant Tenant Routing Desk
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Audit and reassign sub-merchants to any reseller tenant node. Direct organic registrations default to Root.
+                  </p>
+                </div>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={merchantSearch}
+                  onChange={(e) => setMerchantSearch(e.target.value)}
+                  placeholder="Search business, email..."
+                  className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-950/80 border border-amber-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent">
+              <table className="w-full text-left text-xs border-collapse min-w-[950px]">
+                <thead>
+                  <tr className="border-b border-amber-500/20 bg-[#09153d]/70 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[200px]">Merchant / Company</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Contact Email</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[170px]">Current Tenant Reseller</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px] text-center">Status</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[110px]">Joined Date</th>
+                    <th className="px-4 py-3.5 whitespace-nowrap min-w-[240px] text-right">Transfer Tenant</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-amber-500/15">
+                  {superMerchants
+                    .filter((m) => {
+                      if (!merchantSearch) return true
+                      const q = merchantSearch.toLowerCase()
+                      return (
+                        m.legalName?.toLowerCase().includes(q) ||
+                        m.fullName?.toLowerCase().includes(q) ||
+                        m.businessEmail?.toLowerCase().includes(q) ||
+                        m.resellerId?.toLowerCase().includes(q)
+                      )
+                    })
+                    .length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-8 text-center text-slate-400">
+                        {superMerchantsLoading ? 'Loading merchants across all tenants...' : 'No merchants found matching your query.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    superMerchants
+                      .filter((m) => {
+                        if (!merchantSearch) return true
+                        const q = merchantSearch.toLowerCase()
+                        return (
+                          m.legalName?.toLowerCase().includes(q) ||
+                          m.fullName?.toLowerCase().includes(q) ||
+                          m.businessEmail?.toLowerCase().includes(q) ||
+                          m.resellerId?.toLowerCase().includes(q)
+                        )
+                      })
+                      .map((merchant) => {
+                        const currentResellerId = merchant.resellerId || 'admin_root'
+                        const targetId = selectedTargetResellers[merchant._id] || currentResellerId
+                        const isChanging = targetId !== currentResellerId
+                        const isReassigning = reassigningMerchantId === merchant._id
+
+                        return (
+                          <tr key={merchant._id} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <div className="font-bold text-white text-sm">{merchant.legalName || merchant.fullName}</div>
+                              <div className="text-[10px] text-slate-400 font-mono">Ref: {merchant.refId || merchant._id.slice(-8)}</div>
+                            </td>
+                            <td className="px-4 py-3.5 whitespace-nowrap font-mono text-slate-300">
+                              <div>{merchant.businessEmail}</div>
+                              <div className="text-[10px] text-slate-400 font-sans">{merchant.phone}</div>
+                            </td>
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold ${
+                                currentResellerId === 'admin_root'
+                                  ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-400/50'
+                                  : 'bg-purple-500/10 text-purple-300 border border-purple-400/50'
+                              }`}>
+                                <span className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
+                                <span>{currentResellerId === 'admin_root' ? 'Primary Root (admin_root)' : currentResellerId}</span>
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 whitespace-nowrap text-center">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                merchant.applicationStatus === 'approved'
+                                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-400/60'
+                                  : merchant.applicationStatus === 'rejected'
+                                  ? 'bg-red-500/10 text-red-300 border border-red-400/60'
+                                  : 'bg-amber-500/10 text-amber-300 border border-amber-400/60'
+                              }`}>
+                                {merchant.applicationStatus === 'approved' ? 'Approved' : merchant.applicationStatus === 'rejected' ? 'Rejected' : 'Under Review'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 whitespace-nowrap text-slate-400 font-mono text-[11px]">
+                              {merchant.createdAt ? new Date(merchant.createdAt).toLocaleDateString() : 'N/A'}
+                            </td>
+                            <td className="px-4 py-3.5 whitespace-nowrap text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <select
+                                  value={targetId}
+                                  onChange={(e) => setSelectedTargetResellers((prev) => ({ ...prev, [merchant._id]: e.target.value }))}
+                                  className="px-2.5 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 text-[11px] font-mono text-slate-200 focus:outline-none focus:border-amber-400 cursor-pointer"
+                                >
+                                  <option value="admin_root">Primary Root (admin_root)</option>
+                                  {resellersList
+                                    .filter((r) => r.resellerId !== 'admin_root')
+                                    .map((r) => (
+                                      <option key={r.resellerId} value={r.resellerId}>
+                                        {r.name} ({r.resellerId})
+                                      </option>
+                                    ))}
+                                </select>
+
+                                <button
+                                  type="button"
+                                  disabled={!isChanging || isReassigning}
+                                  onClick={() => handleReassignMerchant(merchant._id)}
+                                  className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
+                                    isChanging
+                                      ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-black shadow-[0_0_12px_rgba(251,191,36,0.6)] hover:brightness-110'
+                                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
+                                  }`}
+                                >
+                                  {isReassigning ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <ArrowRightLeft className="h-3 w-3" />
+                                  )}
+                                  <span>Transfer</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: WHITE-LABEL & SYSTEM BRANDING SETTINGS */}
+      {activeTab === 'branding' && (
+        <div className="space-y-6 animate-fade-in">
+          <BrandingTab onShowToast={showToast} />
+        </div>
+      )}
+
       {/* TAB 3: GLOBAL MASTER TRANSACTION LEDGER */}
       {activeTab === 'transactions' && (
         <div className="space-y-6 animate-fade-in">
-          <TransactionsTab onShowToast={showToast} />
+          <TransactionsTab onShowToast={showToast} isSuperAdmin={true} />
         </div>
       )}
 
