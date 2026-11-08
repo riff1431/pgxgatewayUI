@@ -9,9 +9,7 @@ import {
   Loader2,
   AlertCircle,
   Building2,
-  DollarSign,
   Landmark,
-  Receipt,
   UserPlus,
   Copy,
   Check,
@@ -19,14 +17,12 @@ import {
   KeyRound,
   X,
   CheckCircle2,
-  Palette,
   Users,
   Search,
   ArrowRightLeft,
   Eye,
   EyeOff,
   Sliders,
-  Code2,
   Calculator,
   Coins,
 } from 'lucide-react'
@@ -45,12 +41,13 @@ import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
 import TransactionsTab from '@/components/admin/TransactionsTab'
 import SuperAdminIntegrationDesk from '@/components/admin/SuperAdminIntegrationDesk'
 import PlatformSettingsTab from '@/components/admin/PlatformSettingsTab'
+import SuperAdminSidebar, { type SuperAdminTabId } from '@/components/admin/SuperAdminSidebar'
 
 export default function SuperAdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredSuperAdminToken())
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'merchants' | 'integrations' | 'settings' | 'branding' | 'transactions'>('overview')
+  const [activeTab, setActiveTab] = useState<SuperAdminTabId>('overview')
 
   // Super Admin Merchant Routing State
   const [superMerchants, setSuperMerchants] = useState<ApplicationItem[]>([])
@@ -510,7 +507,7 @@ Status: ${reseller.status.toUpperCase()}`
 
   // AUTHENTICATED SUPER ADMIN COMMAND CENTER
   return (
-    <div className="min-h-screen pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 pt-4 animate-fade-in relative">
+    <div className="min-h-screen pb-16 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto space-y-6 pt-4 animate-fade-in relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -571,115 +568,42 @@ Status: ${reseller.status.toUpperCase()}`
         </div>
       </header>
 
-      {/* Super Admin Platform Telemetry Hero Bar */}
-      <SuperAdminAnalyticsBar
-        onRefresh={() => {
-          fetchSuperAdminData()
-          fetchResellers()
-        }}
-      />
+      
+      {/* Super Admin Dashboard Grid: Sidebar (3 Cols) + Main Content (9 Cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        
+        {/* Left Sidebar (Col 3 on desktop) */}
+        <div className="lg:col-span-3 w-full lg:sticky lg:top-4">
+          <SuperAdminSidebar
+            activeTab={activeTab}
+            onTabChange={(tab) => setActiveTab(tab)}
+            resellerCount={resellersList.length || analytics?.resellers?.length || 1}
+            merchantCount={superMerchants.length}
+            onRefresh={() => {
+              fetchSuperAdminData()
+              if (activeTab === 'resellers') fetchResellers()
+              if (activeTab === 'merchants') {
+                fetchSuperMerchants()
+                fetchResellers()
+              }
+              showToast('Refreshed', 'Telemetry synced.', 'success')
+            }}
+            onLogout={handleLogout}
+            isRefreshing={loading || resellersLoading}
+          />
+        </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-amber-500/20 pb-3">
-        <button
-          type="button"
-          onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'overview'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <DollarSign className="h-4 w-4" />
-          <span>Platform 9% Revenue Audit</span>
-        </button>
+        {/* Main Content Area (Col 9 on desktop) */}
+        <div className="lg:col-span-9 space-y-6 min-w-0">
+          {/* Telemetry Hero Bar in Main Content */}
+          <SuperAdminAnalyticsBar
+            onRefresh={() => {
+              fetchSuperAdminData()
+              fetchResellers()
+            }}
+          />
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('resellers')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'resellers'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Building2 className="h-4 w-4" />
-          <span>Connected Resellers & Tenants</span>
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono text-white">
-            {resellersList.length || analytics?.resellers?.length || 1}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('merchants')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'merchants'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          <span>Merchant Routing & Tenants</span>
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono text-white">
-            {superMerchants.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('integrations')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'integrations'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Code2 className="h-4 w-4" />
-          <span>Integration Desk & Collab</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('settings')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'settings'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Sliders className="h-4 w-4" />
-          <span>Platform & Stripe Settings</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('branding')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'branding'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Palette className="h-4 w-4" />
-          <span>White-Label & System Branding</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('transactions')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            activeTab === 'transactions'
-              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Receipt className="h-4 w-4" />
-          <span>Global Master Ledger</span>
-        </button>
-      </div>
-
-      {/* TAB 1: OVERVIEW & 9% AUDIT */}
+          {/* TAB 1: OVERVIEW & 9% AUDIT */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-fade-in">
           {/* Revenue Forecast Matrix */}
@@ -1192,6 +1116,10 @@ Status: ${reseller.status.toUpperCase()}`
           <TransactionsTab onShowToast={showToast} isSuperAdmin={true} />
         </div>
       )}
+
+      
+        </div>
+      </div>
 
       {/* MODAL 1: VIEW RESELLER ACCESS VAULT */}
       {viewAccessReseller && (
