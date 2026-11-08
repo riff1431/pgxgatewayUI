@@ -110,7 +110,7 @@ export default function InvoicesTab() {
                 Weekly Service Billing & Invoices
               </h2>
               <p className="text-xs sm:text-sm text-slate-300">
-                PRD Section 07: Ongoing 9% service fee billing on verified weekly transaction volume.
+                Ongoing 9% platform service billing on verified weekly transaction volume.
               </p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function InvoicesTab() {
       <div className="p-5 rounded-2xl bg-[#091332] border border-cyan-500/20 text-xs space-y-2 text-slate-300">
         <div className="font-bold text-white flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-cyan-400" />
-          How Weekly 9% Service Invoicing Works (PRD Section 07):
+          How Weekly 9% Platform Service Invoicing Works:
         </div>
         <p className="leading-relaxed">
           At the end of each weekly cycle, PGX Gateway aggregates your verified card transaction volume. A <span className="text-cyan-300 font-semibold">9% service fee invoice</span> is generated with a 5-day settlement window. You can pay instantly using card (Stripe) or upload a bank wire transfer confirmation slip.

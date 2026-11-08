@@ -124,9 +124,9 @@ export default function SuperAdminSidebar({
           <div className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] font-mono text-amber-300">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-              <span>COMMAND CONSOLE</span>
+              <span>SUPER ADMIN</span>
             </div>
-            <span className="text-[10px] text-slate-400">PRD v1.0</span>
+            <span className="text-[10px] text-emerald-400 font-semibold">Active</span>
           </div>
         </div>
 

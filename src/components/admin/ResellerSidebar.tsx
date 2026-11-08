@@ -104,7 +104,7 @@ export default function ResellerSidebar({
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
               <span>AFFILIATE PARTNER</span>
             </div>
-            <span className="text-[10px] text-slate-400">PRD Model</span>
+            <span className="text-[10px] text-emerald-400 font-semibold">Active</span>
           </div>
 
           {/* Quick 1-Click Referral Link Pill */}

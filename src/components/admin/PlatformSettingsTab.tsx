@@ -285,7 +285,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-semibold text-slate-200">Merchant Setup Fee (USD)</label>
-                <span className="text-[10px] text-fuchsia-400 font-bold">PRD v1.0 Configurable</span>
+                <span className="text-[10px] text-cyan-300 font-bold">Standard Pricing</span>
               </div>
               <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
                 <span className="px-3 text-cyan-400 font-bold text-sm">$</span>
@@ -299,7 +299,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                 />
               </div>
 
-              {/* Quick Presets from PRD */}
+              {/* Quick Presets */}
               <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
@@ -310,7 +310,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                       : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
                   }`}
                 >
-                  $450 (PRD Standard)
+                  $450 (Standard Tier)
                 </button>
                 <button
                   type="button"
@@ -321,7 +321,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                       : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
                   }`}
                 >
-                  $565 (PRD VIP Turnkey)
+                  $565 (VIP Turnkey)
                 </button>
               </div>
             </div>

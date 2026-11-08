@@ -43,7 +43,7 @@ function GithubIcon({ className = 'w-4 h-4' }: { className?: string }) {
   )
 }
 
-const PRD_MILESTONES = [
+const ONBOARDING_MILESTONES = [
   { id: 'payment_pending', label: 'Payment Pending' },
   { id: 'information_pending', label: 'Information Pending' },
   { id: 'under_review', label: 'Under Review' },
@@ -233,7 +233,7 @@ export default function IntegrationTab() {
                 White-Glove Integration Desk
               </h2>
               <p className="text-xs sm:text-sm text-slate-300">
-                PRD v1.0 Managed Payment Integration: 5-Business-Day Delivery Target after verified access.
+                Managed Payment Gateway Integration: 5-Business-Day Delivery Target after verified repository access.
               </p>
             </div>
           </div>
@@ -243,10 +243,10 @@ export default function IntegrationTab() {
           </div>
         </div>
 
-        {/* PRD Section 06: 7-Stage Milestone Stepper */}
+        {/* 7-Stage Milestone Stepper */}
         <div className="pt-2 border-t border-cyan-500/20">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-            {PRD_MILESTONES.map((step, idx) => {
+            {ONBOARDING_MILESTONES.map((step, idx) => {
               const isPast = idx < currentMilestoneIdx
               const isCurrent = idx === currentMilestoneIdx
               return (
@@ -347,7 +347,7 @@ export default function IntegrationTab() {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
-                  One-Time Onboarding Fee (PRD Spec)
+                  One-Time Onboarding Fee
                 </span>
                 <span className="text-3xl font-black text-white">
                   ${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}
@@ -611,7 +611,7 @@ export default function IntegrationTab() {
                 <div>
                   <h3 className="text-lg font-bold text-white">3. Secure .env & Credentials Vault</h3>
                   <p className="text-xs text-slate-300">
-                    PRD Section 05: Secure credential vault (never sent via ordinary unencrypted chat)
+                    Secure credential vault (encrypted end-to-end; never sent over unencrypted channels)
                   </p>
                 </div>
               </div>
