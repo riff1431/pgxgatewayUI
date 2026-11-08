@@ -189,7 +189,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30">
         {/* Status Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+        <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5"><div className="flex items-center gap-1.5 whitespace-nowrap">
           {[
             { id: 'all', label: 'All Requests' },
             { id: 'payment_pending', label: '01. Payment Pending' },
@@ -213,6 +213,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
               {tab.label}
             </button>
           ))}
+          </div>
         </div>
 
         {/* Search Input */}
@@ -238,17 +239,17 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
 
       {/* Merchants Table */}
       <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar sm:scrollbar-thin sm:scrollbar-thumb-cyan-500/25">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] text-slate-300 font-semibold border-b border-cyan-500/20 uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="px-5 py-4">Merchant</th>
-                <th className="px-5 py-4">Store Domain</th>
-                <th className="px-5 py-4">Git Repository</th>
-                <th className="px-5 py-4">Status</th>
-                <th className="px-5 py-4">GitHub Collab</th>
-                <th className="px-5 py-4">Affiliate</th>
-                <th className="px-5 py-4 text-right">Actions</th>
+                <th className="px-4 py-3">Merchant</th>
+                <th className="px-3.5 py-3">Store Domain</th>
+                <th className="px-3.5 py-3">Git Repository</th>
+                <th className="px-3.5 py-3">Delivery Status</th>
+                <th className="px-3.5 py-3">GitHub Collab</th>
+                <th className="px-3 py-3">Affiliate</th>
+                <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cyan-500/10">
@@ -270,93 +271,104 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                   const domain = m.websiteDomain || m.website
                   return (
                     <tr key={m._id} className="hover:bg-[#091332]/50 transition-colors">
-                      <td className="px-5 py-4">
-                        <div className="font-bold text-white text-sm">{m.fullName}</div>
-                        <div className="text-slate-400 text-[11px]">{m.businessEmail}</div>
+                                            <td className="px-3.5 py-3 whitespace-nowrap">
+                        <div className="font-bold text-white text-xs sm:text-sm">{m.fullName}</div>
+                        <div className="text-slate-400 text-[11px] truncate max-w-[150px]">{m.businessEmail}</div>
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-3.5 py-3 whitespace-nowrap">
                         {domain ? (
                           <a
                             href={domain.startsWith('http') ? domain : `https://${domain}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-cyan-300 hover:text-cyan-200 flex items-center gap-1 font-medium"
+                            className="text-cyan-300 hover:text-cyan-200 flex items-center gap-1 font-medium text-xs"
                           >
-                            <Globe className="w-3.5 h-3.5" />
-                            <span className="truncate max-w-[140px]">{domain.replace(/^https?:\/\//, '')}</span>
+                            <Globe className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                            <span className="truncate max-w-[130px]">{domain.replace(/^https?:\/\//, '')}</span>
                           </a>
                         ) : (
-                          <span className="text-slate-500 italic">Not provided</span>
+                          <span className="text-slate-500 italic text-xs">Not provided</span>
                         )}
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-3.5 py-3 whitespace-nowrap">
                         {m.gitRepoUrl ? (
                           <a
                             href={m.gitRepoUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-mono text-[11px]"
+                            className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 font-mono text-xs"
                           >
-                            <GithubIcon className="w-3.5 h-3.5" />
-                            <span className="truncate max-w-[150px]">{m.gitRepoUrl.replace('https://github.com/', '')}</span>
-                            <ExternalLink className="w-3 h-3 shrink-0" />
+                            <GithubIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate max-w-[130px]">{m.gitRepoUrl.replace('https://github.com/', '')}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
                           </a>
                         ) : (
-                          <span className="text-slate-500 italic">Pending invite</span>
+                          <span className="text-slate-500 italic text-xs">Pending invite</span>
                         )}
                       </td>
-                      <td className="px-5 py-4">
-                        {m.setupStatus === 'pending_payment' && (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-semibold">
-                            Pending Payment
+                      <td className="px-3.5 py-3 whitespace-nowrap">
+                        {['payment_pending', 'pending_payment'].includes(m.setupStatus || '') && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" /> Payment Pending
                           </span>
                         )}
-                        {m.setupStatus === 'paid_setup' && (
-                          <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[11px] font-semibold">
-                            Fee Paid
+                        {['information_pending', 'paid_setup'].includes(m.setupStatus || '') && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" /> Info Pending
                           </span>
                         )}
-                        {m.setupStatus === 'collab_submitted' && (
-                          <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 text-[11px] font-semibold">
-                            Collab Ready
+                        {['under_review', 'collab_submitted'].includes(m.setupStatus || '') && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" /> Under Review
                           </span>
                         )}
-                        {m.setupStatus === 'in_progress' && (
-                          <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[11px] font-semibold">
-                            In Progress
+                        {['in_development', 'in_progress'].includes(m.setupStatus || '') && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" /> In Dev
+                          </span>
+                        )}
+                        {m.setupStatus === 'integration_testing' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400 shrink-0" /> Testing
                           </span>
                         )}
                         {m.setupStatus === 'completed' && (
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold">
-                            Gateway Live
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" /> Completed
+                          </span>
+                        )}
+                        {m.setupStatus === 'delivered' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/30 text-[10px] font-semibold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0" /> Delivered
                           </span>
                         )}
                       </td>
-                      <td className="px-5 py-4">
+                      <td className="px-3.5 py-3 whitespace-nowrap">
                         {m.gitCollabStatus === 'accepted' ? (
                           <span className="text-emerald-400 font-semibold flex items-center gap-1 text-[11px]">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Accepted
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Accepted
                           </span>
                         ) : m.gitCollabStatus === 'invite_sent' ? (
                           <span className="text-cyan-300 font-semibold flex items-center gap-1 text-[11px]">
-                            <Clock className="w-3.5 h-3.5" /> Invite Sent
+                            <Clock className="w-3.5 h-3.5 shrink-0" /> Invite Sent
                           </span>
                         ) : (
                           <span className="text-slate-500 text-[11px]">Pending</span>
                         )}
                       </td>
-                      <td className="px-5 py-4">
-                        <span className="font-mono text-[11px] text-slate-300">
+                      <td className="px-3.5 py-3 whitespace-nowrap">
+                        <span className="font-mono text-[10px] text-slate-300 px-2 py-0.5 rounded-md bg-[#091332] border border-cyan-500/20">
                           {m.resellerId || 'admin_root'}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => setActiveMerchant(m)}
-                          className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-[#040819] font-bold text-xs shadow-[0_0_12px_rgba(0,240,255,0.3)] transition-all cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-[#040819] font-bold text-xs shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all cursor-pointer whitespace-nowrap inline-flex items-center gap-1"
                         >
-                          Open Workspace &rarr;
+                          <span>Workspace</span>
+                          <span>&rarr;</span>
                         </button>
                       </td>
                     </tr>

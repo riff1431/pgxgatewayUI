@@ -570,10 +570,10 @@ Status: ${reseller.status.toUpperCase()}`
 
       
       {/* Super Admin Dashboard Grid: Sidebar (3 Cols) + Main Content (9 Cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
         
         {/* Left Sidebar (Col 3 on desktop) */}
-        <div className="lg:col-span-3 w-full lg:sticky lg:top-4">
+        <div className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-4">
           <SuperAdminSidebar
             activeTab={activeTab}
             onTabChange={(tab) => setActiveTab(tab)}
@@ -594,7 +594,7 @@ Status: ${reseller.status.toUpperCase()}`
         </div>
 
         {/* Main Content Area (Col 9 on desktop) */}
-        <div className="lg:col-span-9 space-y-6 min-w-0">
+        <div className="flex-1 min-w-0 w-full space-y-6">
           {/* Telemetry Hero Bar in Main Content */}
           <SuperAdminAnalyticsBar
             onRefresh={() => {
