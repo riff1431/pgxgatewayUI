@@ -9,7 +9,8 @@ import {
   Settings, 
   Tag,
   User,
-  Code2
+  Code2,
+  Receipt
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
@@ -30,6 +31,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'integration', label: 'Integration & Collab', icon: Code2 },
+    { id: 'invoices', label: 'Weekly Invoices', icon: Receipt },
     { id: 'application', label: 'My Application', icon: FileText },
     { id: 'documents', label: 'Documents', icon: Folder },
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount },

@@ -192,11 +192,13 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
           {[
             { id: 'all', label: 'All Requests' },
-            { id: 'pending_payment', label: 'Pending Payment' },
-            { id: 'paid_setup', label: 'Paid Setup' },
-            { id: 'collab_submitted', label: 'Collab Submitted' },
-            { id: 'in_progress', label: 'In Progress' },
-            { id: 'completed', label: 'Live / Completed' },
+            { id: 'payment_pending', label: '01. Payment Pending' },
+            { id: 'information_pending', label: '02. Info Pending' },
+            { id: 'under_review', label: '03. Under Review' },
+            { id: 'in_development', label: '04. In Dev' },
+            { id: 'integration_testing', label: '05. Testing' },
+            { id: 'completed', label: '06. Completed' },
+            { id: 'delivered', label: '07. Delivered' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -408,11 +410,13 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                   disabled={updatingStatus}
                   className="w-full px-3 py-2 rounded-xl bg-[#030614] border border-cyan-500/40 text-cyan-200 text-xs font-semibold focus:outline-none"
                 >
-                  <option value="pending_payment">Pending Payment</option>
-                  <option value="paid_setup">Paid Setup</option>
-                  <option value="collab_submitted">Collab Submitted</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="completed">Live / Completed</option>
+                  <option value="payment_pending">01. Payment Pending</option>
+                  <option value="information_pending">02. Information Pending</option>
+                  <option value="under_review">03. Under Review</option>
+                  <option value="in_development">04. In Development</option>
+                  <option value="integration_testing">05. Integration & Testing</option>
+                  <option value="completed">06. Completed</option>
+                  <option value="delivered">07. Delivered</option>
                 </select>
               </div>
 
@@ -437,6 +441,22 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                 <span className="text-xs text-white font-mono truncate">
                   {activeMerchant.websiteDomain || activeMerchant.website || 'No domain'}
                 </span>
+              </div>
+            </div>
+
+            {/* PRD Section 05: Tech Stack & Hosting Badge Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 rounded-2xl bg-[#040819] border border-cyan-500/30 text-xs">
+              <div>
+                <span className="text-slate-400 block text-[10px]">Hosting Provider:</span>
+                <span className="text-cyan-300 font-bold">{activeMerchant.hostingProvider || 'Not specified'}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px]">Technology Stack:</span>
+                <span className="text-cyan-300 font-bold">{activeMerchant.techStack || 'Not specified'}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px]">Integration Notes:</span>
+                <span className="text-slate-300 truncate block">{activeMerchant.integrationNotes || 'None'}</span>
               </div>
             </div>
 

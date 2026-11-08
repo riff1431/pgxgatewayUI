@@ -16,6 +16,10 @@ import {
   AlertCircle,
   Code2,
   MessageSquare,
+  Server,
+  Layers,
+  FileCode,
+  Check,
 } from 'lucide-react'
 import {
   fetchMerchantSetupStatus,
@@ -39,6 +43,15 @@ function GithubIcon({ className = 'w-4 h-4' }: { className?: string }) {
   )
 }
 
+const PRD_MILESTONES = [
+  { id: 'payment_pending', label: 'Payment Pending' },
+  { id: 'information_pending', label: 'Information Pending' },
+  { id: 'under_review', label: 'Under Review' },
+  { id: 'in_development', label: 'In Development' },
+  { id: 'integration_testing', label: 'Testing' },
+  { id: 'delivered', label: 'Delivered' },
+]
+
 export default function IntegrationTab() {
   const { merchant } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -49,6 +62,11 @@ export default function IntegrationTab() {
   const [websiteDomain, setWebsiteDomain] = useState('')
   const [gitRepoUrl, setGitRepoUrl] = useState('')
   const [envConfig, setEnvConfig] = useState('')
+  const [hostingProvider, setHostingProvider] = useState('')
+  const [techStack, setTechStack] = useState('')
+  const [integrationNotes, setIntegrationNotes] = useState('')
+  const [preferredDomain, setPreferredDomain] = useState('')
+
   const [showEnv, setShowEnv] = useState(false)
   const [paying, setPaying] = useState(false)
   const [savingCollab, setSavingCollab] = useState(false)
@@ -68,6 +86,10 @@ export default function IntegrationTab() {
       setWebsiteDomain(data.websiteDomain || '')
       setGitRepoUrl(data.gitRepoUrl || '')
       setEnvConfig(data.envConfig || '')
+      setHostingProvider(data.hostingProvider || '')
+      setTechStack(data.techStack || '')
+      setIntegrationNotes(data.integrationNotes || '')
+      setPreferredDomain(data.preferredDomain || data.websiteDomain || '')
 
       if (data.merchantId) {
         const msgs = await fetchSetupMessages(data.merchantId)
@@ -133,6 +155,10 @@ export default function IntegrationTab() {
         gitRepoUrl: gitRepoUrl.trim(),
         envConfig: envConfig.trim(),
         inviteSent,
+        hostingProvider: hostingProvider.trim(),
+        techStack: techStack.trim(),
+        integrationNotes: integrationNotes.trim(),
+        preferredDomain: preferredDomain.trim(),
       })
       setSetupData((prev) => (prev ? { ...prev, ...updated } : prev))
       await loadStatus()
@@ -172,13 +198,27 @@ export default function IntegrationTab() {
     )
   }
 
-  const isPaid = setupData && setupData.setupStatus !== 'pending_payment'
+  const normalizedStatus = setupData?.setupStatus || 'payment_pending'
+  const isPaid = !['payment_pending', 'pending_payment'].includes(normalizedStatus)
+
+  // Map status index to milestones
+  const getMilestoneIndex = (status: string) => {
+    if (['payment_pending', 'pending_payment'].includes(status)) return 0
+    if (['information_pending', 'paid_setup'].includes(status)) return 1
+    if (['under_review', 'collab_submitted'].includes(status)) return 2
+    if (['in_development', 'in_progress'].includes(status)) return 3
+    if (['integration_testing'].includes(status)) return 4
+    if (['completed', 'delivered'].includes(status)) return 5
+    return 0
+  }
+
+  const currentMilestoneIdx = getMilestoneIndex(normalizedStatus)
 
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Top Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.15)] flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.15)] space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-400">
               <Code2 className="w-6 h-6" />
@@ -188,40 +228,41 @@ export default function IntegrationTab() {
                 White-Glove Integration Desk
               </h2>
               <p className="text-xs sm:text-sm text-slate-300">
-                Connect your website repository, share configuration secrets, and collaborate directly with our engineering team.
+                PRD v1.0 Managed Payment Integration: 5-Business-Day Delivery Target after verified access.
               </p>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#040819]/80 border border-cyan-400/30 shrink-0 text-xs text-cyan-300 font-semibold">
+            <Clock className="w-3.5 h-3.5" /> Target Delivery: 5 Business Days
+          </div>
         </div>
 
-        {/* Current Setup Status Badge */}
-        <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#040819]/80 border border-cyan-400/30 shrink-0">
-          <div className="text-xs text-slate-400 font-medium">Integration Status:</div>
-          {setupData?.setupStatus === 'pending_payment' && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
-              <Clock className="w-3.5 h-3.5" /> Pending Setup Fee
-            </span>
-          )}
-          {setupData?.setupStatus === 'paid_setup' && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Fee Paid - Collab Required
-            </span>
-          )}
-          {setupData?.setupStatus === 'collab_submitted' && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30">
-              <Clock className="w-3.5 h-3.5" /> In Super Admin Review
-            </span>
-          )}
-          {setupData?.setupStatus === 'in_progress' && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 animate-pulse">
-              <Code2 className="w-3.5 h-3.5" /> Code Integration In Progress
-            </span>
-          )}
-          {setupData?.setupStatus === 'completed' && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Gateway Live & Active
-            </span>
-          )}
+        {/* PRD Section 06: 7-Stage Milestone Stepper */}
+        <div className="pt-2 border-t border-cyan-500/20">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            {PRD_MILESTONES.map((step, idx) => {
+              const isPast = idx < currentMilestoneIdx
+              const isCurrent = idx === currentMilestoneIdx
+              return (
+                <div
+                  key={step.id}
+                  className={`p-2.5 rounded-xl border transition-all text-center space-y-1 ${
+                    isCurrent
+                      ? 'bg-fuchsia-600/20 border-fuchsia-400 text-white shadow-[0_0_12px_rgba(217,70,239,0.5)]'
+                      : isPast
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                      : 'bg-[#030614]/60 border-slate-800 text-slate-500'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+                    {isPast ? <Check className="w-3 h-3 text-emerald-400" /> : <span>0{idx + 1}</span>}
+                  </div>
+                  <div className="text-[11px] font-bold truncate">{step.label}</div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
 
@@ -245,7 +286,7 @@ export default function IntegrationTab() {
                 We Build & Connect The Gateway Right Into Your Codebase
               </h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Rather than wrestling with complex webhook signatures, payment intents, and card compliance yourself, our platform integration engineers do it all for you.
+                Rather than wrestling with webhook signatures, payment intents, and card compliance yourself, our platform integration engineers do it all for you.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
@@ -294,10 +335,10 @@ export default function IntegrationTab() {
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
-                  One-Time Onboarding Fee
+                  One-Time Onboarding Fee (PRD Spec)
                 </span>
                 <span className="text-3xl font-black text-white">
-                  ${setupData?.setupFeePriceUSD?.toFixed(2) || '49.00'}
+                  ${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}
                   <span className="text-xs font-normal text-slate-400 ml-1">USD</span>
                 </span>
               </div>
@@ -312,23 +353,23 @@ export default function IntegrationTab() {
                     placeholder="https://myfashionbrand.com"
                     value={websiteDomain}
                     onChange={(e) => setWebsiteDomain(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                    <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> Git Repository Link (Optional at sign-up)
+                    <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> Git Repository Link
                   </label>
                   <input
                     type="url"
                     placeholder="https://github.com/my-org/my-store"
                     value={gitRepoUrl}
                     onChange={(e) => setGitRepoUrl(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400"
                   />
                   <p className="text-[11px] text-slate-400">
-                    You can also connect private repos right after unlocking.
+                    You can connect private repos directly after fee verification.
                   </p>
                 </div>
               </div>
@@ -349,7 +390,7 @@ export default function IntegrationTab() {
                 ) : (
                   <>
                     <CreditCard className="w-4 h-4" />
-                    Pay Setup Fee & Unlock Desk
+                    Pay Setup Fee (${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}) & Unlock Desk
                   </>
                 )}
               </button>
@@ -362,7 +403,7 @@ export default function IntegrationTab() {
           </div>
         </div>
       ) : (
-        /* STATE 2: PAID (UNLOCKED COLLAB DESK + SECURE .ENV VAULT + LIVE CHAT) */
+        /* STATE 2: PAID (UNLOCKED COLLAB DESK + HOSTING/TECH STACK + SECURE .ENV VAULT + LIVE CHAT) */
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Step A: GitHub Collaborator Desk */}
@@ -462,76 +503,157 @@ export default function IntegrationTab() {
               </button>
             </div>
 
-            {/* Step B: Secure .env Vault */}
-            <div className="lg:col-span-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                    <Lock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">2. Secure .env & Credentials Vault</h3>
-                    <p className="text-xs text-slate-300">Submit configuration keys for your website</p>
-                  </div>
+            {/* Step B: PRD Section 05 Hosting & Tech Stack Configuration */}
+            <div className="lg:col-span-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                  <Layers className="w-5 h-5" />
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowEnv(!showEnv)}
-                  className="px-2.5 py-1 rounded-lg bg-[#091332] border border-cyan-500/30 text-cyan-300 hover:text-cyan-200 text-xs flex items-center gap-1.5 cursor-pointer"
-                >
-                  {showEnv ? (
-                    <>
-                      <EyeOff className="w-3.5 h-3.5" /> Mask Secrets
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-3.5 h-3.5" /> Reveal Secrets
-                    </>
-                  )}
-                </button>
+                <div>
+                  <h3 className="text-lg font-bold text-white">2. Hosting & Technology Stack</h3>
+                  <p className="text-xs text-slate-300">Tell us where your website is deployed</p>
+                </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Hosting Provider */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                    <Server className="w-3.5 h-3.5 text-cyan-400" /> Hosting Provider
+                  </label>
+                  <select
+                    value={hostingProvider}
+                    onChange={(e) => setHostingProvider(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="">Select Hosting...</option>
+                    <option value="Vercel">Vercel</option>
+                    <option value="AWS">AWS (Amazon Web Services)</option>
+                    <option value="Cloudflare">Cloudflare Pages / Workers</option>
+                    <option value="DigitalOcean">DigitalOcean App Platform / Droplet</option>
+                    <option value="VPS / Dedicated Server">Linux VPS / Dedicated Server</option>
+                    <option value="Shopify">Shopify</option>
+                    <option value="Other">Other Hosting Provider</option>
+                  </select>
+                </div>
+
+                {/* Technology Stack */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                    <FileCode className="w-3.5 h-3.5 text-cyan-400" /> Technology Stack
+                  </label>
+                  <select
+                    value={techStack}
+                    onChange={(e) => setTechStack(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="">Select Tech Stack...</option>
+                    <option value="Next.js / React">Next.js / React (TypeScript)</option>
+                    <option value="Node.js / Express">Node.js / Express API</option>
+                    <option value="WooCommerce / WordPress">WooCommerce (WordPress)</option>
+                    <option value="Shopify Custom App">Shopify Custom App / Liquid</option>
+                    <option value="Python / Django / FastAPI">Python (Django / FastAPI)</option>
+                    <option value="PHP / Laravel">PHP / Laravel</option>
+                    <option value="Custom Frontend">Custom HTML5 / Vanilla JS</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Preferred Domain */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-200">
-                  Environment Variables (.env format)
+                  Preferred Production Store Domain
                 </label>
-                <div className="relative">
-                  <textarea
-                    rows={6}
-                    placeholder={`NEXT_PUBLIC_STORE_NAME=MyBrand\nDATABASE_URL=postgresql://...\nCUSTOM_WEBHOOK_URL=https://...`}
-                    value={envConfig}
-                    onChange={(e) => setEnvConfig(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-xl bg-[#030614] border border-cyan-500/30 text-cyan-200 font-mono text-xs focus:outline-none focus:border-cyan-400 ${
-                      !showEnv && envConfig ? 'filter blur-[3px] select-none' : ''
-                    }`}
-                  />
-                  {!showEnv && envConfig && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="px-3 py-1 rounded-full bg-[#040819]/90 border border-cyan-500/40 text-cyan-300 text-xs font-semibold">
-                        🔒 Secrets Masked for Security
-                      </span>
-                    </div>
-                  )}
+                <input
+                  type="url"
+                  placeholder="https://mystore.com"
+                  value={preferredDomain}
+                  onChange={(e) => setPreferredDomain(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              {/* Integration Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-200">
+                  Special Architecture or Integration Notes
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Uses Redis for cart cache, custom checkout webhook path..."
+                  value={integrationNotes}
+                  onChange={(e) => setIntegrationNotes(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Step C: Secure .env Vault */}
+          <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                  <Lock className="w-5 h-5" />
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  These variables are only visible to the Super Administrator integration team.
-                </p>
+                <div>
+                  <h3 className="text-lg font-bold text-white">3. Secure .env & Credentials Vault</h3>
+                  <p className="text-xs text-slate-300">
+                    PRD Section 05: Secure credential vault (never sent via ordinary unencrypted chat)
+                  </p>
+                </div>
               </div>
 
               <button
                 type="button"
-                onClick={() => handleSaveCollab(false)}
-                disabled={savingCollab}
-                className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                onClick={() => setShowEnv(!showEnv)}
+                className="px-2.5 py-1 rounded-lg bg-[#091332] border border-cyan-500/30 text-cyan-300 hover:text-cyan-200 text-xs flex items-center gap-1.5 cursor-pointer"
               >
-                {savingCollab ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                Save & Submit Credentials To Super Admin
+                {showEnv ? (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5" /> Mask Secrets
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3.5 h-3.5" /> Reveal Secrets
+                  </>
+                )}
               </button>
             </div>
+
+            <div className="space-y-1.5">
+              <div className="relative">
+                <textarea
+                  rows={5}
+                  placeholder={`NEXT_PUBLIC_STORE_NAME=MyBrand\nDATABASE_URL=postgresql://...\nCUSTOM_WEBHOOK_URL=https://...`}
+                  value={envConfig}
+                  onChange={(e) => setEnvConfig(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl bg-[#030614] border border-cyan-500/30 text-cyan-200 font-mono text-xs focus:outline-none focus:border-cyan-400 ${
+                    !showEnv && envConfig ? 'filter blur-[3px] select-none' : ''
+                  }`}
+                />
+                {!showEnv && envConfig && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="px-3 py-1 rounded-full bg-[#040819]/90 border border-cyan-500/40 text-cyan-300 text-xs font-semibold">
+                      🔒 Secrets Masked for Security
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleSaveCollab(false)}
+              disabled={savingCollab}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {savingCollab ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+              Save All Configuration Details & Notify Super Admin
+            </button>
           </div>
 
-          {/* Step C: Direct Messaging Window with Super Admin */}
+          {/* Step D: Direct Messaging Window with Super Admin */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-3">
@@ -541,7 +663,7 @@ export default function IntegrationTab() {
                 <div>
                   <h3 className="text-lg font-bold text-white">Direct Integration Chat</h3>
                   <p className="text-xs text-slate-300">
-                    Communicate with the Super Admin and engineer integrating your website
+                    Communicate directly with the integration engineer working on your repository
                   </p>
                 </div>
               </div>
@@ -557,7 +679,7 @@ export default function IntegrationTab() {
                 <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400">
                   <MessageSquare className="w-8 h-8 text-cyan-400/50" />
                   <p className="text-xs">
-                    No messages yet. Send a greeting or ask questions about your GitHub integration!
+                    No messages yet. Send a greeting or ask questions about your integration!
                   </p>
                 </div>
               ) : (
