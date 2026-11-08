@@ -11,6 +11,7 @@ import RegistrationPage from '@/pages/RegistrationPage'
 import DashboardPage from '@/pages/DashboardPage'
 import Checkout from '@/pages/Checkout'
 import AdminPage from '@/pages/AdminPage'
+import SuperAdminPage from '@/pages/SuperAdminPage'
 import { AuthProvider } from '@/context/AuthContext'
 import { BrandingProvider } from '@/context/BrandingContext'
 
@@ -18,6 +19,7 @@ function AppContent() {
   const location = useLocation()
   const isDashboard = location.pathname.startsWith('/dashboard')
   const isAdmin = location.pathname.startsWith('/admin')
+  const isSuperAdmin = location.pathname.startsWith('/super-admin')
 
   return (
     <div className="min-h-screen bg-[#040714] text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
@@ -27,8 +29,8 @@ function AppContent() {
       {/* Perspective Cyber Grid Background Floor */}
       <div className="fixed inset-0 cyber-grid-floor opacity-35 pointer-events-none -z-20" />
       
-      {/* Top Navbar (hidden on /admin to provide full dedicated back-office canvas) */}
-      {!isAdmin && <Navbar isDashboard={isDashboard} />}
+      {/* Top Navbar (hidden on /admin and /super-admin to provide full dedicated back-office canvas) */}
+      {!isAdmin && !isSuperAdmin && <Navbar isDashboard={isDashboard} />}
 
       {/* Main Content View */}
       <main className="flex-1 flex flex-col">
@@ -43,12 +45,13 @@ function AppContent() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/super-admin" element={<SuperAdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
       {/* Public Pages Footer */}
-      {!isAdmin && !isDashboard && <Footer />}
+      {!isAdmin && !isSuperAdmin && !isDashboard && <Footer />}
     </div>
   )
 }

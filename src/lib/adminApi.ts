@@ -5,6 +5,7 @@ const API_BASE =
   (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1' : 'http://localhost:5000/api/v1')
 
 const ADMIN_TOKEN_KEY = 'pgx_admin_auth_token'
+const SUPER_ADMIN_TOKEN_KEY = 'pgx_superadmin_auth_token'
 
 export function getStoredAdminToken(): string | null {
   return localStorage.getItem(ADMIN_TOKEN_KEY)
@@ -18,11 +19,23 @@ export function removeStoredAdminToken(): void {
   localStorage.removeItem(ADMIN_TOKEN_KEY)
 }
 
+export function getStoredSuperAdminToken(): string | null {
+  return localStorage.getItem(SUPER_ADMIN_TOKEN_KEY)
+}
+
+export function setStoredSuperAdminToken(token: string): void {
+  localStorage.setItem(SUPER_ADMIN_TOKEN_KEY, token)
+}
+
+export function removeStoredSuperAdminToken(): void {
+  localStorage.removeItem(SUPER_ADMIN_TOKEN_KEY)
+}
+
 async function adminRequest<T = unknown>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; message?: string; token?: string; [key: string]: unknown }> {
-  const token = getStoredAdminToken()
+  const token = getStoredSuperAdminToken() || getStoredAdminToken()
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -184,6 +197,16 @@ export interface SuperAdminAnalytics {
   totalMerchants: number
   approvedMerchants: number
   platformFeeRate: number
+  resellers?: Array<{
+    _id: string
+    resellerId: string
+    stripe?: { mode: string; isConfigured: boolean }
+    feeSettings?: { basePlatformFee: number; merchantFeeRate: number }
+    totalVolumeProcessed: number
+    totalPlatformFeesEarned: number
+    totalResellerProfit: number
+    updatedAt: string
+  }>
 }
 
 export const adminApi = {
@@ -194,6 +217,17 @@ export const adminApi = {
     })
     if (res.token) {
       setStoredAdminToken(res.token)
+    }
+    return res
+  },
+
+  superAdminLogin: async (payload: { email: string; password: string }) => {
+    const res = await adminRequest<{ email: string; role: string }>('/admin/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    if (res.token) {
+      setStoredSuperAdminToken(res.token)
     }
     return res
   },

@@ -40,7 +40,6 @@ import {
   type MerchantMessageItem,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
-import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
 import StripeGatewayTab from '@/components/admin/StripeGatewayTab'
 import TransactionsTab from '@/components/admin/TransactionsTab'
 import { CreditCard, Receipt } from 'lucide-react'
@@ -572,8 +571,8 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Super Admin Platform Oversight Chamber */}
-      <SuperAdminAnalyticsBar onRefresh={fetchData} />
+
+
 
       {/* Admin Section Tabs Navigation */}
       <div className="flex items-center gap-3 border-b border-cyan-500/20 pb-3">
