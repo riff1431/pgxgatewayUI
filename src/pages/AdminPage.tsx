@@ -40,8 +40,8 @@ import {
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
 import ResellerAffiliateTab from '@/components/admin/ResellerAffiliateTab'
+import ResellerSidebar, { type ResellerSectionId } from '@/components/admin/ResellerSidebar'
 import TransactionsTab from '@/components/admin/TransactionsTab'
-import { CreditCard, Receipt } from 'lucide-react'
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredAdminToken())
@@ -57,7 +57,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(() => getStoredAdminUser())
-  const [adminSection, setAdminSection] = useState<'applications' | 'stripe' | 'transactions'>('applications')
+  const [adminSection, setAdminSection] = useState<ResellerSectionId>('applications')
   const [copiedReferral, setCopiedReferral] = useState(false)
 
   const resellerId = adminUser?.resellerId || 'admin_root'
@@ -524,7 +524,31 @@ export default function AdminPage() {
 
 
 
-      {/* Sub-Merchant Onboarding Referral Link Banner */}
+      
+      {/* Reseller Portal Grid: Sidebar (3 Cols) + Main Content (9 Cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        
+        {/* Left Sidebar (Col 3 on desktop) */}
+        <div className="lg:col-span-3 w-full lg:sticky lg:top-4">
+          <ResellerSidebar
+            activeSection={adminSection}
+            onSectionChange={(sec) => setAdminSection(sec)}
+            adminUser={adminUser}
+            resellerId={resellerId}
+            pendingCount={stats.pendingReview}
+            totalMerchants={stats.totalMerchants}
+            referralLink={referralLink}
+            copiedReferral={copiedReferral}
+            onCopyReferral={handleCopyReferralLink}
+            onRefresh={fetchData}
+            onLogout={handleLogout}
+            isRefreshing={loading}
+          />
+        </div>
+
+        {/* Main Content Area (Col 9 on desktop) */}
+        <div className="lg:col-span-9 space-y-6 min-w-0">
+          {/* Sub-Merchant Onboarding Referral Link Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-950/60 via-[#0d1238] to-purple-950/60 border border-purple-500/40 p-4 sm:p-5 shadow-[0_0_25px_rgba(168,85,247,0.15)]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -575,53 +599,9 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Admin Section Tabs Navigation */}
-      <div className="flex items-center gap-3 border-b border-cyan-500/20 pb-3">
-        <button
-          type="button"
-          onClick={() => setAdminSection('applications')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            adminSection === 'applications'
-              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Users className="h-4 w-4" />
-          <span>Merchant Applications</span>
-          <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono">
-            {applications.length}
-          </span>
-        </button>
+      
 
-        <button
-          type="button"
-          onClick={() => setAdminSection('stripe')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            adminSection === 'stripe'
-              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <CreditCard className="h-4 w-4" />
-          <span>Affiliate & Earnings Program</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setAdminSection('transactions')}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
-            adminSection === 'transactions'
-              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
-              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
-          }`}
-        >
-          <Receipt className="h-4 w-4" />
-          <span>Transaction Ledger</span>
-        </button>
-      </div>
-
-      {/* SECTION 1: APPLICATIONS & UNDERWRITING */}
-      {adminSection === 'applications' && (
+          {adminSection === 'applications' && (
         <div className="space-y-6">
           {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -869,6 +849,10 @@ export default function AdminPage() {
       {adminSection === 'transactions' && (
         <TransactionsTab onShowToast={showToast} isSuperAdmin={false} />
       )}
+
+      
+        </div>
+      </div>
 
       {/* Review & Decision Modal */}
       {selectedApp && (
