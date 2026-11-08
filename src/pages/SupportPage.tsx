@@ -87,7 +87,11 @@ export default function SupportPage() {
     // Check backend health endpoint
     const checkHealth = async () => {
       try {
-        const res = await fetch('http://localhost:5001/api/v1/health')
+        const healthUrl =
+          import.meta.env.VITE_API_URL
+            ? `${import.meta.env.VITE_API_URL}/health`
+            : (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1/health' : 'http://localhost:5000/api/v1/health')
+        const res = await fetch(healthUrl)
         const data = await res.json()
         if (data.status === 'healthy') {
           setSystemHealthy(true)

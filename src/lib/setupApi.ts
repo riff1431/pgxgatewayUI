@@ -1,5 +1,8 @@
 // API client helper for Merchant Setup, GitHub Collaboration, Weekly Invoices, and Super Admin Integration Desk
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1'
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1' : 'http://localhost:5000/api/v1')
 
 export interface SetupStatusResponse {
   merchantId: string
