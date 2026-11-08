@@ -58,14 +58,14 @@ export default function SuperAdminSidebar({
     },
     {
       id: 'integrations',
-      label: 'Integration Desk & Collab',
+      label: 'Integration Desk',
       shortLabel: 'Integration Desk',
       icon: Code2,
       highlight: true,
     },
     {
       id: 'settings',
-      label: 'Platform & Stripe Settings',
+      label: 'Platform Settings',
       shortLabel: 'Platform Settings',
       icon: Sliders,
     },
@@ -85,7 +85,7 @@ export default function SuperAdminSidebar({
     },
     {
       id: 'transactions',
-      label: 'Global Master Ledger',
+      label: 'Global Ledger',
       shortLabel: 'Master Ledger',
       icon: Receipt,
     },

@@ -529,7 +529,7 @@ export default function AdminPage() {
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
         
         {/* Left Sidebar (Col 3 on desktop) */}
-        <div className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-4">
+        <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-4">
           <ResellerSidebar
             activeSection={adminSection}
             onSectionChange={(sec) => setAdminSection(sec)}
@@ -693,7 +693,7 @@ export default function AdminPage() {
 
       {/* Applications Table */}
       <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] overflow-hidden backdrop-blur-xl">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar sm:scrollbar-thin sm:scrollbar-thumb-cyan-500/25">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] border-b border-cyan-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>

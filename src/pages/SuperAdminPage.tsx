@@ -573,7 +573,7 @@ Status: ${reseller.status.toUpperCase()}`
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
         
         {/* Left Sidebar (Col 3 on desktop) */}
-        <div className="w-full lg:w-64 xl:w-72 shrink-0 lg:sticky lg:top-4">
+        <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-4">
           <SuperAdminSidebar
             activeTab={activeTab}
             onTabChange={(tab) => setActiveTab(tab)}

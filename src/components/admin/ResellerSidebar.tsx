@@ -37,7 +37,7 @@ export default function ResellerSidebar({
   resellerId,
   pendingCount = 0,
   totalMerchants = 0,
-  referralLink,
+  referralLink: _referralLink,
   copiedReferral,
   onCopyReferral,
   onRefresh,
@@ -48,31 +48,27 @@ export default function ResellerSidebar({
   const navItems: Array<{
     id: ResellerSectionId
     label: string
-    shortLabel: string
     icon: React.ComponentType<{ className?: string }>
     badge?: number | string
     badgeColor?: string
   }> = [
     {
       id: 'applications',
-      label: 'Merchant KYC & Desk',
-      shortLabel: 'Applications',
+      label: 'Merchant Applications',
       icon: Users,
       badge: pendingCount > 0 ? `${pendingCount} Pending` : totalMerchants > 0 ? totalMerchants : undefined,
       badgeColor: pendingCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : undefined,
     },
     {
       id: 'stripe',
-      label: 'Affiliate & Commissions',
-      shortLabel: 'Affiliate Program',
+      label: 'Affiliate Program',
       icon: Coins,
       badge: '20% + 2%',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     },
     {
       id: 'transactions',
-      label: 'Tenant Transactions',
-      shortLabel: 'Transactions',
+      label: 'Gateway Transactions',
       icon: Receipt,
     },
   ]
@@ -92,7 +88,7 @@ export default function ResellerSidebar({
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black tracking-wide text-white truncate">
+                <span className="text-xs font-black tracking-wide text-white truncate" title={adminUser?.name || 'Reseller Gateway'}>
                   {adminUser?.name || 'Reseller Gateway'}
                 </span>
                 <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
@@ -111,40 +107,28 @@ export default function ResellerSidebar({
             <span className="text-[10px] text-slate-400">PRD Model</span>
           </div>
 
-          {/* Quick Referral Link Widget in Sidebar */}
-          <div className="p-3 rounded-2xl bg-[#091332]/90 border border-purple-500/30 space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-bold text-white flex items-center gap-1">
-                <LinkIcon className="h-3 w-3 text-purple-400" />
-                Referral Link
+          {/* Quick 1-Click Referral Link Pill */}
+          <button
+            type="button"
+            onClick={onCopyReferral}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-[#091332] hover:bg-[#0e1c4a] border border-purple-500/40 text-purple-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.15)]"
+          >
+            <div className="flex items-center gap-2">
+              <LinkIcon className="h-3.5 w-3.5 text-purple-400" />
+              <span>Copy Referral Link</span>
+            </div>
+            {copiedReferral ? (
+              <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-bold">
+                <Check className="h-3.5 w-3.5" /> Copied!
               </span>
-              <span className="text-[10px] font-mono text-purple-300">20% Cut</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="text"
-                readOnly
-                value={referralLink}
-                className="flex-1 min-w-0 px-2.5 py-1.5 rounded-xl bg-black/40 border border-purple-500/30 font-mono text-[10px] text-purple-200 truncate select-all focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={onCopyReferral}
-                className="p-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-all shrink-0 cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.4)]"
-                title="Copy Referral Link"
-              >
-                {copiedReferral ? (
-                  <Check className="h-3.5 w-3.5 text-emerald-300" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )}
-              </button>
-            </div>
-          </div>
+            ) : (
+              <Copy className="h-3.5 w-3.5 text-purple-400" />
+            )}
+          </button>
         </div>
 
         {/* Navigation Items List */}
-        <div className="space-y-1.5 flex-1">
+        <div className="space-y-2 flex-1">
           <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
             Partner Navigation
           </div>
@@ -174,12 +158,12 @@ export default function ResellerSidebar({
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                   </div>
-                  <span className="truncate text-left">{item.label}</span>
+                  <span className="whitespace-nowrap text-left">{item.label}</span>
                 </div>
 
                 {item.badge !== undefined && item.badge !== null ? (
                   <span
-                    className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0 border ${
+                    className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0 border whitespace-nowrap ${
                       item.badgeColor ||
                       (isActive
                         ? 'bg-black/30 text-white border-white/30'
