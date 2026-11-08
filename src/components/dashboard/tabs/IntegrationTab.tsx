@@ -71,6 +71,7 @@ export default function IntegrationTab() {
   const [paying, setPaying] = useState(false)
   const [savingCollab, setSavingCollab] = useState(false)
   const [copiedHandle, setCopiedHandle] = useState(false)
+  const [paymentSuccessNotice, setPaymentSuccessNotice] = useState(false)
 
   // Chat states
   const [messages, setMessages] = useState<SetupMessageItem[]>([])
@@ -104,6 +105,10 @@ export default function IntegrationTab() {
 
   useEffect(() => {
     loadStatus()
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('setup_payment') === 'success') {
+      setPaymentSuccessNotice(true)
+    }
     const interval = setInterval(() => {
       if (setupData?.merchantId) {
         fetchSetupMessages(setupData.merchantId)
@@ -265,6 +270,13 @@ export default function IntegrationTab() {
           </div>
         </div>
       </div>
+
+      {paymentSuccessNotice && (
+        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+          <span>Payment of ${setupData?.setupFeeAmount || 450}.00 confirmed! Your White-Glove Integration Desk is now unlocked.</span>
+        </div>
+      )}
 
       {error && (
         <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center gap-3">
