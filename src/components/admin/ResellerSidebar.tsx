@@ -56,14 +56,14 @@ export default function ResellerSidebar({
       id: 'applications',
       label: 'Merchant Applications',
       icon: Users,
-      badge: pendingCount > 0 ? `${pendingCount} Pending` : totalMerchants > 0 ? totalMerchants : undefined,
+      badge: pendingCount > 0 ? pendingCount : totalMerchants > 0 ? totalMerchants : undefined,
       badgeColor: pendingCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : undefined,
     },
     {
       id: 'stripe',
       label: 'Affiliate Program',
       icon: Coins,
-      badge: '20% + 2%',
+      badge: '20%',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
     },
     {
@@ -87,13 +87,16 @@ export default function ResellerSidebar({
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black tracking-wide text-white truncate" title={adminUser?.name || 'Reseller Gateway'}>
-                  {adminUser?.name || 'Reseller Gateway'}
+              <div className="flex items-center justify-between gap-1.5">
+                <span
+                  className="text-xs font-black tracking-wide text-white leading-tight break-words"
+                  title={adminUser?.name || 'Reseller Gateway'}
+                >
+                  {adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Gateway Admin' : (adminUser?.name || 'Reseller Gateway')}
                 </span>
                 <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
               </div>
-              <div className="text-[10px] font-mono text-cyan-300 truncate">
+              <div className="text-[10px] font-mono text-cyan-300 truncate mt-0.5">
                 Tenant: {resellerId}
               </div>
             </div>

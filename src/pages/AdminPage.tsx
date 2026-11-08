@@ -697,13 +697,13 @@ export default function AdminPage() {
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] border-b border-cyan-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="p-4">Company & Legal Name</th>
-                <th className="p-4">Merchant Contact</th>
-                <th className="p-4">Est. Volume</th>
-                <th className="p-4">KYC Docs</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Offer</th>
-                <th className="p-4 text-right">Actions</th>
+                <th className="px-5 py-3.5 whitespace-nowrap min-w-[180px]">Company & Legal Name</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Merchant Contact</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Est. Volume</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">KYC Docs</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px]">Status</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Offer</th>
+                <th className="px-5 py-3.5 whitespace-nowrap text-right min-w-[210px]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -722,7 +722,7 @@ export default function AdminPage() {
                   return (
                     <tr key={app._id} className="hover:bg-slate-800/30 transition-colors">
                       {/* Company Name */}
-                      <td className="p-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="font-bold text-white text-sm">
                           {app.legalName || 'Unnamed Entity'}
                         </div>
@@ -739,16 +739,16 @@ export default function AdminPage() {
                       </td>
 
                       {/* Contact */}
-                      <td className="p-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         <div className="font-semibold text-slate-200">{app.fullName}</div>
                         <div className="text-[11px] text-slate-400">{app.businessEmail}</div>
                         <div className="text-[10px] text-slate-500">{app.phone}</div>
                       </td>
 
                       {/* Volume */}
-                      <td className="p-4">
-                        <div className="font-bold text-white">
-                          {app.monthlyVolume || 'Not Specified'}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="font-bold text-white capitalize">
+                          {app.monthlyVolume === 'under-10k' ? '< $10,000 / mo' : (app.monthlyVolume?.replace('-', ' ') || 'Not Specified')}
                         </div>
                         <div className="text-[10px] text-slate-400">
                           Current: {app.currentProcessor || 'None'}
@@ -756,7 +756,7 @@ export default function AdminPage() {
                       </td>
 
                       {/* Documents */}
-                      <td className="p-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         {hasDocs ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-400/50">
                             <CheckCircle2 className="h-3 w-3" /> Cloudinary KYC
@@ -767,7 +767,7 @@ export default function AdminPage() {
                       </td>
 
                       {/* Status */}
-                      <td className="p-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         {isUnderReview && (
                           <span className="px-3 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/80 shadow-[0_0_8px_rgba(251,191,36,0.3)]">
                             Under Review
@@ -786,7 +786,7 @@ export default function AdminPage() {
                       </td>
 
                       {/* Offer Status */}
-                      <td className="p-4">
+                      <td className="px-4 py-4 whitespace-nowrap">
                         {app.offer?.isAvailable ? (
                           app.offer.accepted ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.25)]">
@@ -798,14 +798,14 @@ export default function AdminPage() {
                             </span>
                           )
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-slate-400 bg-slate-800/60 border border-slate-700/60">
-                            <Clock className="h-3 w-3 text-amber-400" /> Blank (Not Sent)
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold text-slate-400 bg-slate-800/60 border border-slate-700/60 whitespace-nowrap">
+                            <Clock className="h-3 w-3 text-amber-400/80" /> No Offer Sent
                           </span>
                         )}
                       </td>
 
                       {/* Action */}
-                      <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                      <td className="px-5 py-4 text-right space-x-2 whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => openMessageModal(app)}
