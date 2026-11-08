@@ -10,15 +10,23 @@ import {
   AlertCircle,
   Building2,
   DollarSign,
-    Sparkles,
-        Receipt,
-    } from 'lucide-react'
+  Sparkles,
+  Receipt,
+  UserPlus,
+  Copy,
+  Check,
+  Ban,
+  KeyRound,
+  X,
+  CheckCircle2,
+} from 'lucide-react'
 import {
   adminApi,
   getStoredSuperAdminToken,
   setStoredSuperAdminToken,
   removeStoredSuperAdminToken,
   type SuperAdminAnalytics,
+  type ResellerTenant,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
 import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
@@ -29,6 +37,35 @@ export default function SuperAdminPage() {
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'transactions'>('overview')
+
+  // Resellers Management State
+  const [resellersList, setResellersList] = useState<ResellerTenant[]>([])
+  const [resellersLoading, setResellersLoading] = useState(false)
+  const [showProvisionModal, setShowProvisionModal] = useState(false)
+
+  // Provision Form State
+  const [formName, setFormName] = useState('')
+  const [formEmail, setFormEmail] = useState('')
+  const [formPassword, setFormPassword] = useState('')
+  const [formFeeRate, setFormFeeRate] = useState(12.0)
+  const [formPayoutTerms, setFormPayoutTerms] = useState('Weekly Wire / Crypto Transfer')
+  const [provisionLoading, setProvisionLoading] = useState(false)
+  const [provisionError, setProvisionError] = useState<string | null>(null)
+
+  // Newly Provisioned Credentials Card
+  const [provisionedReceipt, setProvisionedReceipt] = useState<{
+    name: string
+    email: string
+    password: string
+    resellerId: string
+    feeRate: number
+  } | null>(null)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+
+  // Reset Password Modal State
+  const [resetModalReseller, setResetModalReseller] = useState<ResellerTenant | null>(null)
+  const [resetNewPassword, setResetNewPassword] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
 
   // Super Admin Login Form State
   const [loginEmail, setLoginEmail] = useState('superadmin@pgxgateway.com')
@@ -60,9 +97,28 @@ export default function SuperAdminPage() {
     }
   }, [token])
 
+  const fetchResellers = useCallback(async () => {
+    if (!token) return
+    setResellersLoading(true)
+    try {
+      const res = await adminApi.getSuperAdminResellersList()
+      if (res.data) {
+        setResellersList(res.data)
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load resellers list'
+      showToast('Error', msg, 'error')
+    } finally {
+      setResellersLoading(false)
+    }
+  }, [token])
+
   useEffect(() => {
     fetchSuperAdminData()
-  }, [fetchSuperAdminData])
+    if (activeTab === 'resellers') {
+      fetchResellers()
+    }
+  }, [fetchSuperAdminData, fetchResellers, activeTab])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -94,6 +150,111 @@ export default function SuperAdminPage() {
     removeStoredSuperAdminToken()
     setToken(null)
     showToast('Signed Out', 'Super Admin session terminated securely.', 'success')
+  }
+
+  // Password generator helper
+  const generateStrongPassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*'
+    let pwd = ''
+    for (let i = 0; i < 16; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return pwd
+  }
+
+  const handleOpenProvisionModal = () => {
+    setFormName('')
+    setFormEmail('')
+    setFormPassword(generateStrongPassword())
+    setFormFeeRate(12.0)
+    setFormPayoutTerms('Weekly Wire / Crypto Transfer')
+    setProvisionError(null)
+    setShowProvisionModal(true)
+  }
+
+  const handleProvisionReseller = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setProvisionError(null)
+
+    if (formFeeRate < 9.0) {
+      setProvisionError('Merchant fee rate cannot be set lower than 9.0% Super Admin base fee.')
+      return
+    }
+
+    setProvisionLoading(true)
+    try {
+      const res = await adminApi.createResellerTenant({
+        name: formName,
+        email: formEmail,
+        password: formPassword,
+        merchantFeeRate: formFeeRate,
+        payoutTerms: formPayoutTerms,
+      })
+
+      if (res.data) {
+        setProvisionedReceipt({
+          name: formName,
+          email: formEmail,
+          password: formPassword,
+          resellerId: res.data.resellerId,
+          feeRate: formFeeRate,
+        })
+        setShowProvisionModal(false)
+        fetchResellers()
+        fetchSuperAdminData()
+        showToast('Reseller Provisioned', `${formName} tenant created successfully.`, 'success')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to provision reseller tenant'
+      setProvisionError(msg)
+    } finally {
+      setProvisionLoading(false)
+    }
+  }
+
+  const handleToggleStatus = async (reseller: ResellerTenant) => {
+    const newStatus = reseller.status === 'active' ? 'suspended' : 'active'
+    try {
+      await adminApi.updateResellerStatus(reseller.resellerId, newStatus)
+      showToast(
+        'Status Updated',
+        `Reseller ${reseller.name} is now ${newStatus}.`,
+        newStatus === 'active' ? 'success' : 'error'
+      )
+      fetchResellers()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update reseller status'
+      showToast('Error', msg, 'error')
+    }
+  }
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetModalReseller || !resetNewPassword) return
+
+    setResetLoading(true)
+    try {
+      await adminApi.resetResellerPassword(resetModalReseller.resellerId, resetNewPassword)
+      showToast(
+        'Password Reset',
+        `Password updated for ${resetModalReseller.name}.`,
+        'success'
+      )
+      setResetModalReseller(null)
+      setResetNewPassword('')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to reset password'
+      showToast('Error', msg, 'error')
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(null), 2500)
+    showToast('Copied', 'Copied to clipboard.', 'success')
   }
 
   // LOGIN SCREEN
@@ -146,15 +307,15 @@ export default function SuperAdminPage() {
                 required
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                placeholder="Enter Super Admin password"
-                className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                placeholder="••••••••••••"
+                className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
               />
             </div>
 
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full py-3.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 hover:from-amber-400 hover:to-amber-400 text-black font-black text-xs shadow-[0_0_25px_rgba(251,191,36,0.6)] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              className="w-full mt-2 py-3 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold shadow-[0_0_25px_rgba(251,191,36,0.5)] transition-all flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
             >
               {loginLoading ? (
                 <>
@@ -163,19 +324,20 @@ export default function SuperAdminPage() {
                 </>
               ) : (
                 <>
-                  <Lock className="h-4 w-4" />
-                  <span>Authenticate Root Command Center</span>
+                  <Lock className="h-4 w-4 text-black stroke-[2.5]" />
+                  <span>Authorize Super Admin Session</span>
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-amber-500/15 text-center flex justify-between text-xs text-slate-400">
-            <Link to="/" className="hover:text-amber-300 flex items-center gap-1">
-              <ArrowLeft className="h-3.5 w-3.5" /> Homepage
-            </Link>
-            <Link to="/admin" className="text-cyan-400 hover:underline">
-              Switch to Reseller Portal
+          <div className="mt-6 pt-4 border-t border-slate-800/80 text-center">
+            <Link
+              to="/admin"
+              className="text-[11px] text-slate-400 hover:text-amber-300 transition-colors inline-flex items-center gap-1.5"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              <span>Looking for Reseller Portal? Go to /admin</span>
             </Link>
           </div>
         </div>
@@ -183,70 +345,72 @@ export default function SuperAdminPage() {
     )
   }
 
-  // AUTHENTICATED COMMAND CENTER VIEW
+  // AUTHENTICATED SUPER ADMIN COMMAND CENTER
   return (
-    <div className="min-h-[calc(100vh-4.5rem)] max-w-[1440px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 relative">
-      {/* Toast Alert */}
+    <div className="min-h-screen pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 pt-4 animate-fade-in relative">
+      {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 p-4 rounded-2xl bg-[#060c24]/95 border border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.5)] backdrop-blur-xl animate-fade-in flex items-start gap-3 text-white text-xs max-w-sm">
-          <div className="w-2 h-2 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-          <div className="flex-1">
-            <div className="font-bold text-sm text-amber-300">{toastMessage.title}</div>
-            <div className="text-slate-300 text-xs mt-0.5">{toastMessage.desc}</div>
+        <div
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-2xl shadow-2xl border backdrop-blur-xl flex items-center gap-3 animate-slide-up text-xs font-semibold ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-950/90 border-emerald-500 text-emerald-200'
+              : 'bg-red-950/90 border-red-500 text-red-200'
+          }`}
+        >
+          {toastMessage.type === 'success' ? (
+            <Check className="h-5 w-5 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
+          )}
+          <div>
+            <div className="font-bold">{toastMessage.title}</div>
+            <div className="text-[11px] opacity-80">{toastMessage.desc}</div>
           </div>
         </div>
       )}
 
       {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-500/20">
+      <header className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-[#060b20]/90 border border-amber-400/40 backdrop-blur-2xl shadow-[0_0_30px_rgba(251,191,36,0.15)]">
         <div className="flex items-center gap-4">
           <Logo size="sm" />
-          <span className="text-slate-600 font-light">/</span>
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="text-[10px] font-black tracking-widest text-amber-400 uppercase bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                Super Admin Root Desk
-              </div>
-              <span className="text-xs text-slate-400">• Platform Master Control</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-0.5">
-              Multi-Tenant Oversight & 9% Platform Revenue
-            </h1>
+          <div className="h-8 w-px bg-amber-500/20" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/80 text-amber-300 text-xs font-mono font-bold">
+            <ShieldCheck className="h-4 w-4" />
+            <span>SUPER ADMIN COMMAND CENTER</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="px-3.5 py-1.5 rounded-full border border-cyan-500/50 bg-[#070f28] text-xs font-semibold text-cyan-300 hover:text-cyan-200 flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(0,240,255,0.2)]"
-            title="Switch to Reseller Admin View"
-          >
-            <span>View Reseller Portal</span>
-          </Link>
-
           <button
-            type="button"
-            onClick={fetchSuperAdminData}
-            disabled={loading}
-            className="px-3.5 py-1.5 rounded-full border border-amber-400/50 bg-[#0a1226] text-xs font-bold text-amber-300 hover:bg-amber-500/10 flex items-center gap-1.5 cursor-pointer"
+            onClick={() => {
+              fetchSuperAdminData()
+              if (activeTab === 'resellers') fetchResellers()
+              showToast('Refreshed', 'Telemetry synced.', 'success')
+            }}
+            disabled={loading || resellersLoading}
+            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+            title="Refresh Ledger"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Sync</span>
+            <RefreshCw className={`h-4 w-4 ${loading || resellersLoading ? 'animate-spin' : ''}`} />
           </button>
 
           <button
-            type="button"
             onClick={handleLogout}
-            className="px-3.5 py-1.5 rounded-full border border-red-500/50 bg-red-500/10 text-xs font-bold text-red-300 hover:bg-red-500/20 flex items-center gap-1.5 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-950/50 hover:bg-red-900/60 border border-red-500/40 text-red-300 text-xs font-bold transition-all cursor-pointer"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span>Sign Out</span>
+            <span>End Session</span>
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Top Super Admin Analytics Chamber */}
-      <SuperAdminAnalyticsBar onRefresh={fetchSuperAdminData} />
+      {/* Super Admin Platform Telemetry Hero Bar */}
+      <SuperAdminAnalyticsBar
+        onRefresh={() => {
+          fetchSuperAdminData()
+          fetchResellers()
+        }}
+      />
 
       {/* Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-3 border-b border-amber-500/20 pb-3">
@@ -275,7 +439,7 @@ export default function SuperAdminPage() {
           <Building2 className="h-4 w-4" />
           <span>Connected Resellers & Tenants</span>
           <span className="ml-1 px-2 py-0.5 rounded-full bg-black/40 text-[10px] font-mono text-white">
-            {analytics?.resellers?.length || 1}
+            {resellersList.length || analytics?.resellers?.length || 1}
           </span>
         </button>
 
@@ -322,7 +486,7 @@ export default function SuperAdminPage() {
                 { volume: 750000, label: '$750,000 Client Goal', highlight: true },
               ].map((tier) => {
                 const superAdminEarnings = tier.volume * 0.09
-                const resellerEarnings = tier.volume * 0.03 // based on 12% - 9%
+                const resellerEarnings = tier.volume * 0.03
 
                 return (
                   <div
@@ -357,58 +521,206 @@ export default function SuperAdminPage() {
       {/* TAB 2: CONNECTED RESELLERS */}
       {activeTab === 'resellers' && (
         <div className="space-y-6 animate-fade-in">
+          {/* Newly Provisioned Credentials Card */}
+          {provisionedReceipt && (
+            <div className="p-6 rounded-3xl bg-emerald-950/40 border-2 border-emerald-400/80 shadow-[0_0_30px_rgba(52,211,153,0.3)] backdrop-blur-xl space-y-4 animate-scale-in">
+              <div className="flex items-center justify-between pb-3 border-b border-emerald-500/30">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                  <div>
+                    <h3 className="text-sm font-bold text-white">
+                      New Reseller Provisioned Successfully!
+                    </h3>
+                    <p className="text-[11px] text-emerald-300">
+                      Send these administrative login credentials directly to your client.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setProvisionedReceipt(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Company / Partner</div>
+                  <div className="font-bold text-white font-mono mt-0.5">{provisionedReceipt.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">{provisionedReceipt.resellerId}</div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Login Email</div>
+                  <div className="font-bold text-emerald-300 font-mono mt-0.5">{provisionedReceipt.email}</div>
+                  <div className="text-[10px] text-slate-400">Portal: /admin</div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30">
+                  <div className="text-[10px] font-bold uppercase text-slate-400">Initial Password</div>
+                  <div className="font-bold text-amber-300 font-mono mt-0.5">{provisionedReceipt.password}</div>
+                  <div className="text-[10px] text-slate-400">Client can change anytime</div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-black/40 border border-emerald-500/30 flex flex-col justify-center">
+                  <button
+                    onClick={() => {
+                      const msg = `PGX Gateway Reseller Portal Credentials:\nPortal URL: ${window.location.origin}/admin\nLogin Email: ${provisionedReceipt.email}\nInitial Password: ${provisionedReceipt.password}\nAssigned Fee Rate: ${provisionedReceipt.feeRate}%`
+                      copyToClipboard(msg, 'receipt_full')
+                    }}
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-500/20"
+                  >
+                    {copiedKey === 'receipt_full' ? (
+                      <>
+                        <Check className="h-4 w-4 text-black" />
+                        <span>Copied All Details!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 text-black" />
+                        <span>Copy Client Message</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Resellers Table Container */}
           <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl overflow-hidden">
-            <div className="p-5 border-b border-amber-500/20 flex items-center justify-between">
+            <div className="p-5 border-b border-amber-500/20 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Tenant Resellers & Connected Stripe Accounts
-                </h3>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Provisioned Reseller Tenants & Connected Stripe Accounts
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Each reseller operates their isolated Stripe gateway with independent sub-merchants.
+                  </p>
+                </div>
               </div>
-              <span className="text-xs font-mono text-amber-300">
-                1 Active Tenant Managed
-              </span>
+
+              <button
+                type="button"
+                onClick={handleOpenProvisionModal}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-black text-xs shadow-[0_0_20px_rgba(251,191,36,0.6)] cursor-pointer transition-all"
+              >
+                <UserPlus className="h-4 w-4 stroke-[2.5]" />
+                <span>Provision New Reseller</span>
+              </button>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-amber-500/20 bg-[#09153d]/50 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="p-4">Tenant / Reseller ID</th>
-                    <th className="p-4">Stripe Gateway State</th>
+                    <th className="p-4">Partner / Company</th>
+                    <th className="p-4">Login Email</th>
+                    <th className="p-4">Stripe Gateway</th>
                     <th className="p-4">Merchant Fee Rate</th>
-                    <th className="p-4 text-amber-300">Super Admin Cut</th>
+                    <th className="p-4 text-amber-300">Super Admin (9%)</th>
                     <th className="p-4 text-fuchsia-300">Reseller Margin</th>
-                    <th className="p-4 text-right">Volume Processed</th>
-                    <th className="p-4 text-right text-amber-300">Platform Fees Collected</th>
+                    <th className="p-4 text-right">Volume</th>
+                    <th className="p-4 text-right text-amber-300">9% Fees Earned</th>
+                    <th className="p-4 text-center">Status</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-amber-500/15">
-                  <tr className="hover:bg-slate-800/30 transition-colors">
-                    <td className="p-4 font-mono font-bold text-white">
-                      admin_root (Client Gateway)
-                    </td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80">
-                        Linked & Active
-                      </span>
-                    </td>
-                    <td className="p-4 font-bold text-cyan-300 font-mono">
-                      12.0%
-                    </td>
-                    <td className="p-4 font-bold text-amber-300 font-mono">
-                      9.0% (Hardwired)
-                    </td>
-                    <td className="p-4 font-bold text-fuchsia-300 font-mono">
-                      3.0% Spread
-                    </td>
-                    <td className="p-4 text-right font-black text-white font-mono">
-                      ${analytics?.totalGrossVolume.toFixed(2) || '0.00'}
-                    </td>
-                    <td className="p-4 text-right font-black text-amber-300 font-mono">
-                      ${analytics?.totalPlatformFees.toFixed(2) || '0.00'}
-                    </td>
-                  </tr>
+                  {resellersList.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="p-8 text-center text-slate-400">
+                        {resellersLoading ? 'Loading provisioned resellers...' : 'No resellers found.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    resellersList.map((reseller) => {
+                      const rate = reseller.feeSettings?.merchantFeeRate || 12.0
+                      const margin = (rate - 9.0).toFixed(1)
+                      const isRoot = reseller.resellerId === 'admin_root'
+
+                      return (
+                        <tr key={reseller.resellerId} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="p-4 font-mono font-bold text-white">
+                            <div>{reseller.name || 'Unnamed Partner'}</div>
+                            <div className="text-[10px] text-slate-400 font-normal">{reseller.resellerId}</div>
+                          </td>
+                          <td className="p-4 font-mono text-slate-300">
+                            {reseller.email || 'N/A'}
+                          </td>
+                          <td className="p-4">
+                            {reseller.stripe?.isConfigured ? (
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80">
+                                Linked ({reseller.stripe.mode})
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-400/50">
+                                Pending Keys
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-4 font-bold text-cyan-300 font-mono">
+                            {rate.toFixed(1)}%
+                          </td>
+                          <td className="p-4 font-bold text-amber-300 font-mono">
+                            9.0% (Hardwired)
+                          </td>
+                          <td className="p-4 font-bold text-fuchsia-300 font-mono">
+                            {margin}% Spread
+                          </td>
+                          <td className="p-4 text-right font-black text-white font-mono">
+                            ${(reseller.totalVolumeProcessed || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="p-4 text-right font-black text-amber-300 font-mono">
+                            ${(reseller.totalPlatformFeesEarned || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          </td>
+                          <td className="p-4 text-center">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                reseller.status === 'active'
+                                  ? 'text-emerald-300 bg-emerald-500/10 border border-emerald-400/80'
+                                  : 'text-red-300 bg-red-500/10 border border-red-400/80'
+                              }`}
+                            >
+                              {reseller.status === 'active' ? 'Active' : 'Suspended'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {!isRoot && (
+                                <>
+                                  <button
+                                    onClick={() => handleToggleStatus(reseller)}
+                                    title={reseller.status === 'active' ? 'Suspend Reseller' : 'Activate Reseller'}
+                                    className={`p-1.5 rounded-lg border text-xs transition-colors cursor-pointer ${
+                                      reseller.status === 'active'
+                                        ? 'bg-red-950/40 border-red-500/40 text-red-300 hover:bg-red-900/60'
+                                        : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
+                                    }`}
+                                  >
+                                    <Ban className="h-3.5 w-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setResetModalReseller(reseller)
+                                      setResetNewPassword(generateStrongPassword())
+                                    }}
+                                    title="Reset Password"
+                                    className="p-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                                  >
+                                    <KeyRound className="h-3.5 w-3.5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
@@ -420,6 +732,206 @@ export default function SuperAdminPage() {
       {activeTab === 'transactions' && (
         <div className="space-y-6 animate-fade-in">
           <TransactionsTab onShowToast={showToast} />
+        </div>
+      )}
+
+      {/* PROVISION NEW RESELLER MODAL */}
+      {showProvisionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-amber-400" />
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Provision New Reseller / Tenant
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowProvisionModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {provisionError && (
+              <div className="p-3 rounded-xl bg-red-950/70 border border-red-500/60 text-red-300 text-xs flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
+                <span>{provisionError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleProvisionReseller} className="space-y-3.5 text-xs">
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-200">Company / Partner Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="e.g. Apex Global Payments"
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-200">Business Login Email</label>
+                <input
+                  type="email"
+                  required
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  placeholder="e.g. admin@apexpayments.com"
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 font-mono"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="font-semibold text-slate-200">Initial Password</label>
+                  <button
+                    type="button"
+                    onClick={() => setFormPassword(generateStrongPassword())}
+                    className="text-[10px] text-amber-400 hover:underline"
+                  >
+                    Regenerate
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 font-mono"
+                />
+              </div>
+
+              <div className="space-y-1.5 p-3 rounded-2xl bg-black/40 border border-amber-500/20">
+                <div className="flex justify-between items-center text-[11px]">
+                  <span className="font-bold text-white">Merchant Fee Rate: {formFeeRate.toFixed(1)}%</span>
+                  <span className="text-amber-400 font-mono">Floor: 9.0% (Hardwired)</span>
+                </div>
+                <input
+                  type="range"
+                  min="9.0"
+                  max="25.0"
+                  step="0.5"
+                  value={formFeeRate}
+                  onChange={(e) => setFormFeeRate(parseFloat(e.target.value))}
+                  className="w-full accent-amber-400 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400">
+                  <span>9.0% Platform Base</span>
+                  <span className="text-fuchsia-300 font-bold">
+                    Reseller Markup Spread: +{(formFeeRate - 9.0).toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-200">Settlement / Payout Terms</label>
+                <input
+                  type="text"
+                  value={formPayoutTerms}
+                  onChange={(e) => setFormPayoutTerms(e.target.value)}
+                  placeholder="e.g. Weekly Wire / USDT Transfer"
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowProvisionModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={provisionLoading}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-extrabold shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {provisionLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-black" />
+                      <span>Provisioning...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 text-black stroke-[2.5]" />
+                      <span>Confirm & Provision</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESET PASSWORD MODAL */}
+      {resetModalReseller && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
+              <div className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-amber-400" />
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  Reset Reseller Password
+                </h3>
+              </div>
+              <button
+                onClick={() => setResetModalReseller(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300">
+              Assign a new administrative password for <strong className="text-white">{resetModalReseller.name}</strong> ({resetModalReseller.email}).
+            </p>
+
+            <form onSubmit={handleResetPassword} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <div className="flex justify-between items-center">
+                  <label className="font-semibold text-slate-200">New Password</label>
+                  <button
+                    type="button"
+                    onClick={() => setResetNewPassword(generateStrongPassword())}
+                    className="text-[10px] text-amber-400 hover:underline"
+                  >
+                    Regenerate
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  className="w-full bg-[#05091d] border border-amber-500/40 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-amber-400 font-mono"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setResetModalReseller(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {resetLoading ? 'Updating...' : 'Set New Password'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

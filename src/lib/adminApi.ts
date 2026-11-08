@@ -188,6 +188,34 @@ export interface ResellerStripeConfig {
   totalResellerProfit: number
 }
 
+export interface ResellerTenant {
+  resellerId: string
+  name: string
+  email: string
+  status: 'active' | 'suspended'
+  stripe?: {
+    isConfigured: boolean
+    mode: 'test' | 'live'
+  }
+  feeSettings: {
+    basePlatformFee: number
+    merchantFeeRate: number
+  }
+  totalVolumeProcessed: number
+  totalPlatformFeesEarned: number
+  totalResellerProfit: number
+  payoutTerms?: string
+  createdAt: string
+}
+
+export interface CreateResellerPayload {
+  name: string
+  email: string
+  password: string
+  merchantFeeRate: number
+  payoutTerms?: string
+}
+
 export interface SuperAdminAnalytics {
   totalGrossVolume: number
   totalPlatformFees: number
@@ -375,6 +403,37 @@ export const adminApi = {
 
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<TransactionItem[]>(`/admin/transactions${qs}`, { method: 'GET' })
+  },
+
+  getSuperAdminResellersList: async () => {
+    return adminRequest<ResellerTenant[]>('/admin/super-resellers', { method: 'GET' })
+  },
+
+  createResellerTenant: async (payload: CreateResellerPayload) => {
+    return adminRequest<ResellerTenant>('/admin/super-resellers', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  updateResellerStatus: async (resellerId: string, status: 'active' | 'suspended') => {
+    return adminRequest<{ resellerId: string; status: string }>(
+      `/admin/super-resellers/${resellerId}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }
+    )
+  },
+
+  resetResellerPassword: async (resellerId: string, newPassword: string) => {
+    return adminRequest<{ message: string }>(
+      `/admin/super-resellers/${resellerId}/reset-password`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ newPassword }),
+      }
+    )
   },
 
   getSuperAdminAnalytics: async () => {
