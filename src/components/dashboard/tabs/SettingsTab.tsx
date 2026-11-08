@@ -7,14 +7,12 @@ import {
   Key,
   Lock,
   Mail,
-  Phone,
-  Send,
-  Shield,
   User,
   Loader2,
   AlertCircle,
-  MessageSquare,
   Camera,
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import AvatarUploader from '@/components/dashboard/AvatarUploader'
@@ -37,13 +35,18 @@ export default function SettingsTab() {
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
-  // Developer Keys State
+  // Developer Keys & Ref ID State
   const [showSecretKey, setShowSecretKey] = useState(false)
   const [copiedKey, setCopiedKey] = useState(false)
   const [copiedId, setCopiedId] = useState(false)
+  const [copiedRef, setCopiedRef] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
   const [webhookUrl, setWebhookUrl] = useState('https://yourdomain.com/api/webhooks/pgx')
 
   const merchantId = merchant?.id || merchant?._id || 'merchant_6aec260c16b974ca'
+  const refId =
+    (merchant as any)?.refId || `PGX_REF_${merchantId.slice(-6).toUpperCase()}`
+  const checkoutUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout?ref=${refId}&amount=100.00`
   const dummySecretKey = `pgx_live_sk_${merchantId.slice(-8)}_e9f8a2026sec`
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -97,150 +100,112 @@ export default function SettingsTab() {
       setCopiedId(true)
       setTimeout(() => setCopiedId(false), 2000)
     }
-    addToast('Copied to Clipboard', text, 'info')
+    addToast('Copied', 'Credential copied to clipboard.', 'success')
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      
-      {/* Top Banner */}
-      <div className="p-5 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/60 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.4)] shrink-0">
-            <Shield className="h-6 w-6" />
-          </div>
-          <div>
-            <div className="text-[11px] font-black tracking-widest text-cyan-400 uppercase">
-              Security & Credentials
-            </div>
-            <h2 className="text-lg sm:text-xl font-black text-white">
-              Account Profile & Security Settings
-            </h2>
-            <p className="text-xs text-slate-300">
-              Manage your contact details, administrative password, and merchant API gateway credentials.
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8 animate-fade-in pb-12">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Account & Security Settings
+        </h2>
+        <p className="text-sm text-slate-300 mt-1">
+          Manage your personal profile, credentials, and merchant gateway integrations.
+        </p>
       </div>
 
-      {/* Account Avatar & Digital Identity (Drag & Drop + Pre-Made Presets) */}
-      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
+      {/* SECTION 0: Avatar Customizer / Uploader */}
+      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] p-6 sm:p-8 backdrop-blur-xl space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
           <Camera className="h-5 w-5 text-cyan-400" />
           <h3 className="text-base font-bold text-white tracking-tight">
-            Account Avatar & Visual Identity
+            Merchant Avatar & Visual Identity
           </h3>
         </div>
+
         <AvatarUploader />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Profile Information Editor */}
+        {/* Profile Information Card */}
         <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
             <User className="h-5 w-5 text-cyan-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Profile & Contact Information
+              Profile & Contact Details
             </h3>
           </div>
 
           {profileError && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-300 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0" />
+            <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 text-xs flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
               <span>{profileError}</span>
             </div>
           )}
 
           <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs">
-            {/* Full Name */}
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Full Name</label>
-              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400">
-                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                  <User className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full bg-transparent px-3 py-2 text-white placeholder-slate-500 focus:outline-none"
-                />
-              </div>
+              <label className="text-slate-300 font-semibold">Authorized Full Name</label>
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Full Name"
+                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+              />
             </div>
 
-            {/* Email (Read Only) */}
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Business Email (Primary ID)</label>
-              <div className="flex rounded-xl border border-slate-700 bg-[#05091a] overflow-hidden opacity-75">
-                <div className="w-10 bg-[#070d22] border-r border-slate-700 flex items-center justify-center text-slate-400">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <input
-                  type="email"
-                  disabled
-                  value={merchant?.businessEmail || 'tanvir@pgxgateway.com'}
-                  className="w-full bg-transparent px-3 py-2 text-slate-400 cursor-not-allowed focus:outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Phone Number</label>
-              <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400">
-                <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-transparent px-3 py-2 text-white placeholder-slate-500 focus:outline-none"
-                />
+              <label className="text-slate-300 font-semibold">Primary Business Email</label>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-700/60 bg-[#040817] px-3 py-2 text-slate-400">
+                <Mail className="h-4 w-4 text-slate-500" />
+                <span className="truncate">{merchant?.businessEmail || 'merchant@pgxgateway.com'}</span>
+                <span className="ml-auto text-[10px] text-cyan-400 font-mono">Immutable</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* WhatsApp */}
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">WhatsApp</label>
-                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400">
-                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-emerald-400">
-                    <MessageSquare className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="tel"
-                    value={whatsapp}
-                    onChange={(e) => setWhatsapp(e.target.value)}
-                    className="w-full bg-transparent px-3 py-2 text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
+                <label className="text-slate-300 font-semibold">Direct Phone / Mobile</label>
+                <input
+                  type="text"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+1 (555) 000-0000"
+                  className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
               </div>
 
-              {/* Telegram */}
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Telegram Handle</label>
-                <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400">
-                  <div className="w-10 bg-[#091332] border-r border-cyan-500/30 flex items-center justify-center text-sky-400">
-                    <Send className="h-4 w-4" />
-                  </div>
-                  <input
-                    type="text"
-                    value={telegram}
-                    onChange={(e) => setTelegram(e.target.value)}
-                    className="w-full bg-transparent px-3 py-2 text-white placeholder-slate-500 focus:outline-none"
-                  />
-                </div>
+                <label className="text-slate-300 font-semibold">WhatsApp Number</label>
+                <input
+                  type="text"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="WhatsApp number"
+                  className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
               </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-slate-300 font-semibold">Telegram Handle</label>
+              <input
+                type="text"
+                value={telegram}
+                onChange={(e) => setTelegram(e.target.value)}
+                placeholder="@username"
+                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+              />
             </div>
 
             <button
               type="submit"
               disabled={profileLoading}
-              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_22px_rgba(0,240,255,0.6)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_15px_rgba(217,70,239,0.6)] hover:shadow-[0_0_22px_rgba(217,70,239,0.85)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
               {profileLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
               <span>Save Profile Changes</span>
@@ -248,18 +213,18 @@ export default function SettingsTab() {
           </form>
         </div>
 
-        {/* Change Password & Security */}
+        {/* Password Security Card */}
         <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
             <Lock className="h-5 w-5 text-cyan-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Change Account Password
+              Password & Authentication
             </h3>
           </div>
 
           {passwordError && (
-            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/40 text-xs text-red-300 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 shrink-0" />
+            <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 text-xs flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 shrink-0 text-red-400" />
               <span>{passwordError}</span>
             </div>
           )}
@@ -313,22 +278,78 @@ export default function SettingsTab() {
             </button>
           </form>
         </div>
-
       </div>
 
       {/* Developer API & Webhook Credentials */}
-      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
+      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-5">
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
           <Key className="h-5 w-5 text-cyan-400" />
           <h3 className="text-base font-bold text-white tracking-tight">
-            Developer Gateway API Keys & Webhooks
+            Store Reference ID & Developer Gateway Credentials
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        {/* PROMINENT SUB-MERCHANT REF ID CHAMBER */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#09153a] border border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.25)] space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                <span>Your Store Reference ID (Ref ID)</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black font-mono text-white flex items-center gap-2 mt-0.5">
+                <span className="text-cyan-300 tracking-wide">{refId}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(refId)
+                    setCopiedRef(true)
+                    addToast('Copied', 'Ref ID copied to clipboard.', 'success')
+                    setTimeout(() => setCopiedRef(false), 2000)
+                  }}
+                  className="p-1.5 rounded-lg bg-black/40 text-cyan-400 hover:text-white cursor-pointer border border-cyan-500/30"
+                  title="Copy Reference ID"
+                >
+                  {copiedRef ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(checkoutUrl)
+                  setCopiedLink(true)
+                  addToast('Copied', 'Checkout URL copied to clipboard.', 'success')
+                  setTimeout(() => setCopiedLink(false), 2000)
+                }}
+                className="px-3.5 py-2 rounded-full bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.2)]"
+              >
+                {copiedLink ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>Copy Checkout Link</span>
+              </button>
+
+              <a
+                href={checkoutUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.6)] hover:shadow-[0_0_22px_rgba(217,70,239,0.85)] transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Test Checkout</span>
+              </a>
+            </div>
+          </div>
+          <p className="text-xs text-slate-300">
+            Provide this <span className="font-mono text-cyan-300 font-semibold">{refId}</span> to your ecommerce shop (WooCommerce/Shopify/custom code) or share your direct Checkout Link. All transactions are securely routed through our central Stripe engine.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
           {/* Merchant ID */}
           <div className="space-y-1.5">
-            <label className="text-slate-300 font-semibold">Merchant Gateway ID</label>
+            <label className="text-slate-300 font-semibold">Internal Merchant Account ID</label>
             <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] p-2.5 items-center justify-between font-mono">
               <span className="text-white truncate">{merchantId}</span>
               <button
@@ -392,7 +413,6 @@ export default function SettingsTab() {
           </div>
         </div>
       </div>
-
     </div>
   )
 }

@@ -1,4 +1,4 @@
-// Admin API Client for PGX Gateway Underwriting Desk
+// Admin API Client for PGX Gateway Underwriting Desk & Multi-Tenant Reseller Control
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
@@ -62,6 +62,7 @@ export interface AdminStats {
 
 export interface ApplicationItem {
   _id: string
+  refId?: string
   fullName: string
   businessEmail: string
   phone: string
@@ -82,6 +83,12 @@ export interface ApplicationItem {
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
   currentStep: number
   agreedToTerms: boolean
+  balance?: {
+    grossVolume: number
+    netBalance: number
+    totalFeesPaid: number
+    pendingPayout: number
+  }
   offer?: {
     rate: string
     volume: string
@@ -123,6 +130,62 @@ export interface MerchantMessageItem {
   updatedAt: string
 }
 
+export interface TransactionItem {
+  _id: string
+  transactionId: string
+  resellerId?: string
+  merchantId: string
+  merchantRefId: string
+  stripePaymentIntentId?: string
+  stripeSessionId?: string
+  currency: string
+  grossAmount: number
+  grossCents?: number
+  platformFeeRate: number // Fixed 9%
+  platformFeeAmount: number
+  resellerFeeRate: number
+  resellerFeeAmount: number
+  resellerProfitAmount: number
+  merchantNetAmount: number
+  status: 'pending' | 'succeeded' | 'failed' | 'refunded'
+  customerEmail?: string
+  customerName?: string
+  orderId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ResellerStripeConfig {
+  resellerId: string
+  stripe: {
+    publishableKey: string
+    secretKeyMasked: string
+    hasSecretKey: boolean
+    webhookSecretMasked: string
+    hasWebhookSecret: boolean
+    isConfigured: boolean
+    mode: 'test' | 'live'
+  }
+  feeSettings: {
+    basePlatformFee: number // Hardwired 9.0%
+    merchantFeeRate: number // e.g. 12.0%
+  }
+  totalVolumeProcessed: number
+  totalPlatformFeesEarned: number
+  totalResellerProfit: number
+}
+
+export interface SuperAdminAnalytics {
+  totalGrossVolume: number
+  totalPlatformFees: number
+  totalResellerProfit: number
+  totalMerchantNet: number
+  totalTransactions: number
+  totalMerchants: number
+  approvedMerchants: number
+  platformFeeRate: number
+}
+
 export const adminApi = {
   login: async (payload: { email: string; password: string }) => {
     const res = await adminRequest<{ email: string; role: string }>('/admin/login', {
@@ -143,8 +206,8 @@ export const adminApi = {
     const query = new URLSearchParams()
     if (params?.status && params.status !== 'all') query.set('status', params.status)
     if (params?.search) query.set('search', params.search)
-    if (params?.page) query.set('page', String(params.page))
-    if (params?.limit) query.set('limit', String(params.limit))
+    if (params?.page) query.set('page', params.page.toString())
+    if (params?.limit) query.set('limit', params.limit.toString())
 
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<ApplicationItem[]>(`/admin/applications${qs}`, { method: 'GET' })
@@ -199,7 +262,6 @@ export const adminApi = {
     })
   },
 
-  // White-Label Branding & System Configuration
   getSystemConfig: async () => {
     return adminRequest<SystemConfigData>('/admin/config', { method: 'GET' })
   },
@@ -236,6 +298,63 @@ export const adminApi = {
     } catch {
       return undefined
     }
+  },
+
+  // Multi-Tenant Reseller & Single-Stripe Gateway Methods
+  getStripeConfig: async (resellerId?: string) => {
+    const qs = resellerId ? `?resellerId=${encodeURIComponent(resellerId)}` : ''
+    return adminRequest<ResellerStripeConfig>(`/admin/stripe-config${qs}`, { method: 'GET' })
+  },
+
+  updateStripeConfig: async (payload: {
+    publishableKey?: string
+    secretKey?: string
+    webhookSecret?: string
+    mode?: 'test' | 'live'
+    merchantFeeRate?: number
+    resellerId?: string
+  }) => {
+    return adminRequest<{
+      isConfigured: boolean
+      mode: string
+      merchantFeeRate: number
+      basePlatformFee: number
+    }>('/admin/stripe-config', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  getTransactions: async (params?: {
+    status?: string
+    search?: string
+    refId?: string
+    page?: number
+    limit?: number
+  }) => {
+    const query = new URLSearchParams()
+    if (params?.status && params.status !== 'all') query.set('status', params.status)
+    if (params?.search) query.set('search', params.search)
+    if (params?.refId) query.set('refId', params.refId)
+    if (params?.page) query.set('page', params.page.toString())
+    if (params?.limit) query.set('limit', params.limit.toString())
+
+    const qs = query.toString() ? `?${query.toString()}` : ''
+    return adminRequest<TransactionItem[]>(`/admin/transactions${qs}`, { method: 'GET' })
+  },
+
+  getSuperAdminAnalytics: async () => {
+    return adminRequest<SuperAdminAnalytics>('/admin/super-analytics', { method: 'GET' })
+  },
+
+  recordMerchantPayout: async (
+    merchantId: string,
+    payload: { amount?: number; reference?: string; notes?: string }
+  ) => {
+    return adminRequest<{ message: string }>(`/admin/merchants/${merchantId}/payout`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
   },
 
   // Two-Way Direct Messaging with Merchants

@@ -40,6 +40,10 @@ import {
   type MerchantMessageItem,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
+import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
+import StripeGatewayTab from '@/components/admin/StripeGatewayTab'
+import TransactionsTab from '@/components/admin/TransactionsTab'
+import { CreditCard, Receipt } from 'lucide-react'
 import { useBranding } from '@/context/BrandingContext'
 
 export default function AdminPage() {
@@ -56,7 +60,7 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const { updateLocalBranding } = useBranding()
-  const [adminSection, setAdminSection] = useState<'applications' | 'branding'>('applications')
+  const [adminSection, setAdminSection] = useState<'applications' | 'branding' | 'stripe' | 'transactions'>('applications')
 
   // White-Label & Branding Form State
   const [brandingForm, setBrandingForm] = useState<SystemConfigData>({
@@ -568,6 +572,9 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* Super Admin Platform Oversight Chamber */}
+      <SuperAdminAnalyticsBar onRefresh={fetchData} />
+
       {/* Admin Section Tabs Navigation */}
       <div className="flex items-center gap-3 border-b border-cyan-500/20 pb-3">
         <button
@@ -597,6 +604,32 @@ export default function AdminPage() {
         >
           <Palette className="h-4 w-4" />
           <span>White-Label & Branding</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setAdminSection('stripe')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            adminSection === 'stripe'
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <CreditCard className="h-4 w-4" />
+          <span>Stripe & Fee Setup</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setAdminSection('transactions')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            adminSection === 'transactions'
+              ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.85)] border border-fuchsia-400'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Receipt className="h-4 w-4" />
+          <span>Transaction Ledger</span>
         </button>
       </div>
 
@@ -726,6 +759,13 @@ export default function AdminPage() {
                         <div className="font-bold text-white text-sm">
                           {app.legalName || 'Unnamed Entity'}
                         </div>
+                        {app.refId && (
+                          <div className="mb-0.5">
+                            <span className="font-mono text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold">
+                              {app.refId}
+                            </span>
+                          </div>
+                        )}
                         <div className="text-[11px] text-cyan-300 capitalize">
                           {app.industry?.replace('-', ' ') || 'General Business'}
                         </div>
@@ -1233,6 +1273,16 @@ export default function AdminPage() {
       </div>
     </div>
   )}
+
+      {/* SECTION 3: STRIPE & RESELLER GATEWAY SETTINGS */}
+      {adminSection === 'stripe' && (
+        <StripeGatewayTab onShowToast={showToast} />
+      )}
+
+      {/* SECTION 4: REAL-TIME TRANSACTION LEDGER */}
+      {adminSection === 'transactions' && (
+        <TransactionsTab onShowToast={showToast} />
+      )}
 
       {/* Review & Decision Modal */}
       {selectedApp && (
