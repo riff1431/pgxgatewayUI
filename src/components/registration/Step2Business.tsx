@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Coins, 
   CreditCard, 
-  Globe, 
+  Globe,
+  GitBranch, 
   Loader2,
   MessageSquare, 
   Store 
@@ -39,6 +40,7 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
     legalName: merchant?.legalName || '',
     industry: merchant?.industry || '',
     website: merchant?.website || '',
+    gitRepoUrl: (merchant as any)?.gitRepoUrl || '',
     yearsInBusiness: merchant?.yearsInBusiness || '',
     currentProcessor: merchant?.currentProcessor || '',
     monthlyVolume: merchant?.monthlyVolume || '',
@@ -159,6 +161,7 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
         legalName: formData.legalName.trim(),
         industry: formData.industry,
         website: formData.website.trim(),
+        gitRepoUrl: formData.gitRepoUrl.trim(),
         yearsInBusiness: formData.yearsInBusiness,
         currentProcessor: formData.currentProcessor.trim(),
         monthlyVolume: formData.monthlyVolume,
@@ -322,6 +325,25 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
               {errors.website}
             </p>
           )}
+        </div>
+
+        {/* Git Repository Link (Optional) */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-200">
+            Git Repository URL <span className="text-slate-500 font-normal">(Optional for White-Glove Setup)</span>
+          </label>
+          <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400 transition-all">
+            <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+              <GitBranch className="h-4 w-4" />
+            </div>
+            <input
+              type="url"
+              value={formData.gitRepoUrl}
+              onChange={(e) => handleChange('gitRepoUrl', e.target.value)}
+              placeholder="https://github.com/my-org/my-store"
+              className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+            />
+          </div>
         </div>
 
         {/* Estimated Monthly Volume */}

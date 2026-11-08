@@ -8,7 +8,8 @@ import {
   MessageSquare, 
   Settings, 
   Tag,
-  User 
+  User,
+  Code2
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
@@ -28,6 +29,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'integration', label: 'Integration & Collab', icon: Code2 },
     { id: 'application', label: 'My Application', icon: FileText },
     { id: 'documents', label: 'Documents', icon: Folder },
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount },

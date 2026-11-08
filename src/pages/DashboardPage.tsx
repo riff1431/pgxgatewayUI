@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import { Code2 } from 'lucide-react'
 import ApplicationStatusCard from '@/components/dashboard/ApplicationStatusCard'
 import ProcessingOfferCard from '@/components/dashboard/ProcessingOfferCard'
 import QuickActions from '@/components/dashboard/QuickActions'
@@ -12,6 +13,7 @@ import DocumentsTab from '@/components/dashboard/tabs/DocumentsTab'
 import MessagesTab from '@/components/dashboard/tabs/MessagesTab'
 import OfferTab from '@/components/dashboard/tabs/OfferTab'
 import SettingsTab from '@/components/dashboard/tabs/SettingsTab'
+import IntegrationTab from '@/components/dashboard/tabs/IntegrationTab'
 
 export default function DashboardPage() {
   const { merchant } = useAuth()
@@ -20,7 +22,7 @@ export default function DashboardPage() {
   const displayName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
 
   // Derive active tab from searchParams (default: 'dashboard')
-  const validTabs = ['dashboard', 'application', 'documents', 'messages', 'offer', 'settings']
+  const validTabs = ['dashboard', 'integration', 'application', 'documents', 'messages', 'offer', 'settings']
   const tabParam = searchParams.get('tab') || 'dashboard'
   const activeTab = validTabs.includes(tabParam) ? tabParam : 'dashboard'
 
@@ -71,7 +73,7 @@ export default function DashboardPage() {
                       Welcome, {displayName}
                     </h1>
                     <p className="text-sm sm:text-base text-slate-300">
-                      Track your application and view your processing offer.
+                      Track your application, configure website integration, and view your processing offer.
                     </p>
                   </div>
                 </div>
@@ -80,6 +82,33 @@ export default function DashboardPage() {
                 <div className="hidden md:flex justify-end pr-4">
                   <HologramCard size="sm" />
                 </div>
+              </div>
+
+              {/* White-Glove Integration Banner */}
+              <div 
+                onClick={() => handleTabChange('integration')}
+                className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#09153a] via-[#0f235e] to-[#09153a] border border-cyan-400/50 shadow-[0_0_20px_rgba(0,240,255,0.2)] flex items-center justify-between gap-4 cursor-pointer hover:border-cyan-300 transition-all group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 rounded-xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 group-hover:scale-105 transition-transform">
+                    <Code2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-white font-bold text-sm flex items-center gap-2">
+                      White-Glove GitHub & Website Integration Desk
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40">Action Desk</span>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      Pay setup fee, invite our official GitHub account, submit .env secrets, and chat directly with Super Admin.
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  type="button"
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs group-hover:bg-cyan-300 transition-colors shrink-0"
+                >
+                  Open Workspace &rarr;
+                </button>
               </div>
 
               {/* Row 1: Status & Processing Offer Cards */}
@@ -94,6 +123,9 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* TAB: Integration & Collab */}
+          {activeTab === 'integration' && <IntegrationTab />}
 
           {/* TAB 2: My Application */}
           {activeTab === 'application' && <ApplicationTab />}

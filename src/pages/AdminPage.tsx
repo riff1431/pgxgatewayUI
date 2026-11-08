@@ -39,7 +39,7 @@ import {
     type MerchantMessageItem,
 } from '@/lib/adminApi'
 import Logo from '@/components/brand/Logo'
-import StripeGatewayTab from '@/components/admin/StripeGatewayTab'
+import ResellerAffiliateTab from '@/components/admin/ResellerAffiliateTab'
 import TransactionsTab from '@/components/admin/TransactionsTab'
 import { CreditCard, Receipt } from 'lucide-react'
 
@@ -603,7 +603,7 @@ export default function AdminPage() {
           }`}
         >
           <CreditCard className="h-4 w-4" />
-          <span>Stripe & Fee Setup</span>
+          <span>Affiliate & Earnings Program</span>
         </button>
 
         <button
@@ -856,9 +856,13 @@ export default function AdminPage() {
     </div>
   )}
 
-  {/* SECTION 2: STRIPE & RESELLER GATEWAY SETTINGS */}
+  {/* SECTION 2: AFFILIATE & COMMISSIONS PROGRAM */}
       {adminSection === 'stripe' && (
-        <StripeGatewayTab onShowToast={showToast} />
+        <ResellerAffiliateTab
+          resellerId={resellerId}
+          applications={applications}
+          onShowToast={showToast}
+        />
       )}
 
       {/* SECTION 4: REAL-TIME TRANSACTION LEDGER */}

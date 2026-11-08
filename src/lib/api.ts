@@ -16,6 +16,9 @@ export interface ApiMerchant {
   legalName?: string
   industry?: string
   website?: string
+  websiteDomain?: string
+  gitRepoUrl?: string
+  setupStatus?: string
   yearsInBusiness?: string
   currentProcessor?: string
   monthlyVolume?: string
@@ -203,6 +206,8 @@ export const api = {
       legalName: string
       industry: string
       website?: string
+      websiteDomain?: string
+      gitRepoUrl?: string
       yearsInBusiness?: string
       currentProcessor?: string
       monthlyVolume?: string

@@ -26,6 +26,7 @@ import {
   Eye,
   EyeOff,
   Sliders,
+  Code2,
   Calculator,
   Coins,
 } from 'lucide-react'
@@ -42,12 +43,14 @@ import BrandingTab from '@/components/admin/BrandingTab'
 import Logo from '@/components/brand/Logo'
 import SuperAdminAnalyticsBar from '@/components/admin/SuperAdminAnalyticsBar'
 import TransactionsTab from '@/components/admin/TransactionsTab'
+import SuperAdminIntegrationDesk from '@/components/admin/SuperAdminIntegrationDesk'
+import PlatformSettingsTab from '@/components/admin/PlatformSettingsTab'
 
 export default function SuperAdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredSuperAdminToken())
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'merchants' | 'branding' | 'transactions'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'resellers' | 'merchants' | 'integrations' | 'settings' | 'branding' | 'transactions'>('overview')
 
   // Super Admin Merchant Routing State
   const [superMerchants, setSuperMerchants] = useState<ApplicationItem[]>([])
@@ -625,6 +628,32 @@ Status: ${reseller.status.toUpperCase()}`
 
         <button
           type="button"
+          onClick={() => setActiveTab('integrations')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            activeTab === 'integrations'
+              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Code2 className="h-4 w-4" />
+          <span>Integration Desk & Collab</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('settings')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+            activeTab === 'settings'
+              ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 text-black shadow-[0_0_18px_rgba(251,191,36,0.85)] border border-amber-300 font-extrabold'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+          }`}
+        >
+          <Sliders className="h-4 w-4" />
+          <span>Platform & Stripe Settings</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('branding')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
             activeTab === 'branding'
@@ -1134,6 +1163,26 @@ Status: ${reseller.status.toUpperCase()}`
       {activeTab === 'branding' && (
         <div className="space-y-6 animate-fade-in">
           <BrandingTab onShowToast={showToast} />
+        </div>
+      )}
+
+      {/* TAB: WHITE-GLOVE INTEGRATION DESK */}
+      {activeTab === 'integrations' && (
+        <div className="space-y-6 animate-fade-in">
+          <SuperAdminIntegrationDesk
+            onSuccessToast={(title, desc) => showToast(title, desc, 'success')}
+            onErrorToast={(title, desc) => showToast(title, desc, 'error')}
+          />
+        </div>
+      )}
+
+      {/* TAB: SUPER ADMIN PLATFORM SETTINGS */}
+      {activeTab === 'settings' && (
+        <div className="space-y-6 animate-fade-in">
+          <PlatformSettingsTab
+            onSuccessToast={(title, desc) => showToast(title, desc, 'success')}
+            onErrorToast={(title, desc) => showToast(title, desc, 'error')}
+          />
         </div>
       )}
 
