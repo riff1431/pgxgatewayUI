@@ -10,7 +10,7 @@ import {
   XCircle,
   DollarSign,
   TrendingUp,
-  Sparkles,
+  Coins,
   Loader2,
 } from 'lucide-react'
 import { adminApi, type TransactionItem } from '@/lib/adminApi'
@@ -124,7 +124,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
             <div className="text-[10px] text-fuchsia-400/80 mt-0.5">Spread Income</div>
           </div>
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300 shrink-0">
-            <Sparkles className="h-5 w-5" />
+            <Coins className="h-5 w-5" />
           </div>
         </div>
 

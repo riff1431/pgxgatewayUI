@@ -10,7 +10,6 @@ import {
   Wallet,
   Loader2,
   AlertCircle,
-  Sparkles,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -172,7 +171,7 @@ export default function Checkout() {
             </div>
 
             <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/30 text-cyan-300 text-[11px] flex items-center gap-2">
-              <Sparkles className="h-4 w-4 shrink-0 text-cyan-400" />
+              <ShieldCheck className="h-4 w-4 shrink-0 text-cyan-400" />
               <span>
                 Fees split: 9.0% hardwired to Super Admin, reseller spread recorded, net balance credited to merchant.
               </span>

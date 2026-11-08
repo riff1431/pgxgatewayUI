@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Zap, 
+import {
+  ArrowRightLeft, 
   ShieldCheck, 
   Code2, 
   ArrowRight, 
@@ -319,7 +319,7 @@ export function CheckoutWidget() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-cyan-500/40 bg-cyan-600/10 text-cyan-300 text-xs font-bold mb-2">
-                <Zap className="h-3.5 w-3.5" />
+                <ArrowRightLeft className="h-3.5 w-3.5" />
                 <span>Real-Time Engine Visualizer</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
@@ -394,7 +394,7 @@ export function CheckoutWidget() {
                 <span className="text-[10px] font-bold uppercase tracking-wider">Phase 2</span>
                 {simStep >= 2 ? <CheckCircle2 className="h-4 w-4 text-cyan-400" /> : <ShieldCheck className="h-4 w-4 text-slate-600" />}
               </div>
-              <h4 className="text-xs font-bold">AI Risk Assessment</h4>
+              <h4 className="text-xs font-bold">Underwriting Risk Assessment</h4>
               <p className="text-[11px] text-slate-400 mt-1">
                 Device, IP velocity & behavioral scoring.
               </p>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Zap, 
+import {
+  ArrowRightLeft, 
   ShieldCheck, 
   Globe2, 
   Layers, 
@@ -21,7 +21,7 @@ interface SolutionItem {
   id: string
   title: string
   badge: string
-  icon: typeof Zap
+  icon: typeof ArrowRightLeft
   tagline: string
   description: string
   stats: { label: string; value: string }[]
@@ -34,7 +34,7 @@ const solutionsData: SolutionItem[] = [
     id: 'cascading',
     title: 'Smart Cascading & Multi-Acquirer Routing',
     badge: 'Core Engine',
-    icon: Zap,
+    icon: ArrowRightLeft,
     tagline: 'Never lose a sale to a bank false-decline again.',
     description: 'Our proprietary algorithm analyzes card BIN, issuing bank latency, geography, and real-time acquirer health to route each transaction to the bank most likely to approve it. If an acquirer declines, PGX automatically re-routes via an alternate channel in under 450ms.',
     stats: [
@@ -107,7 +107,7 @@ const solutionsData: SolutionItem[] = [
   },
   {
     id: 'fraud-shield',
-    title: 'AI-Powered Fraud & 3DS2 Frictionless Shield',
+    title: 'Enterprise Fraud Protection & 3DS2 Shield',
     badge: 'Security & ML',
     icon: ShieldCheck,
     tagline: 'Block fraudulent attempts before they become chargebacks.',
@@ -124,7 +124,7 @@ const solutionsData: SolutionItem[] = [
       'Configurable custom rule engine with if-this-then-that logic'
     ],
     technicalSpecs: {
-      'Risk Engine': 'Sub-15ms AI Machine Learning Inference',
+      'Risk Engine': 'Sub-15ms Real-Time Behavioral Risk Analysis',
       'Biometric Check': 'FIDO2 / 3DS 2.3.1 Specification',
       'Early Warning': 'Ethoca Eliminator & Verifi RDR',
       'Data Encryption': 'AES-256 at rest, TLS 1.3 in transit'
@@ -213,7 +213,7 @@ export default function SolutionsPage() {
               </span>
               <span className="text-slate-500">|</span>
               <span className="text-xs font-semibold text-fuchsia-300">
-                Next-Gen Fintech
+                Global Payment Infrastructure
               </span>
             </div>
 
@@ -234,7 +234,7 @@ export default function SolutionsPage() {
                 to="/register"
                 className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-extrabold text-sm sm:text-base border border-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.7)] hover:shadow-[0_0_35px_rgba(217,70,239,0.9)] transition-all duration-300 hover:scale-[1.02]"
               >
-                <Zap className="h-5 w-5 text-white" />
+                <ArrowRightLeft className="h-5 w-5 text-white" />
                 <span>Get Customized Solution</span>
                 <ArrowRight className="h-4 w-4 text-white" />
               </Link>

@@ -11,8 +11,8 @@ import {
   Lock,
   ShieldCheck,
   Layers,
-  Terminal, 
-  Zap 
+  Terminal,
+  ArrowRightLeft 
 } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
 import HologramCard from '@/components/brand/HologramCard'
@@ -233,7 +233,7 @@ const session = await pgx.checkouts.create({
           {/* Card 1 */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/40 p-6 space-y-4 backdrop-blur-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,240,255,0.35)] transition-all duration-300 group">
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/80 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.5)] group-hover:scale-110 transition-transform">
-              <Zap className="h-6 w-6" />
+              <ArrowRightLeft className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
@@ -252,7 +252,7 @@ const session = await pgx.checkouts.create({
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-fuchsia-300 transition-colors">
-                AI Fraud Shield & 3DS2
+                Enterprise Fraud Protection & 3DS2
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
                 Frictionless 3D Secure 2.0 with machine learning anomaly detection to stop chargebacks before they strike.

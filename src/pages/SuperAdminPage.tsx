@@ -10,7 +10,7 @@ import {
   AlertCircle,
   Building2,
   DollarSign,
-  Sparkles,
+  Landmark,
   Receipt,
   UserPlus,
   Copy,
@@ -610,7 +610,7 @@ Status: ${reseller.status.toUpperCase()}`
           <div className="p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-400" />
+                <Landmark className="h-5 w-5 text-amber-400" />
                 <h3 className="text-base font-bold text-white tracking-tight">
                   Super Admin Commission Matrix (Hardwired 9.0%)
                 </h3>

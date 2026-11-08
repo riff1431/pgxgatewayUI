@@ -58,7 +58,7 @@ export const BrandingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Sync document title and favicon dynamically
   useEffect(() => {
     if (branding.siteName) {
-      document.title = `${branding.siteName} - Next-Gen Payment Gateway`
+      document.title = `${branding.siteName} - Institutional Payment Gateway`
     }
     if (branding.faviconUrl) {
       const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']")

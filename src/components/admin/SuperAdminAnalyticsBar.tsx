@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DollarSign, TrendingUp, Users, Sparkles, RefreshCw } from 'lucide-react'
+import { DollarSign, TrendingUp, Users, BadgePercent, Coins, RefreshCw } from 'lucide-react'
 import { adminApi, type SuperAdminAnalytics } from '@/lib/adminApi'
 
 interface SuperAdminAnalyticsBarProps {
@@ -55,7 +55,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
                 Super Admin Multi-Tenant Oversight
               </h2>
               <span className="text-[10px] font-bold text-amber-300 bg-amber-950/70 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Sparkles className="h-2.5 w-2.5" /> 9.0% Hardwired Commission
+                <BadgePercent className="h-3 w-3" /> 9.0% Hardwired Commission
               </span>
             </div>
             <p className="text-xs text-slate-300">
@@ -112,7 +112,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
         <div className="p-4 rounded-2xl bg-[#050a22]/80 border border-purple-500/40">
           <div className="text-[10px] font-bold uppercase tracking-wider text-fuchsia-300 flex items-center justify-between">
             <span>Reseller Profit Spread</span>
-            <Sparkles className="h-3.5 w-3.5 text-fuchsia-400" />
+            <Coins className="h-3.5 w-3.5 text-fuchsia-400" />
           </div>
           <div className="text-xl sm:text-2xl font-black text-fuchsia-300 mt-1">
             ${data.totalResellerProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

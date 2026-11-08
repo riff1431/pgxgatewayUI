@@ -9,7 +9,7 @@ import {
   Check,
   Sliders,
   Loader2,
-  Sparkles,
+  Calculator,
   ExternalLink,
 } from 'lucide-react'
 import { adminApi, type ResellerStripeConfig } from '@/lib/adminApi'
@@ -341,7 +341,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
             {/* Estimated Monthly Revenue Card ($750k Volume) */}
             <div className="p-4 rounded-2xl bg-gradient-to-br from-[#0a1845] to-[#04081c] border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.2)] space-y-2.5">
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-cyan-300 uppercase tracking-wider">
-                <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+                <Calculator className="h-3.5 w-3.5 text-cyan-400" />
                 <span>Monthly Forecast on $750,000 Target Volume</span>
               </div>
 

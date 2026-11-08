@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
-import { Layers, Zap, ShieldCheck } from 'lucide-react'
+import { Layers, Clock, ShieldCheck } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
 import HologramCard from '@/components/brand/HologramCard'
 import IndustriesBar from '@/components/brand/IndustriesBar'
@@ -137,7 +137,7 @@ export default function RegistrationPage() {
             {/* Fast */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <Zap className="h-5 w-5" />
+                <Clock className="h-5 w-5" />
               </div>
               <div>
                 <div className="text-sm font-bold text-white leading-tight">Fast</div>
