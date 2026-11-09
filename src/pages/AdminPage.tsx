@@ -655,7 +655,7 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {[
-            { id: 'all', label: 'All Applications' },
+            { id: 'all', label: `All Applications (${stats.totalMerchants})` },
             { id: 'under_review', label: `Pending Review (${stats.pendingReview})` },
             { id: 'approved', label: `Approved (${stats.approved})` },
             { id: 'rejected', label: `Declined (${stats.rejected})` },
@@ -781,6 +781,11 @@ export default function AdminPage() {
                         {app.applicationStatus === 'rejected' && (
                           <span className="px-3 py-1 rounded-full text-[10px] font-bold text-red-300 bg-red-500/10 border border-red-400/80 shadow-[0_0_8px_rgba(239,68,68,0.3)]">
                             Declined
+                          </span>
+                        )}
+                        {(app.applicationStatus === 'draft' || !app.applicationStatus) && (
+                          <span className="px-3 py-1 rounded-full text-[10px] font-bold text-slate-400 bg-slate-500/10 border border-slate-400/40">
+                            Draft Onboarding
                           </span>
                         )}
                       </td>
