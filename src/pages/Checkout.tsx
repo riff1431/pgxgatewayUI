@@ -31,7 +31,9 @@ export default function Checkout() {
   const amountParam = parseFloat(searchParams.get('amount') || '129.00')
   const amount = isNaN(amountParam) || amountParam <= 0 ? 129.0 : amountParam
   const currencyParam = (searchParams.get('currency') || 'USD').toUpperCase()
-  const orderIdParam = searchParams.get('orderId') || `ORD-${Date.now().toString().slice(-5)}`
+  const [orderIdParam] = useState(
+    () => searchParams.get('orderId') || `ORD-${Date.now().toString().slice(-5)}`
+  )
   const statusParam = searchParams.get('status')
   const sessionIdParam = searchParams.get('session_id')
 

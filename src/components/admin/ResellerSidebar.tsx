@@ -37,7 +37,7 @@ export default function ResellerSidebar({
   resellerId,
   pendingCount = 0,
   totalMerchants = 0,
-  referralLink: _referralLink,
+  referralLink,
   copiedReferral,
   onCopyReferral,
   onRefresh,
@@ -114,6 +114,7 @@ export default function ResellerSidebar({
           <button
             type="button"
             onClick={onCopyReferral}
+            title={referralLink}
             className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl bg-[#091332] hover:bg-[#0e1c4a] border border-purple-500/40 text-purple-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.15)]"
           >
             <div className="flex items-center gap-2">

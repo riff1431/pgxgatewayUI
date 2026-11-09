@@ -7,6 +7,7 @@ const API_BASE =
 export interface ApiMerchant {
   id: string
   _id?: string
+  refId?: string
   fullName: string
   businessEmail: string
   phone: string

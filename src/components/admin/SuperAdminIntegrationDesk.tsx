@@ -43,7 +43,7 @@ interface SuperAdminIntegrationDeskProps {
 export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast }: SuperAdminIntegrationDeskProps) {
   const [loading, setLoading] = useState(true)
   const [merchants, setMerchants] = useState<AdminIntegrationMerchant[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<Record<string, number> | null>(null)
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState<string>('')
 
@@ -68,8 +68,9 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       })
       setMerchants(data.merchants || [])
       setStats(data.stats || null)
-    } catch (err: any) {
-      onErrorToast?.('Failed to load integration data', err.message || 'Error connecting to server')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error connecting to server'
+      onErrorToast?.('Failed to load integration data', message)
     } finally {
       setLoading(false)
     }
@@ -118,8 +119,9 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
         prev.map((m) => (m._id === activeMerchant._id ? { ...m, ...res.merchant } : m))
       )
       onSuccessToast?.('Status Updated', `Integration status changed to ${setupStatus.toUpperCase()}`)
-    } catch (err: any) {
-      onErrorToast?.('Update Failed', err.message || 'Error updating status')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error updating status'
+      onErrorToast?.('Update Failed', message)
     } finally {
       setUpdatingStatus(false)
     }
@@ -145,8 +147,9 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       })
       setMessages((prev) => [...prev, msg])
       setNewMessage('')
-    } catch (err: any) {
-      onErrorToast?.('Message Error', err.message || 'Failed to send message')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to send message'
+      onErrorToast?.('Message Error', message)
     } finally {
       setSendingMsg(false)
     }

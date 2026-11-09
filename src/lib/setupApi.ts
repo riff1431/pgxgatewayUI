@@ -52,6 +52,20 @@ export interface SetupMessageItem {
   createdAt: string
 }
 
+export interface UpdatePlatformSettingsPayload {
+  siteName?: string
+  setupFeePriceUSD?: number
+  setupFeePresetAltUSD?: number
+  officialGithubHandle?: string
+  affiliateCommissionRate?: number
+  stripe?: {
+    publishableKey?: string
+    secretKey?: string
+    webhookSecret?: string
+    mode?: 'test' | 'live'
+  }
+}
+
 export interface PlatformSettingsResponse {
   siteName: string
   setupFeePriceUSD: number
@@ -160,7 +174,7 @@ export async function submitCollabData(data: {
   companyDescription?: string
   preferredDomain?: string
   integrationNotes?: string
-}): Promise<any> {
+}): Promise<SetupStatusResponse> {
   const token = localStorage.getItem('pgx_auth_token')
   const res = await fetch(`${API_BASE}/setup/collab`, {
     method: 'POST',
@@ -216,7 +230,7 @@ export async function payInvoiceViaStripe(invoiceId: string): Promise<{
 export async function uploadInvoiceProof(
   invoiceId: string,
   payload: { proofDocUrl: string; notes?: string }
-): Promise<any> {
+): Promise<{ success: boolean; message?: string }> {
   const token = localStorage.getItem('pgx_auth_token')
   const res = await fetch(`${API_BASE}/invoices/${invoiceId}/upload-proof`, {
     method: 'POST',
@@ -271,7 +285,7 @@ export async function fetchPlatformSettings(): Promise<PlatformSettingsResponse>
   return json.settings
 }
 
-export async function updatePlatformSettings(data: any): Promise<PlatformSettingsResponse> {
+export async function updatePlatformSettings(data: UpdatePlatformSettingsPayload): Promise<PlatformSettingsResponse> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const res = await fetch(`${API_BASE}/setup/admin/settings`, {
     method: 'PATCH',
@@ -289,7 +303,7 @@ export async function updatePlatformSettings(data: any): Promise<PlatformSetting
 export async function fetchAdminIntegrations(params?: {
   status?: string
   search?: string
-}): Promise<{ stats: any; merchants: AdminIntegrationMerchant[] }> {
+}): Promise<{ stats: Record<string, number>; merchants: AdminIntegrationMerchant[] }> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const query = new URLSearchParams()
   if (params?.status) query.set('status', params.status)
@@ -309,7 +323,7 @@ export async function fetchAdminIntegrations(params?: {
 export async function updateAdminIntegrationStatus(
   merchantId: string,
   data: { setupStatus?: string; gitCollabStatus?: string }
-): Promise<any> {
+): Promise<{ success: boolean; merchant: AdminIntegrationMerchant }> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const res = await fetch(`${API_BASE}/setup/admin/desk/${merchantId}`, {
     method: 'PATCH',
@@ -327,7 +341,7 @@ export async function updateAdminIntegrationStatus(
 export async function fetchAdminInvoices(params?: {
   status?: string
   search?: string
-}): Promise<{ summary: any; invoices: InvoiceItem[] }> {
+}): Promise<{ summary: Record<string, unknown>; invoices: InvoiceItem[] }> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const query = new URLSearchParams()
   if (params?.status) query.set('status', params.status)
@@ -349,7 +363,7 @@ export async function generateWeeklyAdminInvoice(data: {
   eligibleVolume: number
   billingCycleStart?: string
   billingCycleEnd?: string
-}): Promise<any> {
+}): Promise<{ success: boolean; invoice?: InvoiceItem }> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const res = await fetch(`${API_BASE}/invoices/admin/generate`, {
     method: 'POST',
@@ -367,7 +381,7 @@ export async function generateWeeklyAdminInvoice(data: {
 export async function updateAdminInvoiceStatus(
   invoiceId: string,
   data: { status: string; adminNotes?: string }
-): Promise<any> {
+): Promise<{ success: boolean; invoice?: InvoiceItem }> {
   const token = localStorage.getItem('pgx_superadmin_auth_token')
   const res = await fetch(`${API_BASE}/invoices/admin/${invoiceId}/status`, {
     method: 'PATCH',

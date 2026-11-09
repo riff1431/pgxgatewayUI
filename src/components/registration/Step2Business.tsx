@@ -40,7 +40,7 @@ export default function Step2Business({ onNext, onBack }: Step2BusinessProps) {
     legalName: merchant?.legalName || '',
     industry: merchant?.industry || '',
     website: merchant?.website || '',
-    gitRepoUrl: (merchant as any)?.gitRepoUrl || '',
+    gitRepoUrl: merchant?.gitRepoUrl || '',
     yearsInBusiness: merchant?.yearsInBusiness || '',
     currentProcessor: merchant?.currentProcessor || '',
     monthlyVolume: merchant?.monthlyVolume || '',

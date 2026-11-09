@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   CreditCard,
   DollarSign,
@@ -45,11 +45,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [officialGithubHandle, setOfficialGithubHandle] = useState('huipper-dev')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
 
-  useEffect(() => {
-    loadSettings()
-  }, [])
-
-  const loadSettings = async () => {
+  const loadSettings = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchPlatformSettings()
@@ -61,12 +57,17 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       setSetupFeePriceUSD(data.setupFeePriceUSD ?? 49.0)
       setOfficialGithubHandle(data.officialGithubHandle || 'huipper-dev')
       setAffiliateCommissionRate(data.affiliateCommissionRate ?? 20.0)
-    } catch (err: any) {
-      onErrorToast?.('Failed to load platform settings', err.message || 'Error connecting to backend')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error connecting to backend'
+      onErrorToast?.('Failed to load platform settings', message)
     } finally {
       setLoading(false)
     }
-  }
+  }, [onErrorToast])
+
+  useEffect(() => {
+    loadSettings()
+  }, [loadSettings])
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,8 +86,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       })
       setIsConfigured(Boolean(updated.stripe?.isConfigured))
       onSuccessToast?.('Platform Settings Updated', 'Stripe credentials, setup fee, and GitHub configurations saved.')
-    } catch (err: any) {
-      onErrorToast?.('Failed to save settings', err.message || 'Server error occurred')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Server error occurred'
+      onErrorToast?.('Failed to save settings', message)
     } finally {
       setSaving(false)
     }

@@ -38,7 +38,7 @@ export default function ResellerAffiliateTab({
   // Calculate stats
   const totalReferred = applications.length
   const paidSetups = applications.filter(
-    (a) => (a as any).setupStatus && (a as any).setupStatus !== 'pending_payment'
+    (a) => a.setupStatus && a.setupStatus !== 'pending_payment'
   ).length
 
   // Assuming $49 setup fee with 20% commission ($9.80 per merchant)
@@ -161,9 +161,9 @@ export default function ResellerAffiliateTab({
               </thead>
               <tbody className="divide-y divide-cyan-500/10">
                 {applications.map((app) => {
-                  const setupStatus = (app as any).setupStatus || 'pending_payment'
+                  const setupStatus = app.setupStatus || 'pending_payment'
                   const isPaid = setupStatus !== 'pending_payment'
-                  const domain = (app as any).websiteDomain || app.website
+                  const domain = app.websiteDomain || app.website
 
                   return (
                     <tr key={app._id} className="hover:bg-[#091332]/50 transition-colors">

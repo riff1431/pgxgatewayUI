@@ -45,8 +45,8 @@ export default function InvoicesTab() {
       const data = await fetchMerchantInvoices()
       setInvoices(data.invoices || [])
       setSummary(data.summary || { totalInvoiced: 0, totalPaid: 0, totalOutstanding: 0, invoiceCount: 0 })
-    } catch (err: any) {
-      setError(err.message || 'Failed to load invoices')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load invoices')
     } finally {
       setLoading(false)
     }
@@ -62,10 +62,10 @@ export default function InvoicesTab() {
     try {
       const res = await payInvoiceViaStripe(invoiceId)
       if (res.checkoutUrl) {
-        window.location.href = res.checkoutUrl
+        window.location.assign(res.checkoutUrl)
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to initiate payment')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to initiate payment')
       setPayingInvoiceId(null)
     }
   }
@@ -89,8 +89,8 @@ export default function InvoicesTab() {
         setProofNotes('')
         loadInvoices()
       }, 1500)
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit proof')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to submit proof')
     } finally {
       setUploadingProof(false)
     }

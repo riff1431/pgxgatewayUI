@@ -138,6 +138,8 @@ export interface ApplicationItem {
   directorIdDoc?: { name: string; url: string; size: string; uploadedAt?: string }
   processingStatementDoc?: { name: string; url: string; size: string; uploadedAt?: string }
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
+  setupStatus?: string
+  websiteDomain?: string
   currentStep: number
   agreedToTerms: boolean
   balance?: {

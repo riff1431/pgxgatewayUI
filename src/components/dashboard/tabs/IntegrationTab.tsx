@@ -96,8 +96,8 @@ export default function IntegrationTab() {
         const msgs = await fetchSetupMessages(data.merchantId)
         setMessages(msgs)
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load integration details.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load integration details.')
     } finally {
       setLoading(false)
     }
@@ -143,10 +143,10 @@ export default function IntegrationTab() {
         gitRepoUrl: gitRepoUrl.trim(),
       })
       if (res.checkoutUrl) {
-        window.location.href = res.checkoutUrl
+        window.location.assign(res.checkoutUrl)
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to initiate setup payment.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to initiate setup payment.')
       setPaying(false)
     }
   }
@@ -167,8 +167,8 @@ export default function IntegrationTab() {
       })
       setSetupData((prev) => (prev ? { ...prev, ...updated } : prev))
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to save collaboration data.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save collaboration data.')
     } finally {
       setSavingCollab(false)
     }
@@ -187,8 +187,8 @@ export default function IntegrationTab() {
       })
       setMessages((prev) => [...prev, msg])
       setNewMessage('')
-    } catch (err: any) {
-      setError(err.message || 'Failed to send message.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send message.')
     } finally {
       setSendingMsg(false)
     }

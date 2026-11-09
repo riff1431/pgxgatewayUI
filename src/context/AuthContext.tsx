@@ -475,7 +475,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (msg._id !== id) return msg
           const current = msg.labels || []
           const exists = current.includes(label)
-          let updated: string[] = []
+          let updated: string[]
           if (action === 'add' || (action === 'toggle' && !exists)) {
             updated = exists ? current : [...current, label]
           } else {

@@ -45,7 +45,7 @@ export default function SettingsTab() {
 
   const merchantId = merchant?.id || merchant?._id || 'merchant_6aec260c16b974ca'
   const refId =
-    (merchant as any)?.refId || `PGX_REF_${merchantId.slice(-6).toUpperCase()}`
+    merchant?.refId || `PGX_REF_${merchantId.slice(-6).toUpperCase()}`
   const checkoutUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout?ref=${refId}&amount=100.00`
   const dummySecretKey = `pgx_live_sk_${merchantId.slice(-8)}_e9f8a2026sec`
 
