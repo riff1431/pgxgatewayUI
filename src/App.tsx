@@ -1,19 +1,23 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ScrollToTop from '@/components/layout/ScrollToTop'
-import Home from '@/pages/Home'
-import SolutionsPage from '@/pages/SolutionsPage'
-import IndustriesPage from '@/pages/IndustriesPage'
-import HowItWorksPage from '@/pages/HowItWorksPage'
-import SupportPage from '@/pages/SupportPage'
-import RegistrationPage from '@/pages/RegistrationPage'
-import DashboardPage from '@/pages/DashboardPage'
-import Checkout from '@/pages/Checkout'
-import AdminPage from '@/pages/AdminPage'
-import SuperAdminPage from '@/pages/SuperAdminPage'
+import PageLoader from '@/components/layout/PageLoader'
 import { AuthProvider } from '@/context/AuthContext'
 import { BrandingProvider } from '@/context/BrandingContext'
+
+// Lazy-loaded route components for optimal initial bundle performance
+const Home = lazy(() => import('@/pages/Home'))
+const SolutionsPage = lazy(() => import('@/pages/SolutionsPage'))
+const IndustriesPage = lazy(() => import('@/pages/IndustriesPage'))
+const HowItWorksPage = lazy(() => import('@/pages/HowItWorksPage'))
+const SupportPage = lazy(() => import('@/pages/SupportPage'))
+const RegistrationPage = lazy(() => import('@/pages/RegistrationPage'))
+const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
+const Checkout = lazy(() => import('@/pages/Checkout'))
+const AdminPage = lazy(() => import('@/pages/AdminPage'))
+const SuperAdminPage = lazy(() => import('@/pages/SuperAdminPage'))
 
 function AppContent() {
   const location = useLocation()
@@ -32,22 +36,24 @@ function AppContent() {
       {/* Top Navbar (hidden on /admin and /super-admin to provide full dedicated back-office canvas) */}
       {!isAdmin && !isSuperAdmin && <Navbar isDashboard={isDashboard} />}
 
-      {/* Main Content View */}
+      {/* Main Content View with Suspense boundary */}
       <main className="flex-1 flex flex-col">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/solutions" element={<SolutionsPage />} />
-          <Route path="/industries" element={<IndustriesPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/support" element={<SupportPage />} />
-          <Route path="/login" element={<RegistrationPage />} />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/super-admin" element={<SuperAdminPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/solutions" element={<SolutionsPage />} />
+            <Route path="/industries" element={<IndustriesPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/login" element={<RegistrationPage />} />
+            <Route path="/register" element={<RegistrationPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/super-admin" element={<SuperAdminPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </main>
 
       {/* Public Pages Footer */}
