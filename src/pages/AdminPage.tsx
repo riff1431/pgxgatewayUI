@@ -693,17 +693,17 @@ export default function AdminPage() {
 
       {/* Applications Table */}
       <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] overflow-hidden backdrop-blur-xl">
-        <div className="overflow-x-auto no-scrollbar sm:scrollbar-thin sm:scrollbar-thumb-cyan-500/25">
+        <div className="overflow-x-auto table-scrollbar">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] border-b border-cyan-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-5 py-3.5 whitespace-nowrap min-w-[180px]">Company & Legal Name</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Merchant Contact</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Est. Volume</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">KYC Docs</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[120px]">Status</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[150px]">Offer</th>
-                <th className="px-5 py-3.5 whitespace-nowrap text-right min-w-[210px]">Actions</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[170px]">Company & Legal Name</th>
+                <th className="px-3 py-3.5 whitespace-nowrap min-w-[160px]">Merchant Contact</th>
+                <th className="px-3 py-3.5 whitespace-nowrap min-w-[130px]">Est. Volume</th>
+                <th className="px-3 py-3.5 whitespace-nowrap min-w-[120px]">KYC Docs</th>
+                <th className="px-3 py-3.5 whitespace-nowrap min-w-[120px]">Status</th>
+                <th className="px-3 py-3.5 whitespace-nowrap min-w-[140px]">Offer</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[210px] sticky right-0 z-20 bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -720,7 +720,7 @@ export default function AdminPage() {
                   const isApproved = app.applicationStatus === 'approved'
 
                   return (
-                    <tr key={app._id} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={app._id} className="group hover:bg-[#0c1538]/60 transition-colors">
                       {/* Company Name */}
                       <td className="px-5 py-4 whitespace-nowrap">
                         <div className="font-bold text-white text-sm">
@@ -810,7 +810,7 @@ export default function AdminPage() {
                       </td>
 
                       {/* Action */}
-                      <td className="px-5 py-4 text-right space-x-2 whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-right space-x-2 whitespace-nowrap sticky right-0 z-10 bg-[#060b20] group-hover:bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20 transition-colors">
                         <button
                           type="button"
                           onClick={() => openMessageModal(app)}

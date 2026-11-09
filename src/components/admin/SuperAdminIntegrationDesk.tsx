@@ -242,7 +242,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
 
       {/* Merchants Table */}
       <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
-        <div className="overflow-x-auto no-scrollbar sm:scrollbar-thin sm:scrollbar-thumb-cyan-500/25">
+        <div className="overflow-x-auto table-scrollbar">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] text-slate-300 font-semibold border-b border-cyan-500/20 uppercase tracking-wider text-[11px]">
               <tr>
@@ -252,7 +252,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                 <th className="px-3.5 py-3">Delivery Status</th>
                 <th className="px-3.5 py-3">GitHub Collab</th>
                 <th className="px-3 py-3">Affiliate</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3 text-right sticky right-0 z-20 bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cyan-500/10">
@@ -273,7 +273,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                 merchants.map((m) => {
                   const domain = m.websiteDomain || m.website
                   return (
-                    <tr key={m._id} className="hover:bg-[#091332]/50 transition-colors">
+                    <tr key={m._id} className="group hover:bg-[#091332]/60 transition-colors">
                                             <td className="px-3.5 py-3 whitespace-nowrap">
                         <div className="font-bold text-white text-xs sm:text-sm">{m.fullName}</div>
                         <div className="text-slate-400 text-[11px] truncate max-w-[150px]">{m.businessEmail}</div>
@@ -364,7 +364,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
                           {m.resellerId || 'admin_root'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <td className="px-4 py-3 text-right whitespace-nowrap sticky right-0 z-10 bg-[#060b20] group-hover:bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20 transition-colors">
                         <button
                           type="button"
                           onClick={() => setActiveMerchant(m)}
