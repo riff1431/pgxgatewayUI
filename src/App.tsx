@@ -4,6 +4,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import PageLoader from '@/components/layout/PageLoader'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import { AuthProvider } from '@/context/AuthContext'
 import { BrandingProvider } from '@/context/BrandingContext'
 
@@ -64,12 +65,14 @@ function AppContent() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <BrandingProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </BrandingProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <BrandingProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </BrandingProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
