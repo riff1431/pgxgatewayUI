@@ -36,7 +36,7 @@ export default function SetupPaymentModal({
   merchantRefId = '',
   merchantLegalName = '',
   merchantEmail = '',
-  supportWhatsapp = '+1 (800) 749-4283',
+  supportWhatsapp = '+1 (437) 577-8785',
   websiteDomain: initialDomain = '',
   gitRepoUrl: initialGitRepo = '',
 }: SetupPaymentModalProps) {

@@ -50,7 +50,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [setupFeePriceUSD, setSetupFeePriceUSD] = useState<number>(49.0)
   const [officialGithubHandle, setOfficialGithubHandle] = useState('huipper-dev')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
-  const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (800) 749-4283')
+  const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (437) 577-8785')
 
   // Stripe Connection Test State
   const [testingStripe, setTestingStripe] = useState(false)
@@ -96,7 +96,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       setSetupFeePriceUSD(data.setupFeePriceUSD ?? 49.0)
       setOfficialGithubHandle(data.officialGithubHandle || 'huipper-dev')
       setAffiliateCommissionRate(data.affiliateCommissionRate ?? 20.0)
-      setSupportWhatsapp(data.supportWhatsapp || '+1 (800) 749-4283')
+      setSupportWhatsapp(data.supportWhatsapp && data.supportWhatsapp !== '+1 (800) 749-4283' ? data.supportWhatsapp : '+1 (437) 577-8785')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error connecting to backend'
       onErrorToast?.('Failed to load platform settings', message)
@@ -489,7 +489,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                 </span>
                 <input
                   type="text"
-                  placeholder="+1 (800) 749-4283"
+                  placeholder="+1 (437) 577-8785"
                   value={supportWhatsapp}
                   onChange={(e) => setSupportWhatsapp(e.target.value)}
                   className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"

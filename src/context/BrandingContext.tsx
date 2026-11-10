@@ -12,9 +12,9 @@ const defaultBranding: SystemConfigData = {
   logoUrl: '',
   faviconUrl: '/favicon.svg',
   supportEmail: 'Register@pgxgateway.com',
-  supportPhone: '+1 (800) 749-4283',
+  supportPhone: '+1 (437) 577-8785',
   supportTelegram: '@pgxsupport',
-  supportWhatsapp: '+1 (800) 749-4283',
+  supportWhatsapp: '+1 (437) 577-8785',
 }
 
 const BrandingContext = createContext<BrandingContextType>({

@@ -25,9 +25,9 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
     logoUrl: '',
     faviconUrl: '/favicon.svg',
     supportEmail: 'support@pgxgateway.com',
-    supportPhone: '+1 (800) 749-4283',
+    supportPhone: '+1 (437) 577-8785',
     supportTelegram: '@pgxsupport',
-    supportWhatsapp: '+1 (800) 749-4283',
+    supportWhatsapp: '+1 (437) 577-8785',
   })
   const [brandingSaving, setBrandingSaving] = useState(false)
   const [logoUploading, setLogoUploading] = useState(false)
@@ -309,7 +309,7 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
                     type="text"
                     value={brandingForm.supportPhone || ''}
                     onChange={(e) => setBrandingForm({ ...brandingForm, supportPhone: e.target.value })}
-                    placeholder="+1 (800) 749-4283"
+                    placeholder="+1 (437) 577-8785"
                     className="w-full bg-transparent px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
                   />
                 </div>
@@ -334,7 +334,7 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
                   type="text"
                   value={brandingForm.supportWhatsapp || ''}
                   onChange={(e) => setBrandingForm({ ...brandingForm, supportWhatsapp: e.target.value })}
-                  placeholder="+1 (800) 749-4283"
+                  placeholder="+1 (437) 577-8785"
                   className="w-full bg-[#060c24] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                 />
               </div>

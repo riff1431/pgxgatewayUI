@@ -414,7 +414,7 @@ export default function IntegrationTab() {
               </div>
 
               <a
-                href={`https://wa.me/${(setupData?.supportWhatsapp || '+1 (800) 749-4283').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                href={`https://wa.me/${(setupData?.supportWhatsapp && setupData.supportWhatsapp !== '+1 (800) 749-4283' ? setupData.supportWhatsapp : '+1 (437) 577-8785').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
                   `Hi, I want to pay the PGX Gateway Setup & Integration Fee ($${(setupData?.setupFeePriceUSD || 450).toFixed(2)}) via Crypto (USDT). Merchant Ref: ${merchant?.refId || 'N/A'} (${merchant?.legalName || merchant?.fullName}). Please share your official USDT/Crypto wallet address.`
                 )}`}
                 target="_blank"
