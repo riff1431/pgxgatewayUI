@@ -379,6 +379,12 @@ export const adminApi = {
     })
   },
 
+  deleteApplication: async (id: string) => {
+    return adminRequest<{ success: boolean; message: string }>(`/admin/applications/${id}`, {
+      method: 'DELETE',
+    })
+  },
+
   submitOffer: async (
     id: string,
     offer: {

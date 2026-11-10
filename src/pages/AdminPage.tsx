@@ -23,6 +23,8 @@ import {
   Link as LinkIcon,
   Eye,
   EyeOff,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react'
 import {
   adminApi,
@@ -93,6 +95,10 @@ export default function AdminPage() {
   const [offerMonthlyFee, setOfferMonthlyFee] = useState('$99 / month')
   const [reviewNotes, setReviewNotes] = useState('')
   const [reviewLoading, setReviewLoading] = useState(false)
+
+  // Deletion State
+  const [deletingApp, setDeletingApp] = useState<ApplicationItem | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Document list for currently selected applicant
   const selectedAppDocs: KycDocumentItem[] = selectedApp
@@ -385,6 +391,36 @@ export default function AdminPage() {
       showToast('Reset Failed', msg, 'error')
     } finally {
       setReviewLoading(false)
+    }
+  }
+
+  // Handle Permanent Application Deletion (Test Account Cleanup)
+  const handleConfirmDelete = async () => {
+    if (!deletingApp) return
+    setIsDeleting(true)
+    try {
+      const res = await adminApi.deleteApplication(deletingApp._id)
+      if (res.success) {
+        showToast('Application Deleted', res.message || 'Merchant application permanently deleted.', 'success')
+        // Optimistic UI updates
+        setApplications((prev) => prev.filter((app) => app._id !== deletingApp._id))
+        setStats((prev) => ({
+          ...prev,
+          totalMerchants: Math.max(0, prev.totalMerchants - 1),
+          pendingReview: deletingApp.applicationStatus === 'under_review' ? Math.max(0, prev.pendingReview - 1) : prev.pendingReview,
+          approved: deletingApp.applicationStatus === 'approved' ? Math.max(0, prev.approved - 1) : prev.approved,
+          rejected: deletingApp.applicationStatus === 'rejected' ? Math.max(0, prev.rejected - 1) : prev.rejected,
+        }))
+        setDeletingApp(null)
+        fetchData()
+      } else {
+        showToast('Delete Failed', res.message || 'Failed to delete merchant application.', 'error')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error deleting merchant application'
+      showToast('Delete Failed', msg, 'error')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -745,7 +781,7 @@ export default function AdminPage() {
                 <th className="px-3 py-3.5 whitespace-nowrap min-w-[120px]">KYC Docs</th>
                 <th className="px-3 py-3.5 whitespace-nowrap min-w-[120px]">Status</th>
                 <th className="px-3 py-3.5 whitespace-nowrap min-w-[140px]">Offer</th>
-                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[210px] sticky right-0 z-20 bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20">Actions</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-right min-w-[310px] sticky right-0 z-20 bg-[#091332] shadow-[-12px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -895,6 +931,16 @@ export default function AdminPage() {
                         >
                           <Tag className="h-3 w-3" />
                           <span>Review & Offer</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setDeletingApp(app)}
+                          className="px-3 py-1.5 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/50 hover:border-rose-400 text-rose-300 hover:text-white font-bold text-xs shadow-[0_0_10px_rgba(244,63,94,0.2)] hover:shadow-[0_0_15px_rgba(244,63,94,0.4)] cursor-pointer transition-all inline-flex items-center gap-1.5"
+                          title="Permanently Delete Merchant & Associated Test Data"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                          <span>Delete</span>
                         </button>
                       </td>
                     </tr>
@@ -1186,6 +1232,88 @@ export default function AdminPage() {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Delete Merchant Confirmation Modal (Test Account Cleanup) */}
+      {deletingApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-rose-500/70 shadow-[0_0_40px_rgba(244,63,94,0.35)] p-6 sm:p-7 space-y-5">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-rose-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-rose-500/20 border border-rose-500/60 flex items-center justify-center text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.4)]">
+                  <Trash2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Delete Merchant Account</h3>
+                  <div className="text-xs text-rose-400 font-mono">Irreversible Action • Cleanup Desk</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeletingApp(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Merchant Identity Card */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">Merchant / Entity:</span>
+                <span className="text-sm font-bold text-white">{deletingApp.legalName || deletingApp.fullName}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">Reference ID:</span>
+                <span className="text-xs font-mono font-bold text-cyan-400">{deletingApp.refId || deletingApp._id}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">Business Email:</span>
+                <span className="text-xs font-mono text-slate-300">{deletingApp.businessEmail}</span>
+              </div>
+            </div>
+
+            {/* Warning Message */}
+            <div className="p-3.5 rounded-2xl bg-rose-950/30 border border-rose-500/30 flex items-start gap-3 text-xs text-rose-200">
+              <AlertTriangle className="h-5 w-5 text-rose-400 shrink-0 mt-0.5" />
+              <p className="leading-relaxed">
+                Are you sure you want to permanently delete this merchant? This will remove their application dossier, generated invoices, ledger records, notifications, and setup chat history.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setDeletingApp(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-600 text-white font-bold text-xs shadow-[0_0_15px_rgba(244,63,94,0.5)] hover:shadow-[0_0_20px_rgba(244,63,94,0.7)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    <span>Confirm Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
