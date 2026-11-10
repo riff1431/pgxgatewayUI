@@ -481,7 +481,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Merchants choosing &ldquo;Pay with Crypto&rdquo; for their setup fee will be directed to this WhatsApp number to arrange USDT/Crypto transfer.
+                Merchants choosing &ldquo;Pay with Bitcoin&rdquo; for their setup fee will be directed to this WhatsApp number to arrange Bitcoin (BTC) transfer.
               </p>
               <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
                 <span className="px-3 text-emerald-400 font-bold text-sm">

@@ -267,13 +267,13 @@ export default function OfferTab() {
                 <span>
                   {merchant?.subscription?.stripeCustomerId
                     ? 'Stripe Card on File'
-                    : 'Crypto (USDT) Invoice'}
+                    : 'Bitcoin (BTC) Invoice'}
                 </span>
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
                 {merchant?.subscription?.stripeCustomerId
                   ? '$99.00 + 3% card fee = $101.97 USD'
-                  : '$99.00 USDT (0% card surcharge)'}
+                  : '$99.00 in BTC (0% card surcharge)'}
               </div>
             </div>
 

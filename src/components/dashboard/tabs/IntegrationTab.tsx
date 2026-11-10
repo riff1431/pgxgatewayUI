@@ -409,20 +409,20 @@ export default function IntegrationTab() {
 
               <div className="relative flex py-1 items-center">
                 <div className="flex-grow border-t border-cyan-500/20"></div>
-                <span className="flex-shrink mx-3 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Or Pay with Crypto</span>
+                <span className="flex-shrink mx-3 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Or Pay with Bitcoin</span>
                 <div className="flex-grow border-t border-cyan-500/20"></div>
               </div>
 
               <a
                 href={`https://wa.me/${(setupData?.supportWhatsapp && setupData.supportWhatsapp !== '+1 (800) 749-4283' ? setupData.supportWhatsapp : '+1 (437) 577-8785').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
-                  `Hi, I want to pay the PGX Gateway Setup & Integration Fee ($${(setupData?.setupFeePriceUSD || 450).toFixed(2)}) via Crypto (USDT). Merchant Ref: ${merchant?.refId || 'N/A'} (${merchant?.legalName || merchant?.fullName}). Please share your official USDT/Crypto wallet address.`
+                  `Hi, I want to pay the Setup & Integration Fee ($${(setupData?.setupFeePriceUSD || 450).toFixed(2)}) via Bitcoin (BTC). Merchant Ref: ${merchant?.refId || 'N/A'} (${merchant?.legalName || merchant?.fullName}). Please share your official BTC wallet address.`
                 )}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
-                <span>Pay via Crypto (USDT on WhatsApp)</span>
+                <span>Pay via Bitcoin (BTC on WhatsApp)</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 

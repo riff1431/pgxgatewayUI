@@ -57,15 +57,15 @@ export default function SetupPaymentModal({
   const cleanPhone = supportWhatsapp.replace(/[^0-9]/g, '') || '18007494283'
 
   // Pre-filled WhatsApp message
-  const whatsappMessage = `Hi, I accepted the commercial processing offer on PGX Gateway and would like to pay the Setup & Integration Fee ($${amount.toFixed(
+  const whatsappMessage = `Hi, I accepted the commercial processing offer and would like to pay the Setup & Integration Fee (${amount.toFixed(
     2
-  )}) via Crypto (USDT).
+  )}) via Bitcoin (BTC).
 
 Merchant Ref: ${merchantRefId || 'N/A'}
 Business: ${merchantLegalName || 'N/A'}
 Email: ${merchantEmail || 'N/A'}
 
-Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange payment.`
+Please provide your official Bitcoin (BTC) wallet address to arrange payment.`
 
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`
 
@@ -150,7 +150,7 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
               ${selectedMethod === 'stripe' ? totalCardAmount : amount.toFixed(2)}
             </span>
             <span className="text-xs text-cyan-300 font-bold">
-              {selectedMethod === 'stripe' ? 'USD' : 'USDT'}
+              {selectedMethod === 'stripe' ? 'USD' : 'BTC'}
             </span>
           </div>
         </div>
@@ -188,20 +188,20 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
               onClick={() => setSelectedMethod('crypto')}
               className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                 selectedMethod === 'crypto'
-                  ? 'bg-emerald-500/15 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  ? 'bg-amber-500/15 border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]'
                   : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
               }`}
             >
               <div className="flex items-center justify-between">
-                <div className="p-2 rounded-xl bg-[#040817] border border-emerald-500/30 text-emerald-400">
+                <div className="p-2 rounded-xl bg-[#040817] border border-amber-500/30 text-amber-400">
                   <Coins className="h-5 w-5" />
                 </div>
-                {selectedMethod === 'crypto' && <CheckCircle2 className="h-5 w-5 text-emerald-400" />}
+                {selectedMethod === 'crypto' && <CheckCircle2 className="h-5 w-5 text-amber-400" />}
               </div>
               <div className="mt-3">
-                <div className="font-bold text-white text-sm">Pay with Crypto</div>
-                <div className="text-[11px] text-emerald-300/80 mt-0.5">
-                  USDT, BTC, ETH • WhatsApp Finance Desk
+                <div className="font-bold text-white text-sm">Pay with Bitcoin</div>
+                <div className="text-[11px] text-amber-300/80 mt-0.5">
+                  BTC Option Only • WhatsApp Finance Desk
                 </div>
               </div>
             </button>
@@ -301,22 +301,22 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
           {/* VIEW B: CRYPTO VIA WHATSAPP */}
           {selectedMethod === 'crypto' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-[#08102b] border border-emerald-500/30 space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-emerald-500/20">
-                  <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Coins className="h-4 w-4 text-emerald-400" />
-                    Crypto Finance Desk (USDT / BTC / ETH)
+              <div className="p-4 rounded-2xl bg-[#08102b] border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-amber-500/20">
+                  <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Coins className="h-4 w-4 text-amber-400" />
+                    Bitcoin Finance Desk (BTC)
                   </span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
                     Manual Settlement
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-200 leading-relaxed">
-                  To pay your setup fee with cryptocurrency (such as <strong>USDT TRC-20</strong> or <strong>ERC-20</strong>), please message our finance desk on WhatsApp. We will provide our official corporate wallet address and confirm your transaction hash.
+                  To pay your setup fee with <strong>Bitcoin (BTC)</strong>, please message our finance desk on WhatsApp. We will provide our official corporate BTC wallet address and verify your transaction on the blockchain.
                 </p>
 
-                <div className="p-3 rounded-xl bg-[#040817] border border-emerald-500/20 space-y-2 text-xs">
+                <div className="p-3 rounded-xl bg-[#040817] border border-amber-500/20 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Finance Desk WhatsApp:</span>
                     <div className="flex items-center gap-2">
@@ -340,8 +340,8 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Amount to Settle:</span>
                     <div className="text-right">
-                      <span className="font-bold text-emerald-400 text-sm">${amount.toFixed(2)} USDT</span>
-                      <span className="text-[10px] text-emerald-300/80 block">0% Surcharge • Save ${stripeFee.toFixed(2)} USD</span>
+                      <span className="font-bold text-amber-400 text-sm">${amount.toFixed(2)} USD in BTC</span>
+                      <span className="text-[10px] text-amber-300/80 block">0% Surcharge • Save ${stripeFee.toFixed(2)} USD</span>
                     </div>
                   </div>
                 </div>
@@ -351,15 +351,15 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
                 href={whatsappUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-2"
               >
                 <MessageSquare className="h-4 w-4" />
-                <span>Message on WhatsApp to Arrange Crypto</span>
+                <span>Message on WhatsApp to Arrange BTC Payment</span>
                 <ExternalLink className="h-4 w-4" />
               </a>
 
               <div className="text-center text-[11px] text-slate-400">
-                After transferring USDT, send the TXID / hash screenshot in WhatsApp for instant activation.
+                After transferring BTC, send the TXID / blockchain hash in WhatsApp for instant activation.
               </div>
             </div>
           )}
