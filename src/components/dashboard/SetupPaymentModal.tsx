@@ -47,6 +47,10 @@ export default function SetupPaymentModal({
   const [error, setError] = useState<string | null>(null)
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false)
 
+  // 3% Stripe Card Processing Surcharge calculation
+  const stripeFee = Math.round(amount * 0.03 * 100) / 100
+  const totalCardAmount = (amount + stripeFee).toFixed(2)
+
   if (!isOpen) return null
 
   // Clean phone number for WhatsApp wa.me link
@@ -123,16 +127,31 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
         {/* Amount Banner */}
         <div className="px-6 py-3.5 bg-[#08102d] border-b border-cyan-500/15 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-300">Total Setup Fee Payable:</span>
+            <span className="text-xs text-slate-300">
+              {selectedMethod === 'stripe' ? 'Total Payable via Card:' : 'Total Payable via Crypto:'}
+            </span>
             {merchantRefId && (
               <span className="font-mono text-[11px] text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded font-bold">
                 {merchantRefId}
               </span>
             )}
+            {selectedMethod === 'stripe' ? (
+              <span className="text-[10px] text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
+                Includes 3% Card Fee (+${stripeFee.toFixed(2)})
+              </span>
+            ) : (
+              <span className="text-[10px] text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold">
+                0% Card Surcharge
+              </span>
+            )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white">${amount.toFixed(2)}</span>
-            <span className="text-xs text-cyan-300 font-bold">USD</span>
+            <span className="text-2xl font-black text-white">
+              ${selectedMethod === 'stripe' ? totalCardAmount : amount.toFixed(2)}
+            </span>
+            <span className="text-xs text-cyan-300 font-bold">
+              {selectedMethod === 'stripe' ? 'USD' : 'USDT'}
+            </span>
           </div>
         </div>
 
@@ -234,6 +253,24 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
                 </div>
               </div>
 
+              {/* Transparent Card Processing Surcharge Breakdown */}
+              <div className="p-3.5 rounded-2xl bg-[#08102b] border border-cyan-500/25 space-y-2 text-xs">
+                <div className="flex justify-between items-center text-slate-300">
+                  <span>Base Setup & Integration Fee:</span>
+                  <span className="font-bold text-white">${amount.toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="flex items-center gap-1.5 text-cyan-300">
+                    <span>Card Processing Surcharge (3%):</span>
+                  </span>
+                  <span className="font-bold text-cyan-300">+${stripeFee.toFixed(2)} USD</span>
+                </div>
+                <div className="border-t border-cyan-500/20 pt-2 flex justify-between items-center font-bold">
+                  <span className="text-white text-xs">Total Charged via Stripe:</span>
+                  <span className="text-cyan-400 font-mono text-base">${totalCardAmount} USD</span>
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={handleStripePay}
@@ -248,7 +285,7 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
                 ) : (
                   <>
                     <CreditCard className="h-4 w-4" />
-                    <span>Pay ${amount.toFixed(2)} USD via Stripe Checkout</span>
+                    <span>Pay ${totalCardAmount} USD via Stripe Checkout</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -302,7 +339,10 @@ Please provide your official USDT (TRC-20 / ERC-20) wallet address to arrange pa
 
                   <div className="flex items-center justify-between">
                     <span className="text-slate-400">Amount to Settle:</span>
-                    <span className="font-bold text-emerald-400">${amount.toFixed(2)} USDT</span>
+                    <div className="text-right">
+                      <span className="font-bold text-emerald-400 text-sm">${amount.toFixed(2)} USDT</span>
+                      <span className="text-[10px] text-emerald-300/80 block">0% Surcharge • Save ${stripeFee.toFixed(2)} USD</span>
+                    </div>
                   </div>
                 </div>
               </div>

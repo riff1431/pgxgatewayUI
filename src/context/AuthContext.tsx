@@ -34,6 +34,8 @@ export interface OfferData {
   volume: string
   settlement: string
   reserve: string
+  setupFee?: string
+  monthlyFee?: string
   isAvailable: boolean
   accepted?: boolean
   acceptedAt?: string
@@ -93,6 +95,8 @@ const defaultOffer: OfferData = {
   volume: '',
   settlement: '',
   reserve: '',
+  setupFee: '$450',
+  monthlyFee: '$99 / month',
   isAvailable: false,
   accepted: false,
 }

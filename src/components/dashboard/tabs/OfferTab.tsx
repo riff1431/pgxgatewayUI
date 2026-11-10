@@ -95,75 +95,113 @@ export default function OfferTab() {
         </div>
       )}
 
-      {/* 4 Core Commercial Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 6 Core Commercial Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Rate */}
-        <div className="p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
-          <div className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-            Interchange Fee Rate
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            Interchange (MDR)
           </div>
-          <div className="my-3">
-            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? baseRate : '—'}
             </div>
-            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
-              {isAvailable ? `${perTxFee} per transaction` : 'Pending underwriter review'}
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+              {isAvailable ? `${perTxFee} per tx` : 'Pending review'}
             </div>
           </div>
-          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
-            Visa / Mastercard / Amex / Crypto
+          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
+            Card / Amex / Crypto
           </div>
         </div>
 
         {/* Volume */}
-        <div className="p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
-          <div className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-            Monthly Volume Limit
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            Volume Limit
           </div>
-          <div className="my-3">
-            <div className="text-xs text-slate-400">Approved Ceiling</div>
-            <div className={`text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.volume || 'Up to $250,000') : '—'}
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.volume || 'Up to $250k') : '—'}
+            </div>
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+              Approved Ceiling
             </div>
           </div>
-          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
-            Scalable upon 90-day review
+          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
+            Scalable at 90 days
           </div>
         </div>
 
         {/* Settlement */}
-        <div className="p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
-          <div className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-            Settlement Schedule
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            Settlement
           </div>
-          <div className="my-3">
-            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? (offer.settlement?.split('(')[0]?.trim() || 'Daily') : '—'}
             </div>
-            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
               {isAvailable ? (offer.settlement?.includes('(') ? offer.settlement.slice(offer.settlement.indexOf('(')) : '(Next Day)') : 'Pending review'}
             </div>
           </div>
-          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
-            Direct bank wire / ACH / USDT
+          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
+            Direct Wire / USDT
           </div>
         </div>
 
         {/* Reserve */}
-        <div className="p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
-          <div className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
-            Rolling Reserve
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            Risk Reserve
           </div>
-          <div className="my-3">
-            <div className={`text-3xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? (offer.reserve?.split('(')[0]?.trim() || '5%') : '—'}
             </div>
-            <div className={`text-xs font-semibold mt-0.5 ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
               {isAvailable ? (offer.reserve?.includes('(') ? offer.reserve.slice(offer.reserve.indexOf('(')) : '(90 Days)') : 'Pending review'}
             </div>
           </div>
-          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-2">
-            Standard chargeback buffer
+          <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
+            Chargeback buffer
+          </div>
+        </div>
+
+        {/* Set Up Fee */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_15px_rgba(251,191,36,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-amber-300 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            One-Time Setup
+          </div>
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-amber-300' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.setupFee || '$450') : '—'}
+            </div>
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-amber-200/90' : 'text-slate-600'}`}>
+              Account Activation
+            </div>
+          </div>
+          <div className="text-[10px] text-amber-300/70 border-t border-amber-500/20 pt-1.5">
+            Payable upon accept
+          </div>
+        </div>
+
+        {/* Monthly Maintenance Fee */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-purple-400/70 shadow-[0_0_15px_rgba(217,70,239,0.25)] flex flex-col justify-between backdrop-blur-xl">
+          <div className="text-purple-300 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+            Monthly Portal
+          </div>
+          <div className="my-2.5">
+            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-purple-300' : 'text-slate-600'}`}>
+              {isAvailable ? (offer.monthlyFee || '$99 / mo') : '—'}
+            </div>
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-purple-200/90' : 'text-slate-600'}`}>
+              Maintenance Fee
+            </div>
+          </div>
+          <div className="text-[10px] text-purple-300/70 border-t border-purple-500/20 pt-1.5">
+            Recurring platform
           </div>
         </div>
       </div>
@@ -216,7 +254,7 @@ export default function OfferTab() {
                   className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 cursor-pointer transition-all"
                 >
                   <CreditCard className="h-4 w-4" />
-                  <span>Pay Setup Fee ($450) & Unlock Gateway</span>
+                  <span>Pay Setup Fee ({offer.setupFee || '$450'}) & Unlock Gateway</span>
                 </button>
               </div>
             ) : (
@@ -247,7 +285,11 @@ export default function OfferTab() {
       <SetupPaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        amount={450}
+        amount={
+          offer?.setupFee
+            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || 450
+            : 450
+        }
         merchantRefId={merchant?.refId}
         merchantLegalName={merchant?.legalName || merchant?.fullName}
         merchantEmail={merchant?.businessEmail}

@@ -163,6 +163,8 @@ export interface ApplicationItem {
     volume: string
     settlement: string
     reserve: string
+    setupFee?: string
+    monthlyFee?: string
     isAvailable: boolean
     accepted?: boolean
     acceptedAt?: string
@@ -353,6 +355,8 @@ export const adminApi = {
         volume?: string
         settlement?: string
         reserve?: string
+        setupFee?: string
+        monthlyFee?: string
         isAvailable?: boolean
         accepted?: boolean
       }
@@ -372,6 +376,8 @@ export const adminApi = {
       volume: string
       settlement: string
       reserve: string
+      setupFee?: string
+      monthlyFee?: string
       isAvailable?: boolean
     },
     notes?: string

@@ -47,6 +47,10 @@ interface ApplicationReviewModalProps {
   setOfferSettlement: (val: string) => void
   offerReserve: string
   setOfferReserve: (val: string) => void
+  offerSetupFee: string
+  setOfferSetupFee: (val: string) => void
+  offerMonthlyFee: string
+  setOfferMonthlyFee: (val: string) => void
   reviewNotes: string
   setReviewNotes: (val: string) => void
 }
@@ -70,6 +74,10 @@ export default function ApplicationReviewModal({
   setOfferSettlement,
   offerReserve,
   setOfferReserve,
+  offerSetupFee,
+  setOfferSetupFee,
+  offerMonthlyFee,
+  setOfferMonthlyFee,
   reviewNotes,
   setReviewNotes,
 }: ApplicationReviewModalProps) {
@@ -791,7 +799,7 @@ export default function ApplicationReviewModal({
                     <div>
                       <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
                       <div className="text-[11px] text-emerald-200/90 mt-0.5">
-                        Current terms: <strong>{app.offer.rate}</strong> • <strong>{app.offer.volume}</strong> • <strong>{app.offer.settlement}</strong> • Reserve: <strong>{app.offer.reserve}</strong>
+                        Current terms: <strong>{app.offer.rate}</strong> • <strong>{app.offer.volume}</strong> • <strong>{app.offer.settlement}</strong> • Reserve: <strong>{app.offer.reserve}</strong> • Setup: <strong>{app.offer.setupFee || '$450'}</strong> • Monthly: <strong>{app.offer.monthlyFee || '$99 / mo'}</strong>
                       </div>
                     </div>
                   </div>
@@ -813,8 +821,9 @@ export default function ApplicationReviewModal({
                 </div>
               )}
 
-              {/* 4 Term Inputs Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              {/* 6 Term Inputs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                {/* 1. MDR */}
                 <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">Interchange Fee (MDR)</label>
                   <input
@@ -827,6 +836,7 @@ export default function ApplicationReviewModal({
                   <span className="text-[10px] text-slate-500 block">Custom blended gateway rate</span>
                 </div>
 
+                {/* 2. Volume */}
                 <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">Processing Volume Limit</label>
                   <input
@@ -839,6 +849,7 @@ export default function ApplicationReviewModal({
                   <span className="text-[10px] text-slate-500 block">Monthly underwriting ceiling</span>
                 </div>
 
+                {/* 3. Settlement */}
                 <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">Settlement Schedule</label>
                   <input
@@ -851,6 +862,7 @@ export default function ApplicationReviewModal({
                   <span className="text-[10px] text-slate-500 block">Payout frequency to merchant bank</span>
                 </div>
 
+                {/* 4. Reserve */}
                 <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">Rolling Risk Reserve</label>
                   <input
@@ -861,6 +873,32 @@ export default function ApplicationReviewModal({
                     className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-white font-bold text-sm focus:outline-none focus:border-cyan-400"
                   />
                   <span className="text-[10px] text-slate-500 block">Holdback for chargeback protection</span>
+                </div>
+
+                {/* 5. Set Up Fee */}
+                <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">Set Up Fee (One-Time)</label>
+                  <input
+                    type="text"
+                    value={offerSetupFee}
+                    onChange={(e) => setOfferSetupFee(e.target.value)}
+                    placeholder="e.g. $450"
+                    className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-amber-300 font-bold text-sm focus:outline-none focus:border-cyan-400"
+                  />
+                  <span className="text-[10px] text-slate-500 block">White-glove onboarding activation</span>
+                </div>
+
+                {/* 6. Monthly Maintenance Fee */}
+                <div className="p-3 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">Monthly Maintenance Fee</label>
+                  <input
+                    type="text"
+                    value={offerMonthlyFee}
+                    onChange={(e) => setOfferMonthlyFee(e.target.value)}
+                    placeholder="e.g. $99 / month"
+                    className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-purple-300 font-bold text-sm focus:outline-none focus:border-cyan-400"
+                  />
+                  <span className="text-[10px] text-slate-500 block">Recurring portal maintenance</span>
                 </div>
               </div>
 

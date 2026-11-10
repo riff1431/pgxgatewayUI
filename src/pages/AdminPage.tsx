@@ -89,6 +89,8 @@ export default function AdminPage() {
   const [offerVolume, setOfferVolume] = useState('Up to $250,000')
   const [offerSettlement, setOfferSettlement] = useState('Daily (Next Day)')
   const [offerReserve, setOfferReserve] = useState('5% (90 Days)')
+  const [offerSetupFee, setOfferSetupFee] = useState('$450')
+  const [offerMonthlyFee, setOfferMonthlyFee] = useState('$99 / month')
   const [reviewNotes, setReviewNotes] = useState('')
   const [reviewLoading, setReviewLoading] = useState(false)
 
@@ -284,6 +286,8 @@ export default function AdminPage() {
     setOfferVolume(app.offer?.volume || 'Up to $250,000')
     setOfferSettlement(app.offer?.settlement || 'Daily (Next Day)')
     setOfferReserve(app.offer?.reserve || '5% (90 Days)')
+    setOfferSetupFee(app.offer?.setupFee || '$450')
+    setOfferMonthlyFee(app.offer?.monthlyFee || '$99 / month')
     setReviewNotes('')
   }
 
@@ -299,6 +303,8 @@ export default function AdminPage() {
           volume: offerVolume,
           settlement: offerSettlement,
           reserve: offerReserve,
+          setupFee: offerSetupFee,
+          monthlyFee: offerMonthlyFee,
           isAvailable: status === 'approved' ? true : Boolean(selectedApp.offer?.isAvailable),
         },
         notes: reviewNotes,
@@ -331,6 +337,8 @@ export default function AdminPage() {
           volume: offerVolume,
           settlement: offerSettlement,
           reserve: offerReserve,
+          setupFee: offerSetupFee,
+          monthlyFee: offerMonthlyFee,
           isAvailable: true,
         },
         reviewNotes || 'Your customized processing offer is now available. Please review and accept to proceed.'
@@ -938,6 +946,10 @@ export default function AdminPage() {
         setOfferSettlement={setOfferSettlement}
         offerReserve={offerReserve}
         setOfferReserve={setOfferReserve}
+        offerSetupFee={offerSetupFee}
+        setOfferSetupFee={setOfferSetupFee}
+        offerMonthlyFee={offerMonthlyFee}
+        setOfferMonthlyFee={setOfferMonthlyFee}
         reviewNotes={reviewNotes}
         setReviewNotes={setReviewNotes}
       />
