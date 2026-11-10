@@ -303,6 +303,25 @@ export async function updatePlatformSettings(data: UpdatePlatformSettingsPayload
   return json.settings
 }
 
+export async function testStripeConnection(secretKey?: string): Promise<{
+  success: boolean
+  livemode?: boolean
+  currencies?: string[]
+  message: string
+}> {
+  const token = localStorage.getItem('pgx_superadmin_auth_token')
+  const res = await fetch(`${API_BASE}/setup/admin/test-stripe`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ secretKey }),
+  })
+  const json = await res.json()
+  return json
+}
+
 export async function fetchAdminIntegrations(params?: {
   status?: string
   search?: string

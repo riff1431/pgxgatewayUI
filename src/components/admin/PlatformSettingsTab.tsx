@@ -3,15 +3,19 @@ import {
   CreditCard,
   DollarSign,
   CheckCircle2,
+  XCircle,
   Loader2,
   Eye,
   EyeOff,
   Phone,
   MessageSquare,
+  Zap,
+  ShieldCheck,
 } from 'lucide-react'
 import {
   fetchPlatformSettings,
   updatePlatformSettings,
+  testStripeConnection,
 } from '@/lib/setupApi'
 
 interface PlatformSettingsTabProps {
@@ -47,6 +51,38 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [officialGithubHandle, setOfficialGithubHandle] = useState('huipper-dev')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
   const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (800) 749-4283')
+
+  // Stripe Connection Test State
+  const [testingStripe, setTestingStripe] = useState(false)
+  const [testResult, setTestResult] = useState<{
+    success: boolean
+    message: string
+    livemode?: boolean
+    currencies?: string[]
+  } | null>(null)
+
+  const handleTestConnection = async () => {
+    setTestingStripe(true)
+    setTestResult(null)
+    try {
+      const res = await testStripeConnection(secretKey)
+      setTestResult(res)
+      if (res.success) {
+        onSuccessToast?.(
+          'Stripe Connection Verified',
+          res.message || 'Successfully authenticated with Stripe.'
+        )
+      } else {
+        onErrorToast?.('Stripe Connection Failed', res.message)
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Connection test failed'
+      setTestResult({ success: false, message: msg })
+      onErrorToast?.('Stripe Connection Failed', msg)
+    } finally {
+      setTestingStripe(false)
+    }
+  }
 
   const loadSettings = useCallback(async () => {
     setLoading(true)
@@ -194,7 +230,13 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
               type="text"
               placeholder={stripeMode === 'live' ? 'pk_live_...' : 'pk_test_...'}
               value={publishableKey}
-              onChange={(e) => setPublishableKey(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value
+                setPublishableKey(val)
+                if (val.startsWith('pk_live_') && stripeMode !== 'live') {
+                  setStripeMode('live')
+                }
+              }}
               className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
             />
           </div>
@@ -223,7 +265,13 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
               type={showSecretKey ? 'text' : 'password'}
               placeholder={stripeMode === 'live' ? 'sk_live_...' : 'sk_test_...'}
               value={secretKey}
-              onChange={(e) => setSecretKey(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value
+                setSecretKey(val)
+                if (val.startsWith('sk_live_') && stripeMode !== 'live') {
+                  setStripeMode('live')
+                }
+              }}
               className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
             />
           </div>
@@ -241,6 +289,74 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
             <p className="text-[11px] text-slate-400">
               Webhook endpoint to configure in Stripe: <span className="text-cyan-300 font-mono">https://api.pgxgateway.com/api/v1/webhooks/super-admin/stripe</span>
             </p>
+          </div>
+
+          {/* Test Stripe Connection Action & Live Telemetry Result */}
+          <div className="pt-2 border-t border-cyan-500/20 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Stripe Gateway Verification</span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Directly pings Stripe API to verify that Secret Key is active and authorized.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTestConnection}
+                disabled={testingStripe}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-400/60 text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(0,240,255,0.15)] disabled:opacity-50 shrink-0"
+              >
+                {testingStripe ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-300" />
+                    <span>Verifying with Stripe...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300/30" />
+                    <span>Test Stripe Connection</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Test Connection Result Box */}
+            {testResult && (
+              <div
+                className={`p-3.5 rounded-2xl border transition-all ${
+                  testResult.success
+                    ? 'bg-emerald-950/40 border-emerald-400/70 shadow-[0_0_20px_rgba(52,211,153,0.2)]'
+                    : 'bg-red-950/40 border-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+                }`}
+              >
+                <div className="flex items-start gap-2.5">
+                  {testResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  )}
+                  <div className="text-xs space-y-1">
+                    <div className="font-bold flex items-center gap-2">
+                      <span className={testResult.success ? 'text-emerald-300' : 'text-red-300'}>
+                        {testResult.success ? 'Stripe Connection Active & Verified' : 'Authentication Failed'}
+                      </span>
+                      {testResult.success && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 font-mono text-emerald-200">
+                          {testResult.livemode ? 'LIVE PRODUCTION' : 'TEST MODE'}
+                        </span>
+                      )}
+                    </div>
+                    <p className={testResult.success ? 'text-emerald-200/90 text-[11px]' : 'text-red-200/90 text-[11px] font-mono'}>
+                      {testResult.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
