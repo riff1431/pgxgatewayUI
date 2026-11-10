@@ -206,6 +206,89 @@ export default function OfferTab() {
         </div>
       </div>
 
+      {/* Recurring Monthly Maintenance Subscription Card */}
+      {isAccepted && (
+        <div className="p-5 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-purple-400/80 shadow-[0_0_20px_rgba(217,70,239,0.3)] backdrop-blur-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-400/50 flex items-center justify-center text-purple-300 shrink-0">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[11px] font-black uppercase tracking-wider text-purple-400">
+                  Recurring Platform Subscription
+                </div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>Monthly Maintenance Engine</span>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    merchant?.subscription?.status === 'active'
+                      ? 'text-emerald-300 bg-emerald-500/10 border-emerald-400/60'
+                      : merchant?.subscription?.status === 'past_due'
+                      ? 'text-amber-300 bg-amber-500/10 border-amber-400/60'
+                      : 'text-purple-300 bg-purple-500/10 border-purple-400/50'
+                  }`}>
+                    {merchant?.subscription?.status === 'active'
+                      ? '● Active (Auto-Renewal Enabled)'
+                      : merchant?.subscription?.status === 'past_due'
+                      ? '● Past Due (Grace Period Active)'
+                      : '● First Cycle Starts 30 Days Post-Setup'}
+                  </span>
+                </h3>
+              </div>
+            </div>
+
+            <div className="text-right sm:self-center">
+              <div className="text-xs text-slate-400">Recurring Rate</div>
+              <div className="text-lg font-black text-white">
+                {offer.monthlyFee || '$99 / month'}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-3.5 rounded-xl bg-[#091332] border border-purple-500/25">
+              <div className="text-slate-400 text-[10px] font-bold uppercase">Next Renewal Date</div>
+              <div className="text-sm font-bold text-white mt-1">
+                {merchant?.subscription?.nextBillingDate
+                  ? new Date(merchant.subscription.nextBillingDate).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : '30 Days Post-Setup'}
+              </div>
+              <div className="text-[10px] text-purple-300/80 mt-0.5">30-day recurring billing cycle</div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#091332] border border-purple-500/25">
+              <div className="text-slate-400 text-[10px] font-bold uppercase">Auto-Debit Channel</div>
+              <div className="text-sm font-bold text-cyan-300 mt-1 flex items-center gap-1.5">
+                <CreditCard className="h-4 w-4" />
+                <span>
+                  {merchant?.subscription?.stripeCustomerId
+                    ? 'Stripe Card on File'
+                    : 'Crypto (USDT) Invoice'}
+                </span>
+              </div>
+              <div className="text-[10px] text-slate-400 mt-0.5">
+                {merchant?.subscription?.stripeCustomerId
+                  ? '$99.00 + 3% card fee = $101.97 USD'
+                  : '$99.00 USDT (0% card surcharge)'}
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#091332] border border-purple-500/25">
+              <div className="text-slate-400 text-[10px] font-bold uppercase">Platform SLA & Coverage</div>
+              <div className="text-sm font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
+                <ShieldCheck className="h-4 w-4" />
+                <span>99.99% Uptime SLA</span>
+              </div>
+              <div className="text-[10px] text-slate-400 mt-0.5">Automated node updates & security patches</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Included Platform Capabilities Grid */}
       <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] p-6 backdrop-blur-xl space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
@@ -217,7 +300,7 @@ export default function OfferTab() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
           {[
-            { title: 'Zero Setup & Integration Fees', desc: 'No onboarding fees or monthly platform maintenance costs.' },
+            { title: 'Continuous Gateway Maintenance', desc: 'Enterprise infrastructure SLA, proactive node updates, and 99.99% uptime.' },
             { title: 'Bank-Grade 3D Secure 2.0', desc: 'Dynamic liability shift protecting your merchant account from card fraud.' },
             { title: 'Multi-Currency Settlement', desc: 'Accept credit cards, debit cards, and digital assets in 135+ currencies.' },
             { title: 'Smart Routing & Failover', desc: 'Multiple acquiring bank rails ensuring 99.99% payment uptime.' },

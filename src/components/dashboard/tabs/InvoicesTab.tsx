@@ -107,10 +107,10 @@ export default function InvoicesTab() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                Weekly Service Billing & Invoices
+                Service Billing & Maintenance Invoices
               </h2>
               <p className="text-xs sm:text-sm text-slate-300">
-                Ongoing 9% platform service billing on verified weekly transaction volume.
+                Weekly 9% platform volume settlement statements and monthly recurring platform maintenance fees.
               </p>
             </div>
           </div>
@@ -213,18 +213,46 @@ export default function InvoicesTab() {
                   return (
                     <tr key={inv._id} className="hover:bg-[#091332]/50 transition-colors">
                       <td className="px-5 py-4">
-                        <span className="font-mono font-bold text-white text-xs">{inv.invoiceNumber}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono font-bold text-white text-xs">{inv.invoiceNumber}</span>
+                          {inv.invoiceType === 'monthly_maintenance' ? (
+                            <span className="inline-flex items-center gap-1 w-fit text-[9px] font-bold text-purple-300 bg-purple-500/15 border border-purple-400/40 px-2 py-0.5 rounded-full">
+                              Monthly Maintenance
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 w-fit text-[9px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/40 px-2 py-0.5 rounded-full">
+                              Weekly Volume (9%)
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-4 text-slate-300 font-mono text-[11px]">
                         {new Date(inv.billingCycleStart).toLocaleDateString()} -{' '}
                         {new Date(inv.billingCycleEnd).toLocaleDateString()}
                       </td>
                       <td className="px-5 py-4 text-white font-bold font-mono">
-                        ${inv.eligibleVolume.toFixed(2)}
+                        {inv.invoiceType === 'monthly_maintenance' ? (
+                          <span className="text-slate-400 text-[11px] font-normal">Fixed Platform Plan</span>
+                        ) : (
+                          `${inv.eligibleVolume.toFixed(2)}`
+                        )}
                       </td>
-                      <td className="px-5 py-4 text-cyan-300 font-semibold">{inv.feeRate}%</td>
-                      <td className="px-5 py-4 text-white font-black text-sm">
-                        ${inv.payableAmount.toFixed(2)}
+                      <td className="px-5 py-4 font-semibold">
+                        {inv.invoiceType === 'monthly_maintenance' ? (
+                          <span className="text-purple-300 text-xs">$99 / month</span>
+                        ) : (
+                          <span className="text-cyan-300">${inv.feeRate}%</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="text-white font-black text-sm">
+                          ${inv.payableAmount.toFixed(2)}
+                        </div>
+                        {inv.surchargeAmount && inv.surchargeAmount > 0 ? (
+                          <div className="text-[10px] text-slate-400">
+                            Includes ${inv.surchargeAmount.toFixed(2)} card fee (3%)
+                          </div>
+                        ) : null}
                       </td>
                       <td className="px-5 py-4">
                         {inv.status === 'issued' && (

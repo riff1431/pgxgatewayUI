@@ -41,6 +41,16 @@ export interface SetupStatusResponse {
   preferredDomain?: string
   altDomain?: string
   integrationNotes?: string
+  subscription?: {
+    status: 'active' | 'past_due' | 'canceled' | 'none'
+    monthlyFee: number
+    nextBillingDate?: string
+    lastBilledDate?: string
+    stripeCustomerId?: string
+    autoRenew: boolean
+    failureCount?: number
+    gracePeriodEnd?: string
+  }
 }
 
 export interface SetupMessageItem {
@@ -120,6 +130,8 @@ export interface InvoiceItem {
   eligibleVolume: number
   feeRate: number
   payableAmount: number
+  surchargeAmount?: number
+  invoiceType?: 'weekly_volume' | 'monthly_maintenance'
   resellerShareRate: number
   resellerShareAmount: number
   platformRetainedAmount: number

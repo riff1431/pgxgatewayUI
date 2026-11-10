@@ -37,9 +37,21 @@ export interface ApiMerchant {
     volume: string
     settlement: string
     reserve: string
+    setupFee?: string
+    monthlyFee?: string
     isAvailable: boolean
     accepted?: boolean
     acceptedAt?: string
+  }
+  subscription?: {
+    status: 'active' | 'past_due' | 'canceled' | 'none'
+    monthlyFee: number
+    nextBillingDate?: string
+    lastBilledDate?: string
+    stripeCustomerId?: string
+    autoRenew: boolean
+    failureCount?: number
+    gracePeriodEnd?: string
   }
 }
 
@@ -264,6 +276,8 @@ export const api = {
         volume: string
         settlement: string
         reserve: string
+    setupFee?: string
+    monthlyFee?: string
         isAvailable: boolean
         accepted?: boolean
         acceptedAt?: string
@@ -278,6 +292,8 @@ export const api = {
         volume: string
         settlement: string
         reserve: string
+    setupFee?: string
+    monthlyFee?: string
         isAvailable: boolean
         accepted: boolean
         acceptedAt?: string

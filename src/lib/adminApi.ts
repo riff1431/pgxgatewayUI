@@ -169,6 +169,16 @@ export interface ApplicationItem {
     accepted?: boolean
     acceptedAt?: string
   }
+  subscription?: {
+    status: 'active' | 'past_due' | 'canceled' | 'none'
+    monthlyFee: number
+    nextBillingDate?: string
+    lastBilledDate?: string
+    stripeCustomerId?: string
+    autoRenew: boolean
+    failureCount?: number
+    gracePeriodEnd?: string
+  }
   createdAt: string
   updatedAt: string
 }
