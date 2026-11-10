@@ -11,11 +11,13 @@ import {
   Loader2,
   ShieldCheck,
   X,
+  Download,
 } from 'lucide-react'
 import {
   fetchMerchantInvoices,
   payInvoiceViaStripe,
   uploadInvoiceProof,
+  downloadInvoicePdf,
 } from '@/lib/setupApi'
 import type { InvoiceItem } from '@/lib/setupApi'
 
@@ -30,6 +32,19 @@ export default function InvoicesTab() {
   })
   const [error, setError] = useState<string | null>(null)
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null)
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null)
+
+  const handleDownloadPdf = async (invoiceId: string, invoiceNumber: string) => {
+    setDownloadingInvoiceId(invoiceId)
+    setError(null)
+    try {
+      await downloadInvoicePdf(invoiceId, invoiceNumber)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to download PDF')
+    } finally {
+      setDownloadingInvoiceId(null)
+    }
+  }
 
   // Upload proof modal state
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceItem | null>(null)
@@ -282,30 +297,47 @@ export default function InvoicesTab() {
                         )}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        {isPaid ? (
-                          <span className="text-emerald-400 font-semibold text-xs flex items-center justify-end gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Settled
-                          </span>
-                        ) : (
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handlePayStripe(inv._id)}
-                              disabled={isPaying}
-                              className="px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                              {isPaying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
-                              Pay Online
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedInvoice(inv)}
-                              className="px-3 py-1.5 rounded-lg bg-[#091332] hover:bg-[#0e1d4a] border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                              <UploadCloud className="w-3.5 h-3.5" /> Wire Proof
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadPdf(inv._id, inv.invoiceNumber)}
+                            disabled={downloadingInvoiceId === inv._id}
+                            className="px-2.5 py-1.5 rounded-lg bg-[#091332] hover:bg-[#0e1d4a] border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                            title="Download official PDF invoice"
+                          >
+                            {downloadingInvoiceId === inv._id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Download className="w-3.5 h-3.5 text-cyan-400" />
+                            )}
+                            <span>PDF</span>
+                          </button>
+
+                          {isPaid ? (
+                            <span className="text-emerald-400 font-semibold text-xs flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Settled
+                            </span>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handlePayStripe(inv._id)}
+                                disabled={isPaying}
+                                className="px-3 py-1.5 rounded-lg bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                {isPaying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                                Pay Online
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInvoice(inv)}
+                                className="px-3 py-1.5 rounded-lg bg-[#091332] hover:bg-[#0e1d4a] border border-cyan-500/30 text-cyan-300 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                              >
+                                <UploadCloud className="w-3.5 h-3.5" /> Wire Proof
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )

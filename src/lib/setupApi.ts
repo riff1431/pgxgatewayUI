@@ -223,6 +223,28 @@ export async function fetchMerchantInvoices(): Promise<{
   return json
 }
 
+export async function downloadInvoicePdf(invoiceId: string, invoiceNumber: string): Promise<void> {
+  const token = localStorage.getItem('pgx_auth_token')
+  const res = await fetch(`${API_BASE}/invoices/${invoiceId}/pdf`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}))
+    throw new Error(json.message || 'Failed to download invoice PDF')
+  }
+  const blob = await res.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${invoiceNumber || 'invoice'}.pdf`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
 export async function payInvoiceViaStripe(invoiceId: string): Promise<{
   checkoutUrl: string
   sessionId: string
