@@ -31,6 +31,7 @@ export interface SetupStatusResponse {
   setupFeePresetAltUSD?: number
   resellerId: string
   isStripeReady: boolean
+  supportWhatsapp?: string
   hostingProvider?: string
   techStack?: string
   companyDescription?: string
@@ -58,6 +59,7 @@ export interface UpdatePlatformSettingsPayload {
   setupFeePresetAltUSD?: number
   officialGithubHandle?: string
   affiliateCommissionRate?: number
+  supportWhatsapp?: string
   stripe?: {
     publishableKey?: string
     secretKey?: string
@@ -72,6 +74,7 @@ export interface PlatformSettingsResponse {
   setupFeePresetAltUSD?: number
   officialGithubHandle: string
   affiliateCommissionRate: number
+  supportWhatsapp?: string
   stripe: {
     publishableKey: string
     secretKey: string

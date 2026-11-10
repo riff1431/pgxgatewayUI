@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Tag, Check, ShieldCheck, X, Clock, Zap } from 'lucide-react'
+import { Tag, Check, ShieldCheck, X, Clock, Zap, CreditCard } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import SetupPaymentModal from './SetupPaymentModal'
 
 export default function ProcessingOfferCard({ className = '' }: { className?: string }) {
-  const { offer, acceptOffer } = useAuth()
+  const { offer, acceptOffer, merchant } = useAuth()
   const [showModal, setShowModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [accepting, setAccepting] = useState(false)
 
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
@@ -60,6 +62,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
     try {
       await acceptOffer()
       setShowModal(false)
+      setShowPaymentModal(true)
     } finally {
       setAccepting(false)
     }
@@ -235,12 +238,25 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               </div>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               {isAccepted ? (
-                <div className="w-full py-2.5 rounded-full bg-emerald-500/20 border border-emerald-400/80 text-emerald-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
-                  <Check className="h-4 w-4 stroke-[3]" />
-                  <span>Terms Accepted & Active</span>
-                </div>
+                <>
+                  <div className="w-full py-2 rounded-full bg-emerald-500/20 border border-emerald-400/80 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2">
+                    <Check className="h-4 w-4 stroke-[3]" />
+                    <span>Terms Accepted & Active</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowModal(false)
+                      setShowPaymentModal(true)
+                    }}
+                    className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    <span>Pay Setup Fee ($450) & Unlock Desk</span>
+                  </button>
+                </>
               ) : (
                 <button
                   type="button"
@@ -256,6 +272,17 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           </div>
         </div>
       )}
+
+      {/* Setup Fee Payment & Method Selector Modal */}
+      <SetupPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={450}
+        merchantRefId={merchant?.refId}
+        merchantLegalName={merchant?.legalName || merchant?.fullName}
+        merchantEmail={merchant?.businessEmail}
+        websiteDomain={merchant?.websiteDomain || merchant?.website}
+      />
     </>
   )
 }

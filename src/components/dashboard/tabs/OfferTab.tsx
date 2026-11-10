@@ -6,13 +6,16 @@ import {
   ArrowRight,
   Check,
   FileCheck,
-  Clock
+  Clock,
+  CreditCard,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import SetupPaymentModal from '../SetupPaymentModal'
 
 export default function OfferTab() {
-  const { offer, applicationStatus, acceptOffer } = useAuth()
+  const { offer, applicationStatus, acceptOffer, merchant } = useAuth()
   const [submitting, setSubmitting] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
 
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
   const isAccepted = Boolean(offer?.accepted)
@@ -26,6 +29,7 @@ export default function OfferTab() {
     setSubmitting(true)
     try {
       await acceptOffer()
+      setShowPaymentModal(true)
     } finally {
       setSubmitting(false)
     }
@@ -200,28 +204,32 @@ export default function OfferTab() {
           </div>
 
           {isAvailable ? (
-            <button
-              type="button"
-              disabled={isAccepted || submitting}
-              onClick={handleAcceptTerms}
-              className={`px-8 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(217,70,239,0.6)] ${
-                isAccepted
-                  ? 'bg-emerald-500/20 border border-emerald-400 text-emerald-300 cursor-default'
-                  : 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white hover:shadow-[0_0_25px_rgba(217,70,239,0.85)]'
-              }`}
-            >
-              {isAccepted ? (
-                <>
+            isAccepted ? (
+              <div className="flex flex-wrap items-center gap-2.5">
+                <div className="px-5 py-2.5 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-bold text-xs flex items-center gap-2">
                   <Check className="h-4 w-4 stroke-[3]" />
                   <span>Terms Confirmed & Active</span>
-                </>
-              ) : (
-                <>
-                  <span>{submitting ? 'Confirming...' : 'Accept to Proceed & Lock In Rates'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </>
-              )}
-            </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentModal(true)}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 cursor-pointer transition-all"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  <span>Pay Setup Fee ($450) & Unlock Gateway</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={handleAcceptTerms}
+                className="px-8 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(217,70,239,0.6)] bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white hover:shadow-[0_0_25px_rgba(217,70,239,0.85)]"
+              >
+                <span>{submitting ? 'Confirming...' : 'Accept to Proceed & Lock In Rates'}</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            )
           ) : (
             <button
               type="button"
@@ -235,6 +243,16 @@ export default function OfferTab() {
         </div>
       </div>
 
+      {/* Setup Payment & Payment Method Selector Modal */}
+      <SetupPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        amount={450}
+        merchantRefId={merchant?.refId}
+        merchantLegalName={merchant?.legalName || merchant?.fullName}
+        merchantEmail={merchant?.businessEmail}
+        websiteDomain={merchant?.websiteDomain || merchant?.website}
+      />
     </div>
   )
 }

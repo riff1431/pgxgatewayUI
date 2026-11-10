@@ -6,6 +6,8 @@ import {
   Loader2,
   Eye,
   EyeOff,
+  Phone,
+  MessageSquare,
 } from 'lucide-react'
 import {
   fetchPlatformSettings,
@@ -44,6 +46,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [setupFeePriceUSD, setSetupFeePriceUSD] = useState<number>(49.0)
   const [officialGithubHandle, setOfficialGithubHandle] = useState('huipper-dev')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
+  const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (800) 749-4283')
 
   const loadSettings = useCallback(async () => {
     setLoading(true)
@@ -57,6 +60,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       setSetupFeePriceUSD(data.setupFeePriceUSD ?? 49.0)
       setOfficialGithubHandle(data.officialGithubHandle || 'huipper-dev')
       setAffiliateCommissionRate(data.affiliateCommissionRate ?? 20.0)
+      setSupportWhatsapp(data.supportWhatsapp || '+1 (800) 749-4283')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error connecting to backend'
       onErrorToast?.('Failed to load platform settings', message)
@@ -77,6 +81,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         setupFeePriceUSD: Number(setupFeePriceUSD),
         officialGithubHandle: officialGithubHandle.trim().replace(/^@/, ''),
         affiliateCommissionRate: Number(affiliateCommissionRate),
+        supportWhatsapp: supportWhatsapp.trim(),
         stripe: {
           publishableKey: publishableKey.trim(),
           secretKey: secretKey.trim(),
@@ -346,6 +351,40 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
               <p className="text-[11px] text-slate-400">
                 Amount credited to reseller: <span className="text-white font-semibold">${((setupFeePriceUSD * affiliateCommissionRate) / 100).toFixed(2)} USD</span> per referred merchant.
               </p>
+            </div>
+
+            {/* Crypto Payments & Direct WhatsApp Finance Desk */}
+            <div className="space-y-2 pt-3 border-t border-cyan-500/20">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Crypto Payments & Finance WhatsApp</span>
+                </label>
+                <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                  Active
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Merchants choosing &ldquo;Pay with Crypto&rdquo; for their setup fee will be directed to this WhatsApp number to arrange USDT/Crypto transfer.
+              </p>
+              <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
+                <span className="px-3 text-emerald-400 font-bold text-sm">
+                  <Phone className="w-3.5 h-3.5" />
+                </span>
+                <input
+                  type="text"
+                  placeholder="+1 (800) 749-4283"
+                  value={supportWhatsapp}
+                  onChange={(e) => setSupportWhatsapp(e.target.value)}
+                  className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
+                />
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#09153a] border border-cyan-500/20 text-[11px] text-slate-300 flex items-center gap-2">
+                <span className="text-emerald-400 font-bold">Auto Message:</span>
+                <span className="text-slate-400 truncate italic">
+                  &ldquo;Hi, I accepted the processing offer and want to pay Setup Fee via Crypto...&rdquo;
+                </span>
+              </div>
             </div>
           </div>
         </div>

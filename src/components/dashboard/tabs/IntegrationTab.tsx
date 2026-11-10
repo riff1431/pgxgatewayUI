@@ -402,14 +402,33 @@ export default function IntegrationTab() {
                 ) : (
                   <>
                     <CreditCard className="w-4 h-4" />
-                    Pay Setup Fee (${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}) & Unlock Desk
+                    Pay with Card (${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}) via Stripe
                   </>
                 )}
               </button>
 
-              <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-cyan-500/20"></div>
+                <span className="flex-shrink mx-3 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Or Pay with Crypto</span>
+                <div className="flex-grow border-t border-cyan-500/20"></div>
+              </div>
+
+              <a
+                href={`https://wa.me/${(setupData?.supportWhatsapp || '+1 (800) 749-4283').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                  `Hi, I want to pay the PGX Gateway Setup & Integration Fee ($${(setupData?.setupFeePriceUSD || 450).toFixed(2)}) via Crypto (USDT). Merchant Ref: ${merchant?.refId || 'N/A'} (${merchant?.legalName || merchant?.fullName}). Please share your official USDT/Crypto wallet address.`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Pay via Crypto (USDT on WhatsApp)</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5 pt-1">
                 <Lock className="w-3 h-3 text-cyan-400" />
-                Processed securely via Super Admin Stripe Checkout
+                <span>Processed securely via Stripe Checkout or Direct WhatsApp Finance Desk</span>
               </div>
             </div>
           </div>
