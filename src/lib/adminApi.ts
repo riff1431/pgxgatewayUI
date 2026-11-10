@@ -134,12 +134,22 @@ export interface ApplicationItem {
   avgTransaction?: string
   chargebackRate?: string
   switchReason?: string
-  businessRegDoc?: { name: string; url: string; size: string; uploadedAt?: string }
-  directorIdDoc?: { name: string; url: string; size: string; uploadedAt?: string }
-  processingStatementDoc?: { name: string; url: string; size: string; uploadedAt?: string }
+  businessRegDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
+  directorIdDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
+  processingStatementDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
   setupStatus?: string
   websiteDomain?: string
+  gitRepoUrl?: string
+  hostingProvider?: string
+  techStack?: string
+  companyDescription?: string
+  brandLogoUrl?: string
+  primaryColor?: string
+  secondaryColor?: string
+  preferredDomain?: string
+  altDomain?: string
+  integrationNotes?: string
   currentStep: number
   agreedToTerms: boolean
   balance?: {

@@ -8,15 +8,11 @@ import {
   CheckCircle2,
   XCircle,
   Search,
-  ExternalLink,
   Lock,
   LogOut,
   RefreshCw,
   Loader2,
-  Building2,
   Mail,
-  Coins,
-  FileText,
   X,
   AlertCircle,
   MessageSquare,
@@ -42,6 +38,8 @@ import Logo from '@/components/brand/Logo'
 import ResellerAffiliateTab from '@/components/admin/ResellerAffiliateTab'
 import ResellerSidebar, { type ResellerSectionId } from '@/components/admin/ResellerSidebar'
 import TransactionsTab from '@/components/admin/TransactionsTab'
+import ApplicationReviewModal from '@/components/admin/ApplicationReviewModal'
+import DocumentViewerModal, { type KycDocumentItem } from '@/components/admin/DocumentViewerModal'
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredAdminToken())
@@ -85,12 +83,47 @@ export default function AdminPage() {
 
   // Review Modal State
   const [selectedApp, setSelectedApp] = useState<ApplicationItem | null>(null)
+  const [reviewInitialTab, setReviewInitialTab] = useState<'dossier' | 'documents' | 'offer'>('dossier')
+  const [previewKycDoc, setPreviewKycDoc] = useState<KycDocumentItem | null>(null)
   const [offerRate, setOfferRate] = useState('2.9% + $0.30')
   const [offerVolume, setOfferVolume] = useState('Up to $250,000')
   const [offerSettlement, setOfferSettlement] = useState('Daily (Next Day)')
   const [offerReserve, setOfferReserve] = useState('5% (90 Days)')
   const [reviewNotes, setReviewNotes] = useState('')
   const [reviewLoading, setReviewLoading] = useState(false)
+
+  // Document list for currently selected applicant
+  const selectedAppDocs: KycDocumentItem[] = selectedApp
+    ? [
+        {
+          id: 'businessReg',
+          title: 'Business Registration Document',
+          category: 'Business Reg',
+          fileName: selectedApp.businessRegDoc?.name,
+          fileSize: selectedApp.businessRegDoc?.size,
+          fileUrl: selectedApp.businessRegDoc?.url || selectedApp.businessRegDoc?.path,
+          uploadedAt: selectedApp.businessRegDoc?.uploadedAt,
+        },
+        {
+          id: 'directorId',
+          title: 'Director / Owner Government ID',
+          category: 'Director ID',
+          fileName: selectedApp.directorIdDoc?.name,
+          fileSize: selectedApp.directorIdDoc?.size,
+          fileUrl: selectedApp.directorIdDoc?.url || selectedApp.directorIdDoc?.path,
+          uploadedAt: selectedApp.directorIdDoc?.uploadedAt,
+        },
+        {
+          id: 'processingStatement',
+          title: 'Processing Statements (3 Months)',
+          category: 'Statements',
+          fileName: selectedApp.processingStatementDoc?.name,
+          fileSize: selectedApp.processingStatementDoc?.size,
+          fileUrl: selectedApp.processingStatementDoc?.url || selectedApp.processingStatementDoc?.path,
+          uploadedAt: selectedApp.processingStatementDoc?.uploadedAt,
+        },
+      ]
+    : []
 
   // Login Form State
   const [loginEmail, setLoginEmail] = useState('admin@pgxgateway.com')
@@ -171,10 +204,10 @@ export default function AdminPage() {
   }, [token, statusFilter, searchQuery])
 
   // Open Direct Message Modal
-  const openMessageModal = async (app: ApplicationItem) => {
+  const openMessageModal = async (app: ApplicationItem, defaultMsg?: string) => {
     setMessagingApp(app)
     setMessageTitle(`Notice regarding application for ${app.legalName || app.fullName}`)
-    setMessageContent('')
+    setMessageContent(defaultMsg || '')
     setMessageType('general')
     setHistoryLoading(true)
     try {
@@ -244,8 +277,9 @@ export default function AdminPage() {
   }
 
   // Open Review Drawer
-  const openReviewModal = (app: ApplicationItem) => {
+  const openReviewModal = (app: ApplicationItem, tab: 'dossier' | 'documents' | 'offer' = 'dossier') => {
     setSelectedApp(app)
+    setReviewInitialTab(tab)
     setOfferRate(app.offer?.rate || '2.9% + $0.30')
     setOfferVolume(app.offer?.volume || 'Up to $250,000')
     setOfferSettlement(app.offer?.settlement || 'Daily (Next Day)')
@@ -715,7 +749,11 @@ export default function AdminPage() {
                 </tr>
               ) : (
                 applications.map((app) => {
-                  const hasDocs = Boolean(app.businessRegDoc?.url || app.directorIdDoc?.url)
+                  const uploadedDocsCount = [
+                    app.businessRegDoc?.url || app.businessRegDoc?.path,
+                    app.directorIdDoc?.url || app.directorIdDoc?.path,
+                    app.processingStatementDoc?.url || app.processingStatementDoc?.path,
+                  ].filter(Boolean).length
                   const isUnderReview = app.applicationStatus === 'under_review'
                   const isApproved = app.applicationStatus === 'approved'
 
@@ -723,19 +761,26 @@ export default function AdminPage() {
                     <tr key={app._id} className="group hover:bg-[#0c1538]/60 transition-colors">
                       {/* Company Name */}
                       <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="font-bold text-white text-sm">
-                          {app.legalName || 'Unnamed Entity'}
-                        </div>
-                        {app.refId && (
-                          <div className="mb-0.5">
-                            <span className="font-mono text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold">
-                              {app.refId}
-                            </span>
+                        <button
+                          type="button"
+                          onClick={() => openReviewModal(app, 'dossier')}
+                          className="text-left group/name block cursor-pointer"
+                          title="Click to view full merchant dossier & underwriting details"
+                        >
+                          <div className="font-bold text-white text-sm group-hover/name:text-cyan-300 transition-colors">
+                            {app.legalName || 'Unnamed Entity'}
                           </div>
-                        )}
-                        <div className="text-[11px] text-cyan-300 capitalize">
-                          {app.industry?.replace('-', ' ') || 'General Business'}
-                        </div>
+                          {app.refId && (
+                            <div className="mb-0.5">
+                              <span className="font-mono text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-1.5 py-0.5 rounded font-bold">
+                                {app.refId}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-[11px] text-cyan-300/80 group-hover/name:text-cyan-200 capitalize">
+                            {app.industry?.replace('-', ' ') || 'General Business'}
+                          </div>
+                        </button>
                       </td>
 
                       {/* Contact */}
@@ -757,12 +802,26 @@ export default function AdminPage() {
 
                       {/* Documents */}
                       <td className="px-4 py-4 whitespace-nowrap">
-                        {hasDocs ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-400/50">
-                            <CheckCircle2 className="h-3 w-3" /> Cloudinary KYC
-                          </span>
+                        {uploadedDocsCount > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => openReviewModal(app, 'documents')}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 cursor-pointer transition-colors shadow-[0_0_8px_rgba(16,185,129,0.25)]"
+                            title="Click to inspect all uploaded KYC documents"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                            <span>{uploadedDocsCount}/3 Cloudinary KYC</span>
+                          </button>
                         ) : (
-                          <span className="text-[11px] text-slate-500">Pending Upload</span>
+                          <button
+                            type="button"
+                            onClick={() => openReviewModal(app, 'documents')}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold text-amber-300/80 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 cursor-pointer transition-colors"
+                            title="Pending Upload - Click to inspect or request files"
+                          >
+                            <Clock className="h-3 w-3 text-amber-400" />
+                            <span>Pending Upload</span>
+                          </button>
                         )}
                       </td>
 
@@ -859,281 +918,39 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Review & Decision Modal */}
-      {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-6 sm:p-7 space-y-5 my-8">
-            
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-white">
-                    {selectedApp.legalName || selectedApp.fullName}
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Application ID: <span className="font-mono text-cyan-300">{selectedApp._id}</span>
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedApp(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-full cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      {/* Comprehensive Merchant Review & Underwriting Dossier Modal */}
+      <ApplicationReviewModal
+        isOpen={Boolean(selectedApp)}
+        app={selectedApp}
+        initialTab={reviewInitialTab}
+        onClose={() => setSelectedApp(null)}
+        onOpenDocViewer={(doc) => setPreviewKycDoc(doc)}
+        onOpenMessageModal={(app, defaultMsg) => openMessageModal(app, defaultMsg)}
+        onDecision={handleDecision}
+        onSubmitOffer={handleSubmitOffer}
+        onRevokeOffer={handleRevokeOffer}
+        reviewLoading={reviewLoading}
+        offerRate={offerRate}
+        setOfferRate={setOfferRate}
+        offerVolume={offerVolume}
+        setOfferVolume={setOfferVolume}
+        offerSettlement={offerSettlement}
+        setOfferSettlement={setOfferSettlement}
+        offerReserve={offerReserve}
+        setOfferReserve={setOfferReserve}
+        reviewNotes={reviewNotes}
+        setReviewNotes={setReviewNotes}
+      />
 
-            {/* Merchant Details Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Merchant Name</span>
-                <span className="font-bold text-white">{selectedApp.fullName}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Business Email</span>
-                <span className="font-bold text-white">{selectedApp.businessEmail}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Phone Number</span>
-                <span className="font-bold text-white">{selectedApp.phone}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Industry</span>
-                <span className="font-bold text-white capitalize">{selectedApp.industry || 'N/A'}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Est. Monthly Volume</span>
-                <span className="font-bold text-white">{selectedApp.monthlyVolume || 'N/A'}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/20">
-                <span className="text-slate-400 block text-[10px]">Current Processor</span>
-                <span className="font-bold text-white">{selectedApp.currentProcessor || 'None'}</span>
-              </div>
-            </div>
-
-            {/* Switch Reason */}
-            {selectedApp.switchReason && (
-              <div className="p-3 rounded-xl bg-[#091332]/70 border border-cyan-500/20 text-xs">
-                <span className="text-slate-400 block text-[10px] font-semibold uppercase">Reason for Applying / Switching</span>
-                <p className="text-slate-200 mt-0.5">{selectedApp.switchReason}</p>
-              </div>
-            )}
-
-            {/* Cloudinary Documents Section */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="h-4 w-4 text-cyan-400" />
-                <span>Uploaded Verification Documents (Cloudinary)</span>
-              </span>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                {/* Business Registration */}
-                <div className="p-3 rounded-xl bg-[#070e28] border border-cyan-500/30 flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-white">Business Registration</div>
-                    <div className="text-[10px] text-slate-400 truncate max-w-[180px]">
-                      {selectedApp.businessRegDoc?.name || 'No file attached'}
-                    </div>
-                  </div>
-                  {selectedApp.businessRegDoc?.url ? (
-                    <a
-                      href={selectedApp.businessRegDoc.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400 text-cyan-300 font-bold text-[11px] hover:bg-cyan-500/25 flex items-center gap-1"
-                    >
-                      <span>View</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-[10px] text-slate-500">Missing</span>
-                  )}
-                </div>
-
-                {/* Director ID */}
-                <div className="p-3 rounded-xl bg-[#070e28] border border-cyan-500/30 flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-white">Director Government ID</div>
-                    <div className="text-[10px] text-slate-400 truncate max-w-[180px]">
-                      {selectedApp.directorIdDoc?.name || 'No file attached'}
-                    </div>
-                  </div>
-                  {selectedApp.directorIdDoc?.url ? (
-                    <a
-                      href={selectedApp.directorIdDoc.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400 text-cyan-300 font-bold text-[11px] hover:bg-cyan-500/25 flex items-center gap-1"
-                    >
-                      <span>View</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <span className="text-[10px] text-slate-500">Missing</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Offer Terms Customizer */}
-            <div className="space-y-3 pt-2 border-t border-cyan-500/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-fuchsia-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Coins className="h-4 w-4" />
-                  <span>Customize Processing Offer Terms</span>
-                </span>
-
-                {selectedApp.offer?.isAvailable && (
-                  <button
-                    type="button"
-                    onClick={handleRevokeOffer}
-                    disabled={reviewLoading}
-                    className="text-[11px] text-red-400 hover:text-red-300 underline cursor-pointer"
-                  >
-                    Reset to Blank
-                  </button>
-                )}
-              </div>
-
-              {selectedApp.offer?.isAvailable ? (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                    <div>
-                      <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
-                      <div className="text-[11px] text-emerald-200/80">
-                        Terms: {selectedApp.offer.rate} • {selectedApp.offer.volume} • {selectedApp.offer.settlement}
-                      </div>
-                    </div>
-                  </div>
-                  {selectedApp.offer.accepted && (
-                    <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-[10px] font-bold shrink-0">
-                      Accepted by Merchant ✓
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
-                  <Clock className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <div className="font-bold text-amber-200">No Offer Sent Yet (Currently Blank)</div>
-                    <div className="text-[11px] text-amber-300/80 mt-0.5 leading-relaxed">
-                      Merchant dashboard currently displays: <em>"Please check back every 24hrs to see if offer is available and accept to proceed"</em> with blank rate fields.
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Interchange Rate</label>
-                  <input
-                    type="text"
-                    value={offerRate}
-                    onChange={(e) => setOfferRate(e.target.value)}
-                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-lg px-2.5 py-1.5 text-white font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Volume Ceiling</label>
-                  <input
-                    type="text"
-                    value={offerVolume}
-                    onChange={(e) => setOfferVolume(e.target.value)}
-                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-lg px-2.5 py-1.5 text-white font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Settlement</label>
-                  <input
-                    type="text"
-                    value={offerSettlement}
-                    onChange={(e) => setOfferSettlement(e.target.value)}
-                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-lg px-2.5 py-1.5 text-white font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">Rolling Reserve</label>
-                  <input
-                    type="text"
-                    value={offerReserve}
-                    onChange={(e) => setOfferReserve(e.target.value)}
-                    className="w-full bg-[#060c24] border border-cyan-500/40 rounded-lg px-2.5 py-1.5 text-white font-bold"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Underwriting Notes */}
-            <div className="space-y-1">
-              <label className="text-[10px] text-slate-400 block">Underwriter Note / Approval Message (Optional)</label>
-              <input
-                type="text"
-                value={reviewNotes}
-                onChange={(e) => setReviewNotes(e.target.value)}
-                placeholder="e.g. Approved with tier 1 pricing and 24-hr daily settlement"
-                className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-cyan-500/20">
-              <button
-                type="button"
-                disabled={reviewLoading}
-                onClick={() => handleDecision('rejected')}
-                className="px-4 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 cursor-pointer disabled:opacity-50"
-              >
-                Decline
-              </button>
-
-              <button
-                type="button"
-                disabled={reviewLoading}
-                onClick={handleSubmitOffer}
-                className="px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-              >
-                {reviewLoading ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-                    <span>Sending Offer...</span>
-                  </>
-                ) : (
-                  <>
-                    <Tag className="h-3.5 w-3.5" />
-                    <span>{selectedApp.offer?.isAvailable ? 'Update Processing Offer' : 'Submit Processing Offer'}</span>
-                  </>
-                )}
-              </button>
-
-              <button
-                type="button"
-                disabled={reviewLoading}
-                onClick={() => handleDecision('approved')}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
-              >
-                {reviewLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                    <span>Broadcasting Approval...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
-                    <span>Approve Application</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
+      {/* Professional Interactive Document Lightbox Viewer */}
+      <DocumentViewerModal
+        isOpen={Boolean(previewKycDoc)}
+        activeDoc={previewKycDoc}
+        allDocs={selectedAppDocs}
+        onSelectDoc={(doc) => setPreviewKycDoc(doc)}
+        onClose={() => setPreviewKycDoc(null)}
+        merchantName={selectedApp?.legalName || selectedApp?.fullName}
+      />
 
       {/* Direct Merchant Messaging Modal */}
       {messagingApp && (
