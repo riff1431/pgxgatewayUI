@@ -52,6 +52,7 @@ export default function DocumentViewerModal({
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [viewMode, setViewMode] = useState<'image' | 'pdf'>('image')
 
   // Reset zoom, rotation & page whenever activeDoc changes
   useEffect(() => {
@@ -60,6 +61,7 @@ export default function DocumentViewerModal({
     setLoading(true)
     setLoadError(false)
     setCurrentPage(1)
+    setViewMode('image')
   }, [activeDoc?.fileUrl])
 
   // Handle ESC key to close
@@ -84,7 +86,6 @@ export default function DocumentViewerModal({
   const isCloudinary = activeDoc.fileUrl.includes('res.cloudinary.com')
 
   // Transform Cloudinary PDF URL to high-res JPG rendering with page selection.
-  // This bypasses Cloudinary's default 401 ACL block on raw PDF CDN delivery.
   const getRenderUrl = (url: string, page: number): string => {
     if (!url) return ''
     if (isCloudinary && isPdf) {
@@ -121,7 +122,7 @@ export default function DocumentViewerModal({
 
   // Helper to force download
   const handleDownload = async () => {
-    const downloadUrl = activeRenderUrl || activeDoc.fileUrl
+    const downloadUrl = viewMode === 'pdf' ? activeDoc.fileUrl : (activeRenderUrl || activeDoc.fileUrl)
     if (!downloadUrl) return
     try {
       const response = await fetch(downloadUrl)
@@ -130,7 +131,7 @@ export default function DocumentViewerModal({
       const a = document.createElement('a')
       a.href = blobUrl
       const baseName = (activeDoc.fileName || activeDoc.title).replace(/\.[^/.]+$/, '')
-      a.download = isPdf && isCloudinary ? `${baseName}_page_${currentPage}.jpg` : activeDoc.fileName || `${baseName}.jpg`
+      a.download = viewMode === 'pdf' ? `${baseName}.pdf` : `${baseName}_page_${currentPage}.jpg`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -238,47 +239,81 @@ export default function DocumentViewerModal({
         {/* Toolbar Controls */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2 border-b border-cyan-500/10 bg-[#070e28] text-xs shrink-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Zoom & Rotation Controls */}
-            <button
-              type="button"
-              onClick={handleZoomOut}
-              disabled={zoom <= 0.5}
-              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
-              title="Zoom Out"
-            >
-              <ZoomOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Zoom Out</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleResetZoom}
-              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors font-mono cursor-pointer"
-              title="Reset Zoom"
-            >
-              {Math.round(zoom * 100)}%
-            </button>
-            <button
-              type="button"
-              onClick={handleZoomIn}
-              disabled={zoom >= 3}
-              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
-              title="Zoom In"
-            >
-              <ZoomIn className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Zoom In</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleRotate}
-              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors flex items-center gap-1 cursor-pointer"
-              title="Rotate 90° Clockwise"
-            >
-              <RotateCw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Rotate</span>
-            </button>
+            {/* View Mode Toggle for PDFs */}
+            {isPdf && (
+              <div className="flex items-center gap-1 bg-[#09153d] border border-cyan-500/40 rounded-lg p-0.5 mr-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('image')}
+                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                    viewMode === 'image'
+                      ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.3)]'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="High-Res Vector Image View"
+                >
+                  Vector Page
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('pdf')}
+                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
+                    viewMode === 'pdf'
+                      ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.3)]'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Native PDF Embed Reader"
+                >
+                  Native PDF
+                </button>
+              </div>
+            )}
 
-            {/* Page Navigation for Multi-Page PDFs */}
-            {isPdf && isCloudinary && (
+            {/* Zoom & Rotation Controls (for Image/Vector view) */}
+            {viewMode === 'image' && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 0.5}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Zoom Out</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetZoom}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors font-mono cursor-pointer"
+                  title="Reset Zoom"
+                >
+                  {Math.round(zoom * 100)}%
+                </button>
+                <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 3}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Zoom In</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRotate}
+                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Rotate 90° Clockwise"
+                >
+                  <RotateCw className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Rotate</span>
+                </button>
+              </>
+            )}
+
+            {/* Page Navigation for Multi-Page PDFs in Vector view */}
+            {isPdf && isCloudinary && viewMode === 'image' && (
               <div className="flex items-center gap-1 bg-[#09153d] border border-cyan-500/40 rounded-lg p-0.5 ml-1">
                 <button
                   type="button"
@@ -309,17 +344,17 @@ export default function DocumentViewerModal({
               type="button"
               onClick={handleDownload}
               className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Download Current Page / Document"
+              title="Download Document"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Download</span>
             </button>
             <a
-              href={activeRenderUrl}
+              href={activeDoc.fileUrl}
               target="_blank"
               rel="noreferrer"
               className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-colors"
-              title="Open in Full Browser Window"
+              title="Open Original File in Browser Window"
             >
               <span>Open in New Tab</span>
               <ExternalLink className="h-3.5 w-3.5" />
@@ -333,7 +368,7 @@ export default function DocumentViewerModal({
             <div className="absolute inset-0 flex items-center justify-center bg-[#030614]/80 z-20">
               <div className="flex flex-col items-center gap-2 text-cyan-400 text-xs">
                 <Loader2 className="h-8 w-8 animate-spin" />
-                <span>Streaming high-resolution document...</span>
+                <span>Streaming document from secure Cloudinary vault...</span>
               </div>
             </div>
           )}
@@ -345,7 +380,7 @@ export default function DocumentViewerModal({
               <p className="text-xs text-slate-400 leading-relaxed">
                 {currentPage > 1
                   ? `There are no further pages in this document. You have reached page ${currentPage}.`
-                  : 'The document is securely stored on Cloudinary, but cannot be rendered directly in this frame.'}
+                  : 'The document is securely stored on Cloudinary. You can download or view it in a new window.'}
               </p>
               <div className="flex items-center justify-center gap-2 pt-2">
                 {currentPage > 1 ? (
@@ -360,7 +395,7 @@ export default function DocumentViewerModal({
                 ) : (
                   <>
                     <a
-                      href={activeRenderUrl}
+                      href={activeDoc.fileUrl}
                       target="_blank"
                       rel="noreferrer"
                       className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 flex items-center gap-1.5"
@@ -380,6 +415,20 @@ export default function DocumentViewerModal({
                 )}
               </div>
             </div>
+          ) : isPdf && viewMode === 'pdf' ? (
+            <iframe
+              src={`${activeDoc.fileUrl}#toolbar=1`}
+              title={activeDoc.title}
+              onLoad={() => {
+                setLoading(false)
+                setLoadError(false)
+              }}
+              onError={() => {
+                setLoading(false)
+                setLoadError(true)
+              }}
+              className="w-full h-full min-h-[500px] rounded-2xl border border-cyan-500/30 bg-white"
+            />
           ) : (
             <div
               className="overflow-auto max-w-full max-h-full flex items-center justify-center transition-transform duration-200"
@@ -410,9 +459,9 @@ export default function DocumentViewerModal({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>High-Resolution Underwriting Preview • TLS 1.3 End-to-End Encrypted</span>
-            {isPdf && isCloudinary && (
+            {isPdf && isCloudinary && viewMode === 'image' && (
               <span className="text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded-full">
-                Vector PDF Page {currentPage}
+                Vector Page {currentPage}
               </span>
             )}
           </div>
