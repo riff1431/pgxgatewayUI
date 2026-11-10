@@ -15,6 +15,8 @@ import {
   Minimize2,
   Calendar,
   HardDrive,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 
 export interface KycDocumentItem {
@@ -49,13 +51,15 @@ export default function DocumentViewerModal({
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  // Reset zoom & rotation whenever activeDoc changes
+  // Reset zoom, rotation & page whenever activeDoc changes
   useEffect(() => {
     setZoom(1)
     setRotation(0)
     setLoading(true)
     setLoadError(false)
+    setCurrentPage(1)
   }, [activeDoc?.fileUrl])
 
   // Handle ESC key to close
@@ -77,6 +81,22 @@ export default function DocumentViewerModal({
     activeDoc.fileUrl.toLowerCase().includes('.pdf') ||
     activeDoc.fileUrl.toLowerCase().includes('/raw/upload/')
 
+  const isCloudinary = activeDoc.fileUrl.includes('res.cloudinary.com')
+
+  // Transform Cloudinary PDF URL to high-res JPG rendering with page selection.
+  // This bypasses Cloudinary's default 401 ACL block on raw PDF CDN delivery.
+  const getRenderUrl = (url: string, page: number): string => {
+    if (!url) return ''
+    if (isCloudinary && isPdf) {
+      return url
+        .replace(/\/image\/upload\/(?:pg_\d+\/)?/, `/image/upload/pg_${page}/`)
+        .replace(/\.pdf(?:\?.*)?$/i, '.jpg')
+    }
+    return url
+  }
+
+  const activeRenderUrl = getRenderUrl(activeDoc.fileUrl, currentPage)
+
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3))
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5))
   const handleResetZoom = () => {
@@ -85,23 +105,38 @@ export default function DocumentViewerModal({
   }
   const handleRotate = () => setRotation((prev) => (prev + 90) % 360)
 
-  // Helper to force download if Cloudinary or cross-origin
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setLoading(true)
+      setLoadError(false)
+      setCurrentPage((prev) => prev - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    setLoading(true)
+    setLoadError(false)
+    setCurrentPage((prev) => prev + 1)
+  }
+
+  // Helper to force download
   const handleDownload = async () => {
-    if (!activeDoc.fileUrl) return
+    const downloadUrl = activeRenderUrl || activeDoc.fileUrl
+    if (!downloadUrl) return
     try {
-      const response = await fetch(activeDoc.fileUrl)
+      const response = await fetch(downloadUrl)
       const blob = await response.blob()
       const blobUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = blobUrl
-      a.download = activeDoc.fileName || `${activeDoc.title.replace(/\s+/g, '_')}.png`
+      const baseName = (activeDoc.fileName || activeDoc.title).replace(/\.[^/.]+$/, '')
+      a.download = isPdf && isCloudinary ? `${baseName}_page_${currentPage}.jpg` : activeDoc.fileName || `${baseName}.jpg`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(blobUrl)
     } catch {
-      // Fallback direct link
-      window.open(activeDoc.fileUrl, '_blank')
+      window.open(downloadUrl, '_blank')
     }
   }
 
@@ -202,52 +237,70 @@ export default function DocumentViewerModal({
 
         {/* Toolbar Controls */}
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2 border-b border-cyan-500/10 bg-[#070e28] text-xs shrink-0">
-          <div className="flex items-center gap-1.5">
-            {!isPdf && (
-              <>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Zoom & Rotation Controls */}
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              disabled={zoom <= 0.5}
+              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Zoom Out</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleResetZoom}
+              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors font-mono cursor-pointer"
+              title="Reset Zoom"
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              disabled={zoom >= 3}
+              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Zoom In</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleRotate}
+              className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors flex items-center gap-1 cursor-pointer"
+              title="Rotate 90° Clockwise"
+            >
+              <RotateCw className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Rotate</span>
+            </button>
+
+            {/* Page Navigation for Multi-Page PDFs */}
+            {isPdf && isCloudinary && (
+              <div className="flex items-center gap-1 bg-[#09153d] border border-cyan-500/40 rounded-lg p-0.5 ml-1">
                 <button
                   type="button"
-                  onClick={handleZoomOut}
-                  disabled={zoom <= 0.5}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Zoom Out"
+                  onClick={handlePrevPage}
+                  disabled={currentPage <= 1}
+                  className="px-2 py-1 rounded text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-30 transition-colors flex items-center cursor-pointer"
+                  title="Previous Page"
                 >
-                  <ZoomOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Zoom Out</span>
+                  <ChevronLeft className="h-3.5 w-3.5" />
                 </button>
+                <span className="px-2 text-[11px] font-bold text-white font-mono">
+                  Page {currentPage}
+                </span>
                 <button
                   type="button"
-                  onClick={handleResetZoom}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors font-mono cursor-pointer"
-                  title="Reset Zoom"
+                  onClick={handleNextPage}
+                  className="px-2 py-1 rounded text-cyan-300 hover:bg-cyan-500/20 transition-colors flex items-center cursor-pointer"
+                  title="Next Page"
                 >
-                  {Math.round(zoom * 100)}%
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={handleZoomIn}
-                  disabled={zoom >= 3}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 disabled:opacity-40 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Zoom In"
-                >
-                  <ZoomIn className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Zoom In</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRotate}
-                  className="px-2.5 py-1.5 rounded-lg bg-[#09153d] border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Rotate 90° Clockwise"
-                >
-                  <RotateCw className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Rotate</span>
-                </button>
-              </>
-            )}
-            {isPdf && (
-              <span className="text-[11px] text-cyan-400 font-semibold px-2 py-1 rounded bg-cyan-950/60 border border-cyan-500/30">
-                PDF Document Reader Active
-              </span>
+              </div>
             )}
           </div>
 
@@ -256,17 +309,17 @@ export default function DocumentViewerModal({
               type="button"
               onClick={handleDownload}
               className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Download File"
+              title="Download Current Page / Document"
             >
               <Download className="h-3.5 w-3.5" />
               <span>Download</span>
             </button>
             <a
-              href={activeDoc.fileUrl}
+              href={activeRenderUrl}
               target="_blank"
               rel="noreferrer"
               className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-400 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-colors"
-              title="Open Raw File in New Window"
+              title="Open in Full Browser Window"
             >
               <span>Open in New Tab</span>
               <ExternalLink className="h-3.5 w-3.5" />
@@ -280,7 +333,7 @@ export default function DocumentViewerModal({
             <div className="absolute inset-0 flex items-center justify-center bg-[#030614]/80 z-20">
               <div className="flex flex-col items-center gap-2 text-cyan-400 text-xs">
                 <Loader2 className="h-8 w-8 animate-spin" />
-                <span>Streaming document from Cloudinary vault...</span>
+                <span>Streaming high-resolution document...</span>
               </div>
             </div>
           )}
@@ -288,41 +341,45 @@ export default function DocumentViewerModal({
           {loadError ? (
             <div className="text-center space-y-3 p-6 max-w-md">
               <AlertCircle className="h-10 w-10 text-amber-400 mx-auto" />
-              <h4 className="text-sm font-bold text-white">Preview Rendering Unavailable</h4>
+              <h4 className="text-sm font-bold text-white">End of Document or Preview Unavailable</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                The document is securely stored on Cloudinary, but cannot be rendered directly in this preview frame. You can open it in a separate tab or download it directly.
+                {currentPage > 1
+                  ? `There are no further pages in this document. You have reached page ${currentPage}.`
+                  : 'The document is securely stored on Cloudinary, but cannot be rendered directly in this frame.'}
               </p>
               <div className="flex items-center justify-center gap-2 pt-2">
-                <a
-                  href={activeDoc.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 flex items-center gap-1.5"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  <span>Open in Browser</span>
-                </a>
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  className="px-4 py-2 rounded-xl bg-[#0a1435] border border-cyan-500/40 text-white text-xs font-bold hover:bg-[#101e4e] flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  <span>Download File</span>
-                </button>
+                {currentPage > 1 ? (
+                  <button
+                    type="button"
+                    onClick={handlePrevPage}
+                    className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                    <span>Back to Page {currentPage - 1}</span>
+                  </button>
+                ) : (
+                  <>
+                    <a
+                      href={activeRenderUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-4 py-2 rounded-xl bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 flex items-center gap-1.5"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      <span>Open in Browser</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleDownload}
+                      className="px-4 py-2 rounded-xl bg-[#0a1435] border border-cyan-500/40 text-white text-xs font-bold hover:bg-[#101e4e] flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      <span>Download File</span>
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          ) : isPdf ? (
-            <iframe
-              src={`${activeDoc.fileUrl}#toolbar=1`}
-              title={activeDoc.title}
-              onLoad={() => setLoading(false)}
-              onError={() => {
-                setLoading(false)
-                setLoadError(true)
-              }}
-              className="w-full h-full min-h-[500px] rounded-2xl border border-cyan-500/30 bg-white"
-            />
           ) : (
             <div
               className="overflow-auto max-w-full max-h-full flex items-center justify-center transition-transform duration-200"
@@ -332,14 +389,17 @@ export default function DocumentViewerModal({
               }}
             >
               <img
-                src={activeDoc.fileUrl}
+                src={activeRenderUrl}
                 alt={activeDoc.title}
-                onLoad={() => setLoading(false)}
+                onLoad={() => {
+                  setLoading(false)
+                  setLoadError(false)
+                }}
                 onError={() => {
                   setLoading(false)
                   setLoadError(true)
                 }}
-                className="max-h-[70vh] max-w-full object-contain rounded-xl border border-cyan-500/30 shadow-[0_0_35px_rgba(0,240,255,0.25)] select-none"
+                className="max-h-[70vh] max-w-full object-contain rounded-xl border border-cyan-500/30 shadow-[0_0_35px_rgba(0,240,255,0.25)] select-none bg-white/5"
               />
             </div>
           )}
@@ -350,6 +410,11 @@ export default function DocumentViewerModal({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>High-Resolution Underwriting Preview • TLS 1.3 End-to-End Encrypted</span>
+            {isPdf && isCloudinary && (
+              <span className="text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+                Vector PDF Page {currentPage}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button

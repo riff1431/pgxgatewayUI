@@ -138,19 +138,23 @@ export default function ApplicationReviewModal({
   // Helper to trigger direct download
   const downloadDocument = async (doc: KycDocumentItem) => {
     if (!doc.fileUrl) return
+    const isCloudinaryPdf = doc.fileUrl.includes('res.cloudinary.com') && doc.fileUrl.toLowerCase().includes('.pdf')
+    const targetUrl = isCloudinaryPdf ? doc.fileUrl.replace(/\.pdf(?:\?.*)?$/i, '.jpg') : doc.fileUrl
+
     try {
-      const response = await fetch(doc.fileUrl)
+      const response = await fetch(targetUrl)
       const blob = await response.blob()
       const blobUrl = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = blobUrl
-      a.download = doc.fileName || `${doc.title.replace(/\s+/g, '_')}.png`
+      const baseName = (doc.fileName || doc.title).replace(/\.[^/.]+$/, '')
+      a.download = isCloudinaryPdf ? `${baseName}.jpg` : doc.fileName || `${baseName}.jpg`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(blobUrl)
     } catch {
-      window.open(doc.fileUrl, '_blank')
+      window.open(targetUrl, '_blank')
     }
   }
 
@@ -694,7 +698,11 @@ export default function ApplicationReviewModal({
                               </button>
 
                               <a
-                                href={doc.fileUrl}
+                                href={
+                                  doc.fileUrl?.includes('res.cloudinary.com') && doc.fileUrl?.toLowerCase().includes('.pdf')
+                                    ? doc.fileUrl.replace(/\.pdf(?:\?.*)?$/i, '.jpg')
+                                    : doc.fileUrl
+                                }
                                 target="_blank"
                                 rel="noreferrer"
                                 className="py-1.5 px-2.5 rounded-lg bg-[#09153a] hover:bg-[#0f215c] border border-cyan-500/40 text-cyan-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors"
