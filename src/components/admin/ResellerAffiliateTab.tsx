@@ -45,15 +45,15 @@ export default function ResellerAffiliateTab({
   const estimatedEarned = paidSetups * 9.8
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
       {/* Top Affiliate Link Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#09153a] via-[#102766] to-[#09153a] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] space-y-6">
+      <div className="p-4 sm:p-8 rounded-3xl bg-gradient-to-r from-[#09153a] via-[#102766] to-[#09153a] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] space-y-4 sm:space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" /> 100% Zero-Liability Affiliate Model
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-black text-white tracking-tight">
               Affiliate Referral & Partner Program
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl">
@@ -61,9 +61,9 @@ export default function ResellerAffiliateTab({
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#040819]/80 border border-cyan-500/30 text-right shrink-0">
+          <div className="p-3 sm:p-4 rounded-2xl bg-[#040819]/80 border border-cyan-500/30 text-left sm:text-right shrink-0">
             <div className="text-[11px] text-slate-400 font-medium">Your Reseller Partner ID</div>
-            <div className="text-lg font-mono font-black text-cyan-300">{resellerId}</div>
+            <div className="text-base sm:text-lg font-mono font-black text-cyan-300">{resellerId}</div>
           </div>
         </div>
 
@@ -81,7 +81,7 @@ export default function ResellerAffiliateTab({
           <button
             type="button"
             onClick={handleCopy}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-[#040819] font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(0,240,255,0.4)] shrink-0 cursor-pointer"
+            className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-[#040819] font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(0,240,255,0.4)] shrink-0 cursor-pointer"
           >
             {copied ? (
               <>
@@ -97,43 +97,43 @@ export default function ResellerAffiliateTab({
       </div>
 
       {/* KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Referred Merchants
             </span>
             <Users className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-3xl font-black text-white">{totalReferred}</div>
+          <div className="text-2xl sm:text-3xl font-black text-white">{totalReferred}</div>
           <p className="text-[11px] text-slate-400">Merchants registered via your referral link</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Paid White-Glove Setups
             </span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400">{paidSetups}</div>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-400">{paidSetups}</div>
           <p className="text-[11px] text-slate-400">Merchants who completed setup fee payment</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Accumulated Commission Earned
             </span>
             <Coins className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-amber-300">${estimatedEarned.toFixed(2)}</div>
+          <div className="text-2xl sm:text-3xl font-black text-amber-300">${estimatedEarned.toFixed(2)}</div>
           <p className="text-[11px] text-slate-400">20% commission on all onboarding setup fees</p>
         </div>
       </div>
 
       {/* Referred Merchants Breakdown */}
-      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden space-y-4 p-6">
+      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden space-y-4 p-4 sm:p-6">
         <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
           <div>
             <h3 className="text-lg font-bold text-white">Your Referred Merchant Roster</h3>
@@ -149,7 +149,7 @@ export default function ResellerAffiliateTab({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+            <table className="w-full text-left text-xs min-w-[600px]">
               <thead className="bg-[#091332] text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="px-4 py-3">Merchant</th>

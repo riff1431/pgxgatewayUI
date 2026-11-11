@@ -1,5 +1,5 @@
 import {
-  BrainCircuit,
+  Users,
   Coins,
   Activity,
   Building2,
@@ -7,7 +7,7 @@ import {
   Check,
   RefreshCw,
   LogOut,
-  Sparkles,
+  ShieldCheck,
   Link as LinkIcon,
 } from 'lucide-react'
 import type { AdminUserInfo } from '@/lib/adminApi'
@@ -55,7 +55,7 @@ export default function ResellerSidebar({
     {
       id: 'applications',
       label: 'Merchant Applications',
-      icon: BrainCircuit,
+      icon: Users,
       badge: pendingCount > 0 ? pendingCount : totalMerchants > 0 ? totalMerchants : undefined,
       badgeColor: pendingCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : undefined,
     },
@@ -89,7 +89,7 @@ export default function ResellerSidebar({
             <div className="min-w-0">
               <div className="text-xs font-bold text-white truncate flex items-center gap-1">
                 <span>{adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Admin' : (adminUser?.name || 'Reseller Gateway')}</span>
-                <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
+                <ShieldCheck className="h-3 w-3 text-cyan-400 shrink-0" />
               </div>
               <div className="text-[10px] font-mono text-cyan-300 truncate">
                 Tenant: {resellerId}
@@ -173,7 +173,7 @@ export default function ResellerSidebar({
                 >
                   {adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Gateway Admin' : (adminUser?.name || 'Reseller Gateway')}
                 </span>
-                <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
+                <ShieldCheck className="h-3 w-3 text-cyan-400 shrink-0" />
               </div>
               <div className="text-[10px] font-mono text-cyan-300 truncate mt-0.5">
                 Tenant: {resellerId}

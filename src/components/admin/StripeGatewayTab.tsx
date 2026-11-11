@@ -183,7 +183,7 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
                 value={publishableKey}
                 onChange={(e) => setPublishableKey(e.target.value)}
                 placeholder="pk_test_51Pxxxxxxxxxxxxxxxxxxxx"
-                className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2.5 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
+                className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl px-3 py-2.5 text-base sm:text-xs min-h-[44px] text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
               />
             </div>
 
@@ -200,12 +200,12 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
                   value={secretKey}
                   onChange={(e) => setSecretKey(e.target.value)}
                   placeholder="sk_test_51Pxxxxxxxxxxxxxxxxxxxx"
-                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl pl-3 pr-10 py-2.5 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl pl-3 pr-10 py-2.5 text-base sm:text-xs min-h-[44px] text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowSecret(!showSecret)}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-white cursor-pointer"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-white cursor-pointer"
                 >
                   {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -225,12 +225,12 @@ export default function StripeGatewayTab({ onShowToast }: StripeGatewayTabProps)
                   value={webhookSecret}
                   onChange={(e) => setWebhookSecret(e.target.value)}
                   placeholder="whsec_xxxxxxxxxxxxxxxxxxxx"
-                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl pl-3 pr-10 py-2.5 text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
+                  className="w-full bg-[#060c24] border border-cyan-500/40 rounded-xl pl-3 pr-10 py-2.5 text-base sm:text-xs min-h-[44px] text-white font-mono placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowWebhook(!showWebhook)}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-white cursor-pointer"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-white cursor-pointer"
                 >
                   {showWebhook ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

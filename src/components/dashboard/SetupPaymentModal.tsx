@@ -94,7 +94,7 @@ Please provide your official Bitcoin (BTC) wallet address to arrange payment.`
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_50px_rgba(0,240,255,0.4)] flex flex-col overflow-hidden my-auto">
+      <div className="w-full max-w-2xl max-h-[92vh] rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_50px_rgba(0,240,255,0.4)] flex flex-col overflow-y-auto my-auto">
         
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-cyan-500/20 bg-gradient-to-r from-[#040819] via-[#091538] to-[#040819] flex items-center justify-between gap-3">
@@ -233,7 +233,7 @@ Please provide your official Bitcoin (BTC) wallet address to arrange payment.`
                       placeholder="e.g. https://mystore.com"
                       value={domain}
                       onChange={(e) => setDomain(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-xs focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
                     />
                   </div>
 
@@ -247,7 +247,7 @@ Please provide your official Bitcoin (BTC) wallet address to arrange payment.`
                       placeholder="e.g. https://github.com/my-org/my-app"
                       value={gitRepo}
                       onChange={(e) => setGitRepo(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-xs focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
                     />
                   </div>
                 </div>

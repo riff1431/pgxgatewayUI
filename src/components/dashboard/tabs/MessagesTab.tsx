@@ -644,8 +644,8 @@ export default function MessagesTab() {
 
       {/* DETAILED MESSAGE & THREAD DRAWER MODAL */}
       {selectedMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-6 sm:p-7 space-y-5 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-4 sm:p-7 space-y-4 sm:space-y-5 my-auto">
             
             {/* Header */}
             <div className="flex items-start justify-between pb-4 border-b border-cyan-500/20">
@@ -781,14 +781,14 @@ export default function MessagesTab() {
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder="Type your response here..."
-                className="w-full rounded-2xl border border-cyan-500/40 bg-[#060c24] p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
+                className="w-full rounded-2xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
               />
 
-              <div className="flex items-center justify-end gap-3">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setSelectedMessage(null)}
-                  className="px-4 py-2 rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+                  className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-xl sm:rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
                 >
                   Close
                 </button>
@@ -796,7 +796,7 @@ export default function MessagesTab() {
                 <button
                   type="submit"
                   disabled={sendingReply || !replyText.trim()}
-                  className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.7)] hover:shadow-[0_0_22px_rgba(217,70,239,0.9)] transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto min-h-[44px] px-6 py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.7)] hover:shadow-[0_0_22px_rgba(217,70,239,0.9)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {sendingReply ? (
                     <>
@@ -819,16 +819,16 @@ export default function MessagesTab() {
 
       {/* NEW INQUIRY / COMPOSE MODAL */}
       {showComposeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
           <form
             onSubmit={handleComposeSubmit}
-            className="w-full max-w-xl rounded-3xl bg-[#060b20] border-[1.5px] border-fuchsia-500 shadow-[0_0_40px_rgba(217,70,239,0.45)] p-6 space-y-4 my-8"
+            className="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#060b20] border-[1.5px] border-fuchsia-500 shadow-[0_0_40px_rgba(217,70,239,0.45)] p-4 sm:p-6 space-y-4 my-auto"
           >
             {/* Modal Title */}
             <div className="flex items-center justify-between pb-3 border-b border-fuchsia-500/20">
               <div className="flex items-center gap-2.5">
                 <Headphones className="h-5 w-5 text-fuchsia-400" />
-                <h3 className="text-lg font-bold text-white">Underwriting & Concierge Desk</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">Underwriting & Concierge Desk</h3>
               </div>
               <button
                 type="button"
@@ -879,7 +879,7 @@ export default function MessagesTab() {
                 <select
                   value={composePriority}
                   onChange={(e) => setComposePriority(e.target.value as typeof composePriority)}
-                  className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                  className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-base sm:text-xs min-h-[44px] text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
                 >
                   <option value="normal">Normal (Under 1 Hour)</option>
                   <option value="high">High Priority</option>
@@ -898,7 +898,7 @@ export default function MessagesTab() {
                 value={composeSubject}
                 onChange={(e) => setComposeSubject(e.target.value)}
                 placeholder="e.g. USDT Payout Configuration or Rate Revision"
-                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
@@ -911,16 +911,16 @@ export default function MessagesTab() {
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
                 placeholder="Describe your inquiry, volume requirements, or technical query in detail..."
-                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
+                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
               />
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowComposeModal(false)}
-                className="px-5 py-2 rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+                className="w-full sm:w-auto min-h-[44px] px-5 py-2 rounded-xl sm:rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
               >
                 Cancel
               </button>
@@ -928,7 +928,7 @@ export default function MessagesTab() {
               <button
                 type="submit"
                 disabled={submittingCompose}
-                className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {submittingCompose ? (
                   <>

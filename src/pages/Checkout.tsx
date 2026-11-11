@@ -109,7 +109,7 @@ export default function Checkout() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 space-y-6 relative animate-fade-in">
+    <div className="max-w-xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-6 relative animate-fade-in">
       {/* Top Header Navigation */}
       <div className="flex items-center justify-between">
         <Button asChild variant="ghost" size="sm" className="gap-2 text-slate-300 hover:text-white">
@@ -190,7 +190,7 @@ export default function Checkout() {
         /* ACTIVE CHECKOUT FORM */
         <Card className="border-[1.5px] border-cyan-400/70 shadow-[0_0_30px_rgba(0,240,255,0.25)] bg-[#050b1f]/95 backdrop-blur-xl">
           <CardHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[10px] font-mono tracking-widest uppercase text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 px-2 py-0.5 rounded-full">
@@ -215,7 +215,7 @@ export default function Checkout() {
                   Order #{orderIdParam} • Routed via Single Stripe Architecture
                 </CardDescription>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right flex sm:flex-col items-baseline sm:items-end justify-between sm:justify-start gap-2 pt-1 sm:pt-0 border-t border-cyan-500/10 sm:border-t-0">
                 <span className="text-2xl sm:text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
                   ${amount.toFixed(2)}
                 </span>
@@ -228,11 +228,11 @@ export default function Checkout() {
             {/* Payment Method Selector */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-300">Select Payment Rails</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                 <Button
                   type="button"
                   variant={method === 'card' ? 'default' : 'outline'}
-                  className={`gap-2 h-auto py-3 flex-col items-center justify-center text-xs font-bold transition-all ${
+                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
                     method === 'card'
                       ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
                       : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
@@ -245,7 +245,7 @@ export default function Checkout() {
                 <Button
                   type="button"
                   variant={method === 'mfs' ? 'default' : 'outline'}
-                  className={`gap-2 h-auto py-3 flex-col items-center justify-center text-xs font-bold transition-all ${
+                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
                     method === 'mfs'
                       ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
                       : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
@@ -258,7 +258,7 @@ export default function Checkout() {
                 <Button
                   type="button"
                   variant={method === 'wallet' ? 'default' : 'outline'}
-                  className={`gap-2 h-auto py-3 flex-col items-center justify-center text-xs font-bold transition-all ${
+                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
                     method === 'wallet'
                       ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
                       : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
@@ -288,7 +288,7 @@ export default function Checkout() {
                     placeholder="Cardholder Name"
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value)}
-                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500"
+                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 text-base sm:text-sm min-h-[44px]"
                   />
                 </div>
 
@@ -298,7 +298,7 @@ export default function Checkout() {
                     placeholder="4111 2222 3333 4444"
                     value={cardNumber}
                     onChange={(e) => setCardNumber(e.target.value)}
-                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 font-mono"
+                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 font-mono text-base sm:text-sm min-h-[44px]"
                   />
                 </div>
 
@@ -308,7 +308,7 @@ export default function Checkout() {
                     <Input
                       placeholder="MM/YY"
                       defaultValue="12/28"
-                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono"
+                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -318,7 +318,7 @@ export default function Checkout() {
                       defaultValue="888"
                       type="password"
                       maxLength={4}
-                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono"
+                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
                     />
                   </div>
                 </div>
@@ -329,7 +329,7 @@ export default function Checkout() {
               <div className="space-y-3 p-4 rounded-2xl bg-[#060c24] border border-cyan-500/30 text-xs">
                 <div className="space-y-1.5">
                   <label className="font-semibold text-slate-300">Mobile Account Number</label>
-                  <Input placeholder="017XXXXXXXX" defaultValue="01812345678" className="bg-[#040817]" />
+                  <Input placeholder="017XXXXXXXX" defaultValue="01812345678" className="bg-[#040817] text-base sm:text-sm min-h-[44px]" />
                 </div>
                 <p className="text-slate-400 text-[11px]">
                   An authorization prompt will be pushed to your verified mobile handset.
@@ -341,7 +341,7 @@ export default function Checkout() {
               <div className="space-y-3 p-4 rounded-2xl bg-[#060c24] border border-cyan-500/30 text-xs">
                 <div className="space-y-1.5">
                   <label className="font-semibold text-slate-300">Digital Asset Currency</label>
-                  <Input defaultValue="USDT (Polygon PoS)" readOnly className="bg-[#040817] font-mono text-cyan-300" />
+                  <Input defaultValue="USDT (Polygon PoS)" readOnly className="bg-[#040817] font-mono text-cyan-300 text-base sm:text-sm min-h-[44px]" />
                 </div>
                 <p className="text-slate-400 text-[11px]">
                   Smart contract escrow deposit address generated and verified on polygonscan.
@@ -352,7 +352,7 @@ export default function Checkout() {
 
           <CardFooter className="flex flex-col gap-3">
             <Button
-              className="w-full gap-2 py-6 text-sm font-extrabold bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 hover:from-cyan-400 hover:via-blue-500 hover:to-cyan-400 text-white shadow-[0_0_25px_rgba(0,240,255,0.7)] cursor-pointer"
+              className="w-full gap-2 py-4 sm:py-6 text-sm font-extrabold min-h-[48px] bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 hover:from-cyan-400 hover:via-blue-500 hover:to-cyan-400 text-white shadow-[0_0_25px_rgba(0,240,255,0.7)] cursor-pointer"
               size="lg"
               disabled={isProcessing}
               onClick={handlePayment}

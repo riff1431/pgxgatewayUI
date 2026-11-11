@@ -283,7 +283,7 @@ export default function DocumentsTab() {
                   </div>
 
                   {/* Right: Actions */}
-                  <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap shrink-0 pt-2 sm:pt-0">
                     {doc.fileUrl && (
                       <button
                         type="button"
@@ -291,7 +291,7 @@ export default function DocumentsTab() {
                           setImgLoading(true)
                           setPreviewDoc(doc)
                         }}
-                        className="px-3.5 py-1.5 rounded-full text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-400/60 hover:border-cyan-400 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.25)]"
+                        className="px-3.5 py-2 min-h-[40px] rounded-full text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-400/60 hover:border-cyan-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.25)] flex-1 sm:flex-initial"
                         title="Inspect document preview"
                       >
                         <Eye className="h-3.5 w-3.5" />
@@ -303,7 +303,7 @@ export default function DocumentsTab() {
                       type="button"
                       disabled={doc.isUploading}
                       onClick={() => triggerUpload(doc.id)}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-300 hover:text-white bg-[#09153d] hover:bg-[#0d1d52] border border-slate-700 hover:border-cyan-400/60 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      className="px-3.5 py-2 min-h-[40px] rounded-full text-xs font-semibold text-slate-300 hover:text-white bg-[#09153d] hover:bg-[#0d1d52] border border-slate-700 hover:border-cyan-400/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 flex-1 sm:flex-initial"
                       title="Upload a new replacement version"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />

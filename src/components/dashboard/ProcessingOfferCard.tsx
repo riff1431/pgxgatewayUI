@@ -200,8 +200,8 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
 
       {/* Offer Modal */}
       {showModal && isAvailable && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-5 sm:p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-4 sm:p-6 space-y-4 sm:space-y-5 my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-6 w-6 text-fuchsia-400" />

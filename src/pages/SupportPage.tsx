@@ -342,7 +342,7 @@ export default function SupportPage() {
                         placeholder="Alex Carter"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                         required
                       />
                     </div>
@@ -353,7 +353,7 @@ export default function SupportPage() {
                         placeholder="alex@enterprise.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                         required
                       />
                     </div>
@@ -365,7 +365,7 @@ export default function SupportPage() {
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-base sm:text-xs min-h-[44px] text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
                       >
                         <option value="technical">Technical & API Integration</option>
                         <option value="application">Application & Onboarding</option>
@@ -382,7 +382,7 @@ export default function SupportPage() {
                         placeholder="e.g. Inquiring about USDT settlement rails"
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                         required
                       />
                     </div>
@@ -395,7 +395,7 @@ export default function SupportPage() {
                       placeholder="Please provide details about your question, expected volume, or specific technical question..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#04081c] border border-cyan-500/30 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                       required
                     />
                   </div>
@@ -403,7 +403,7 @@ export default function SupportPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:to-purple-600 text-white font-bold text-xs sm:text-sm border border-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.6)] transition-all cursor-pointer disabled:opacity-50"
+                    className="w-full py-3.5 px-6 min-h-[48px] rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:to-purple-600 text-white font-bold text-xs sm:text-sm border border-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.6)] transition-all cursor-pointer disabled:opacity-50"
                   >
                     {isSubmitting ? 'Submitting Ticket...' : 'Send Priority Ticket'}
                   </button>
@@ -434,7 +434,7 @@ export default function SupportPage() {
             placeholder="Search FAQs..."
             value={faqSearch}
             onChange={(e) => setFaqSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#04081c] border border-cyan-500/30 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.2)]"
+            className="w-full pl-10 pr-4 py-2 text-base sm:text-xs min-h-[44px] rounded-xl bg-[#04081c] border border-cyan-500/30 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.2)]"
           />
         </div>
 

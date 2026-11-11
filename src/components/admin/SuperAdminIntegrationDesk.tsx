@@ -243,7 +243,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       {/* Merchants Table */}
       <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
         <div className="overflow-x-auto table-scrollbar">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[850px]">
             <thead className="bg-[#091332] text-slate-300 font-semibold border-b border-cyan-500/20 uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="px-4 py-3">Merchant</th>

@@ -330,7 +330,7 @@ export function CheckoutWidget() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0">
               <button
                 onClick={() => { setSimScenario('normal'); setSimStep(0); }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -533,7 +533,7 @@ export function CheckoutWidget() {
           
           {/* Code Header Bar with Tabs */}
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 bg-[#030614] border-b border-cyan-500/20">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2 sm:pt-0">
               <span className="w-3 h-3 rounded-full bg-rose-500/80" />
               <span className="w-3 h-3 rounded-full bg-amber-500/80" />
               <span className="w-3 h-3 rounded-full bg-emerald-500/80" />

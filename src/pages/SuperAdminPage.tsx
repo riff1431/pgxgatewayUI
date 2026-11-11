@@ -1123,8 +1123,8 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* MODAL 1: VIEW RESELLER ACCESS VAULT */}
       {viewAccessReseller && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-cyan-400/80 shadow-[0_0_50px_rgba(0,240,255,0.3)] space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-[#060b20] border-2 border-cyan-400/80 shadow-[0_0_50px_rgba(0,240,255,0.3)] space-y-4 my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-cyan-400" />
@@ -1237,8 +1237,8 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* MODAL 2: PROVISION NEW RESELLER MODAL */}
       {showProvisionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4 my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-amber-400" />
@@ -1372,8 +1372,8 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* MODAL 4: ADJUST PARTNER COMMERCIAL TERMS & FEE STRUCTURE */}
       {adjustingReseller && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-lg p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-5 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-5 my-auto">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2.5">
@@ -1468,31 +1468,33 @@ Status: ${reseller.status.toUpperCase()}`
               </div>
 
               {/* Live Multi-Tier Revenue Split Matrix */}
-              <div className="rounded-2xl bg-[#030718] border border-amber-500/20 p-3.5 space-y-2">
+              <div className="rounded-2xl bg-[#030718] border border-amber-500/20 p-3.5 space-y-2 overflow-x-auto">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                   <Calculator className="h-3.5 w-3.5 text-amber-400" />
                   <span>Projected Monthly Income Split by Volume</span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-[10px] border-b border-slate-800 pb-1.5 font-bold text-slate-400 uppercase font-mono">
-                  <div>Volume</div>
-                  <div className="text-amber-300">You ({editBasePlatformFee.toFixed(1)}%)</div>
-                  <div className="text-fuchsia-300">Partner (+{Math.max(0, editMerchantFeeRate - editBasePlatformFee).toFixed(1)}%)</div>
-                  <div className="text-right text-cyan-300">Merchants Net</div>
+                <div className="min-w-[320px]">
+                  <div className="grid grid-cols-4 gap-2 text-[10px] border-b border-slate-800 pb-1.5 font-bold text-slate-400 uppercase font-mono">
+                    <div>Volume</div>
+                    <div className="text-amber-300">You ({editBasePlatformFee.toFixed(1)}%)</div>
+                    <div className="text-fuchsia-300">Partner (+{Math.max(0, editMerchantFeeRate - editBasePlatformFee).toFixed(1)}%)</div>
+                    <div className="text-right text-cyan-300">Merchants Net</div>
+                  </div>
+                  {[100000, 500000, 750000].map((vol) => {
+                    const spread = Math.max(0, editMerchantFeeRate - editBasePlatformFee)
+                    const sa = (vol * editBasePlatformFee) / 100
+                    const res = (vol * spread) / 100
+                    const net = vol - (vol * editMerchantFeeRate) / 100
+                    return (
+                      <div key={vol} className="grid grid-cols-4 gap-2 text-xs font-mono py-1 border-b border-slate-800/40">
+                        <div className="font-bold text-white">${(vol / 1000).toFixed(0)}k</div>
+                        <div className="font-bold text-amber-300">${sa.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                        <div className="font-bold text-fuchsia-300">${res.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                        <div className="font-bold text-slate-300 text-right">${net.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                      </div>
+                    )
+                  })}
                 </div>
-                {[100000, 500000, 750000].map((vol) => {
-                  const spread = Math.max(0, editMerchantFeeRate - editBasePlatformFee)
-                  const sa = (vol * editBasePlatformFee) / 100
-                  const res = (vol * spread) / 100
-                  const net = vol - (vol * editMerchantFeeRate) / 100
-                  return (
-                    <div key={vol} className="grid grid-cols-4 gap-2 text-xs font-mono py-1 border-b border-slate-800/40">
-                      <div className="font-bold text-white">${(vol / 1000).toFixed(0)}k</div>
-                      <div className="font-bold text-amber-300">${sa.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
-                      <div className="font-bold text-fuchsia-300">${res.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
-                      <div className="font-bold text-slate-300 text-right">${net.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
-                    </div>
-                  )
-                })}
               </div>
 
               {/* Payout Settlement Terms Input */}
@@ -1505,7 +1507,7 @@ Status: ${reseller.status.toUpperCase()}`
                   value={editPayoutTerms}
                   onChange={(e) => setEditPayoutTerms(e.target.value)}
                   placeholder="e.g. Weekly Wire / Crypto USDT Transfer"
-                  className="w-full bg-[#05091d] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                  className="w-full bg-[#05091d] border border-slate-700 rounded-xl px-3.5 py-2 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
                 />
               </div>
 
@@ -1543,8 +1545,8 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* MODAL 3: RESET PASSWORD MODAL */}
       {resetModalReseller && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-md max-h-[92vh] overflow-y-auto p-4 sm:p-6 rounded-3xl bg-[#060b20] border-2 border-amber-400/80 shadow-[0_0_50px_rgba(251,191,36,0.35)] space-y-4 my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
               <div className="flex items-center gap-2">
                 <KeyRound className="h-5 w-5 text-amber-400" />

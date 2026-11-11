@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from 'react'
 import {
   UploadCloud,
   Check,
-  Sparkles,
   User,
   Loader2,
   Trash2,
@@ -278,8 +277,8 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
       <div className="space-y-3 pt-2 border-t border-cyan-500/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-fuchsia-500/10 border border-fuchsia-400/50 flex items-center justify-center text-fuchsia-300">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="w-6 h-6 rounded-lg bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
+              <ImageIcon className="h-3.5 w-3.5" />
             </div>
             <div>
               <h5 className="text-xs sm:text-sm font-bold text-white">

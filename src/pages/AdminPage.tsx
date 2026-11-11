@@ -24,11 +24,10 @@ import {
   EyeOff,
   Trash2,
   AlertTriangle,
-  BrainCircuit,
-  Sparkles,
-  Cpu,
-  Radar,
-  ScanFace,
+  Building2,
+  Users,
+  FileCheck,
+  FileText,
   Activity,
   Terminal,
   Zap,
@@ -719,7 +718,7 @@ export default function AdminPage() {
             <div className="text-xl sm:text-3xl font-black text-white mt-1">{stats.totalMerchants}</div>
           </div>
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.2)] shrink-0">
-            <Cpu className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
           </div>
         </div>
 
@@ -733,7 +732,7 @@ export default function AdminPage() {
             <div className="text-xl sm:text-3xl font-black text-amber-300 mt-1">{stats.pendingReview}</div>
           </div>
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] shrink-0">
-            <Radar className="h-4 w-4 sm:h-5 sm:w-5 animate-[spin_6s_linear_infinite] drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
           </div>
         </div>
 
@@ -762,11 +761,11 @@ export default function AdminPage() {
 
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Tabs with AI & Cyberpunk Icons */}
+        {/* Tabs with Fintech Status Icons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {[
             { id: 'all', label: `All Applications (${stats.totalMerchants})`, icon: Boxes },
-            { id: 'under_review', label: `Pending Review (${stats.pendingReview})`, icon: Radar },
+            { id: 'under_review', label: `Pending Review (${stats.pendingReview})`, icon: Clock },
             { id: 'approved', label: `Approved (${stats.approved})`, icon: ShieldCheck },
             { id: 'rejected', label: `Declined (${stats.rejected})`, icon: XCircle },
           ].map((tab) => {
@@ -813,7 +812,7 @@ export default function AdminPage() {
               <tr>
                 <th className="px-3.5 py-3 whitespace-nowrap min-w-[170px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
-                    <BrainCircuit className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    <Building2 className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
                     Company
                   </span>
                 </th>
@@ -831,7 +830,7 @@ export default function AdminPage() {
                 </th>
                 <th className="px-2.5 py-3 whitespace-nowrap min-w-[110px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
-                    <ScanFace className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    <FileCheck className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
                     KYC Docs
                   </span>
                 </th>
@@ -843,7 +842,7 @@ export default function AdminPage() {
                 </th>
                 <th className="px-2.5 py-3 whitespace-nowrap min-w-[115px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
-                    <Sparkles className="h-3.5 w-3.5 text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.7)]" />
+                    <FileText className="h-3.5 w-3.5 text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.7)]" />
                     Offer
                   </span>
                 </th>
@@ -951,7 +950,7 @@ export default function AdminPage() {
                             className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 cursor-pointer transition-all shadow-[0_0_8px_rgba(16,185,129,0.2)]"
                             title="Click to inspect all uploaded KYC documents"
                           >
-                            <ScanFace className="h-3 w-3 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+                            <FileCheck className="h-3 w-3 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                             <span>{uploadedDocsCount}/3 Verified</span>
                           </button>
                         ) : (
@@ -1037,7 +1036,7 @@ export default function AdminPage() {
                             className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:brightness-110 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.5)] hover:shadow-[0_0_16px_rgba(217,70,239,0.75)] cursor-pointer transition-all inline-flex items-center gap-1"
                             title="Review Merchant Dossier & Manage Underwriting Offer"
                           >
-                            <Sparkles className="h-3 w-3 text-fuchsia-200 animate-pulse" />
+                            <FileText className="h-3 w-3 text-fuchsia-200" />
                             <span>Review</span>
                           </button>
 
@@ -1169,7 +1168,7 @@ export default function AdminPage() {
                           onClick={() => openReviewModal(app, 'documents')}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 cursor-pointer"
                         >
-                          <ScanFace className="h-3 w-3 text-emerald-400" />
+                          <FileCheck className="h-3 w-3 text-emerald-400" />
                           <span>{uploadedDocsCount}/3 Verified</span>
                         </button>
                       ) : (
@@ -1222,7 +1221,7 @@ export default function AdminPage() {
                     onClick={() => openReviewModal(app)}
                     className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-[0_0_12px_rgba(217,70,239,0.5)]"
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-fuchsia-200" />
+                    <FileText className="h-3.5 w-3.5 text-fuchsia-200" />
                     <span>Review & Offer</span>
                   </button>
 

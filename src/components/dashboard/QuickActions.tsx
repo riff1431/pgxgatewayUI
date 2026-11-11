@@ -184,12 +184,12 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
 
       {/* Recent Activity Modal */}
       {modalType === 'activity' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_35px_rgba(0,240,255,0.45)] p-4 sm:p-6 space-y-4 my-auto">
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
                 <Clock className="h-5 w-5 text-cyan-400" />
-                <h3 className="text-lg font-bold text-white">Application Audit Activity</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">Application Audit Activity</h3>
               </div>
               <button
                 type="button"
@@ -231,15 +231,15 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
 
       {/* Support Request Modal */}
       {modalType === 'support' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in overflow-y-auto">
           <form
             onSubmit={handleSupportSubmit}
-            className="w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-fuchsia-500 shadow-[0_0_35px_rgba(217,70,239,0.45)] p-6 space-y-4"
+            className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl bg-[#060b20] border-[1.5px] border-fuchsia-500 shadow-[0_0_35px_rgba(217,70,239,0.45)] p-4 sm:p-6 space-y-4 my-auto"
           >
             <div className="flex items-center justify-between pb-3 border-b border-fuchsia-500/20">
               <div className="flex items-center gap-2.5">
                 <Headphones className="h-5 w-5 text-fuchsia-400" />
-                <h3 className="text-lg font-bold text-white">24/7 Priority Support Request</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">24/7 Priority Support Request</h3>
               </div>
               <button
                 type="button"
@@ -264,22 +264,22 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
                 value={supportMessage}
                 onChange={(e) => setSupportMessage(e.target.value)}
                 placeholder="Describe your inquiry or question regarding onboarding, processing rates, or technical integration..."
-                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setModalType(null)}
-                className="px-5 py-2 rounded-full border border-slate-600 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+                className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl sm:rounded-full border border-slate-600 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={supportSubmitting}
-                className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {supportSubmitting ? (
                   <>

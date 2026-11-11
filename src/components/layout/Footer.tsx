@@ -171,17 +171,17 @@ export default function Footer() {
         </div>
 
         {/* Bottom Horizon Line & Copyright */}
-        <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 text-center sm:text-left">
           <div>
             &copy; {new Date().getFullYear()} PGX Gateway Technologies LLC. All rights reserved.
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <span className="hover:text-slate-400 transition-colors cursor-pointer">Privacy Policy</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="hover:text-slate-400 transition-colors cursor-pointer">Terms of Service</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="hover:text-slate-400 transition-colors cursor-pointer">Compliance</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="hover:text-slate-400 transition-colors cursor-pointer">Security Standards</span>
           </div>
         </div>

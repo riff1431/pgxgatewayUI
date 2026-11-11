@@ -242,7 +242,7 @@ export default function IndustriesPage() {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
               Industries We Power &{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 via-pink-400 to-cyan-400">
                 Approve
@@ -257,19 +257,19 @@ export default function IndustriesPage() {
             {/* Quick Stat Highlights */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
               <div className="p-3 rounded-2xl bg-[#060c24] border border-cyan-500/30">
-                <div className="text-2xl font-black text-cyan-300">99.2%</div>
+                <div className="text-xl sm:text-2xl font-black text-cyan-300">99.2%</div>
                 <div className="text-[11px] text-slate-400">Approval Ratio</div>
               </div>
               <div className="p-3 rounded-2xl bg-[#060c24] border border-fuchsia-500/30">
-                <div className="text-2xl font-black text-fuchsia-300">&lt; 24h</div>
+                <div className="text-xl sm:text-2xl font-black text-fuchsia-300">&lt; 24h</div>
                 <div className="text-[11px] text-slate-400">Go-Live Speed</div>
               </div>
               <div className="p-3 rounded-2xl bg-[#060c24] border border-teal-500/30">
-                <div className="text-2xl font-black text-teal-300">0%</div>
+                <div className="text-xl sm:text-2xl font-black text-teal-300">0%</div>
                 <div className="text-[11px] text-slate-400">Reserve Options</div>
               </div>
               <div className="p-3 rounded-2xl bg-[#060c24] border border-amber-500/30">
-                <div className="text-2xl font-black text-amber-300">Daily</div>
+                <div className="text-xl sm:text-2xl font-black text-amber-300">Daily</div>
                 <div className="text-[11px] text-slate-400">Payout Cycles</div>
               </div>
             </div>

@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   LogOut,
   RefreshCw,
-  Sparkles,
 } from 'lucide-react'
 
 export type SuperAdminTabId =
@@ -66,7 +65,7 @@ export default function SuperAdminSidebar({
     {
       id: 'settings',
       label: 'Platform Settings',
-      shortLabel: 'Platform Settings',
+      shortLabel: 'Settings',
       icon: Sliders,
     },
     {
@@ -99,8 +98,87 @@ export default function SuperAdminSidebar({
 
   return (
     <aside className={`w-full select-none ${className}`}>
-      {/* Outer Glowing Neon Container (Amber/Gold Root Aesthetics) */}
-      <div className="rounded-3xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.22),inset_0_0_12px_rgba(251,191,36,0.08)] p-4 sm:p-5 flex flex-col justify-between h-full backdrop-blur-2xl space-y-5">
+      {/* MOBILE (< lg): Compact Admin Identity & Horizontal Tab Rail */}
+      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
+        <div className="flex items-center justify-between gap-3 pb-2 border-b border-amber-500/20">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.35)]">
+              <div className="w-full h-full rounded-[9px] bg-[#050a1d] flex items-center justify-center text-amber-300">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white truncate">Super Administrator</div>
+              <div className="text-[10px] font-mono text-amber-300/80 truncate">Root Platform Controller</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onRefresh && (
+              <button
+                type="button"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="p-1.5 rounded-lg bg-[#0d163a] border border-amber-400/40 text-amber-300 hover:text-white cursor-pointer"
+                title="Refresh Telemetry"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+            )}
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="p-1.5 rounded-lg bg-red-950/40 border border-red-500/40 text-red-300 hover:text-white cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Horizontal Tab Rail */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeTab === item.id
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onTabChange(item.id)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition-all duration-300 cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.6)] border border-amber-300 scale-[1.02] font-black'
+                    : 'text-slate-300 hover:text-white bg-[#091332]/80 border border-amber-500/20'
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-slate-950' : 'text-amber-400'}`} />
+                <span>{item.shortLabel}</span>
+
+                {item.badge !== undefined &&
+                item.badge !== null &&
+                (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) ? (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold shrink-0 border ${
+                      isActive
+                        ? 'bg-black/30 text-slate-950 border-black/30'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* DESKTOP (>= lg): Original Glowing Neon Container (Amber/Gold Root Aesthetics) */}
+      <div className="hidden lg:flex rounded-3xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.22),inset_0_0_12px_rgba(251,191,36,0.08)] p-4 sm:p-5 flex-col justify-between h-full backdrop-blur-2xl space-y-5">
         
         {/* Top: Identity Pill */}
         <div className="space-y-3">
@@ -113,7 +191,6 @@ export default function SuperAdminSidebar({
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-black tracking-wide text-white truncate">Super Administrator</span>
-                <Sparkles className="h-3 w-3 text-amber-400 shrink-0" />
               </div>
               <div className="text-[10px] font-mono text-amber-300/80 truncate">
                 Root Platform Controller

@@ -96,14 +96,14 @@ export default function OfferTab() {
       )}
 
       {/* 6 Core Commercial Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-4">
         {/* Rate */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             Interchange (MDR)
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? baseRate : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
@@ -116,12 +116,12 @@ export default function OfferTab() {
         </div>
 
         {/* Volume */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             Volume Limit
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? (offer.volume || 'Up to $250k') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
@@ -134,12 +134,12 @@ export default function OfferTab() {
         </div>
 
         {/* Settlement */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             Settlement
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? (offer.settlement?.split('(')[0]?.trim() || 'Daily') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
@@ -152,12 +152,12 @@ export default function OfferTab() {
         </div>
 
         {/* Reserve */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-slate-400 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             Risk Reserve
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? (offer.reserve?.split('(')[0]?.trim() || '5%') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
@@ -170,12 +170,12 @@ export default function OfferTab() {
         </div>
 
         {/* Set Up Fee */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_15px_rgba(251,191,36,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_15px_rgba(251,191,36,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-amber-300 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             One-Time Setup
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-amber-300' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-amber-300' : 'text-slate-600'}`}>
               {isAvailable ? (offer.setupFee || '$450') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-amber-200/90' : 'text-slate-600'}`}>
@@ -188,12 +188,12 @@ export default function OfferTab() {
         </div>
 
         {/* Monthly Maintenance Fee */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-purple-400/70 shadow-[0_0_15px_rgba(217,70,239,0.25)] flex flex-col justify-between backdrop-blur-xl">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-purple-400/70 shadow-[0_0_15px_rgba(217,70,239,0.25)] flex flex-col justify-between backdrop-blur-xl">
           <div className="text-purple-300 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
             Monthly Portal
           </div>
           <div className="my-2.5">
-            <div className={`text-xl sm:text-2xl font-black ${isAvailable ? 'text-purple-300' : 'text-slate-600'}`}>
+            <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-purple-300' : 'text-slate-600'}`}>
               {isAvailable ? (offer.monthlyFee || '$99 / mo') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-purple-200/90' : 'text-slate-600'}`}>
