@@ -179,36 +179,36 @@ export default function ApplicationReviewModal({
       <div className="w-full max-w-5xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_50px_rgba(0,240,255,0.4)] flex flex-col max-h-[92vh] overflow-hidden my-auto">
         
         {/* Top Header Banner */}
-        <div className="px-6 py-4 border-b border-cyan-500/20 bg-gradient-to-r from-[#040819] via-[#091538] to-[#040819] shrink-0">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.25)] shrink-0">
-                <Building2 className="h-6 w-6" />
+        <div className="px-3.5 sm:px-6 py-2.5 sm:py-4 border-b border-cyan-500/20 bg-gradient-to-r from-[#040819] via-[#091538] to-[#040819] shrink-0">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.25)] shrink-0">
+                <Building2 className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight truncate">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <h2 className="text-base sm:text-xl font-black text-white tracking-tight truncate max-w-[200px] sm:max-w-none">
                     {app.legalName || app.fullName}
                   </h2>
                   {app.refId && (
                     <button
                       type="button"
                       onClick={() => handleCopy(app.refId || '', 'refId')}
-                      className="inline-flex items-center gap-1 font-mono text-[11px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-2 py-0.5 rounded-full font-bold hover:bg-cyan-900/50 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 font-mono text-[10px] sm:text-[11px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-1.5 sm:px-2 py-0.5 rounded-full font-bold hover:bg-cyan-900/50 transition-colors cursor-pointer shrink-0"
                       title="Click to copy Ref ID"
                     >
                       <span>{app.refId}</span>
-                      {copiedField === 'refId' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                      {copiedField === 'refId' ? <Check className="h-2.5 w-2.5 text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
                     </button>
                   )}
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 shrink-0">
                     Tenant: {app.resellerId || 'admin_root'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span>Application ID: <span className="font-mono text-cyan-300">{app._id}</span></span>
-                  <span>•</span>
-                  <span>Submitted: {new Date(app.createdAt).toLocaleDateString()}</span>
+                <p className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1.5 sm:gap-2 mt-0.5 flex-wrap">
+                  <span className="truncate max-w-[140px] sm:max-w-none">ID: <span className="font-mono text-cyan-300">{app._id}</span></span>
+                  <span className="hidden xs:inline">•</span>
+                  <span className="hidden xs:inline">{new Date(app.createdAt).toLocaleDateString()}</span>
                   <span>•</span>
                   <span className="capitalize text-slate-300">
                     Industry: <strong className="text-cyan-300">{app.industry?.replace('-', ' ') || 'General Business'}</strong>
@@ -217,77 +217,77 @@ export default function ApplicationReviewModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Application Status Pill */}
               {app.applicationStatus === 'approved' && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Approved Active
+                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden xs:inline">Approved Active</span><span className="xs:hidden">Approved</span>
                 </span>
               )}
               {app.applicationStatus === 'under_review' && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5" />
-                  Under Review
+                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center gap-1">
+                  <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden xs:inline">Under Review</span><span className="xs:hidden">Review</span>
                 </span>
               )}
               {app.applicationStatus === 'rejected' && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold text-red-300 bg-red-500/15 border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.3)] flex items-center gap-1.5">
-                  <AlertCircle className="h-3.5 w-3.5" />
+                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-red-300 bg-red-500/15 border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.3)] flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   Declined
                 </span>
               )}
               {app.applicationStatus === 'draft' && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold text-slate-400 bg-slate-800 border border-slate-700">
-                  Draft Onboarding
+                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-400 bg-slate-800 border border-slate-700">
+                  Draft
                 </span>
               )}
 
               <button
                 type="button"
                 onClick={onClose}
-                className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-white p-1 sm:p-2 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer"
                 title="Close Underwriting Window (Esc)"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </div>
           </div>
 
           {/* Underwriting Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-cyan-500/15 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-cyan-500/15 overflow-x-auto no-scrollbar scrollbar-none">
             <button
               type="button"
               onClick={() => setActiveTab('dossier')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                 activeTab === 'dossier'
                   ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
               }`}
             >
-              <FileCheck className="h-4 w-4 text-cyan-400" />
-              <span>Merchant Profile & Dossier</span>
+              <FileCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-400" />
+              <span className="hidden xs:inline">Merchant Profile &</span> Dossier
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('documents')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                 activeTab === 'documents'
                   ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
               }`}
             >
-              <FileText className="h-4 w-4 text-cyan-400" />
-              <span>KYC Compliance Docs</span>
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-cyan-400" />
+              <span>KYC Docs</span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                className={`px-1.5 py-0.2 rounded-full text-[9px] sm:text-[10px] font-bold ${
                   uploadedDocsCount > 0
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40'
                     : 'bg-amber-500/20 text-amber-300 border border-amber-400/40'
                 }`}
               >
-                {uploadedDocsCount}/3 Uploaded
+                {uploadedDocsCount}/3
               </span>
             </button>
 
@@ -922,39 +922,42 @@ export default function ApplicationReviewModal({
         </div>
 
         {/* Persistent Bottom Underwriter Action Bar (Visible across all tabs) */}
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-cyan-500/20 bg-[#040817] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400">
+        <div className="px-3 sm:px-6 py-2 sm:py-3.5 border-t border-cyan-500/20 bg-[#040817] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-1.5 sm:gap-3 shrink-0">
+          <div className="hidden sm:flex items-center gap-2 sm:gap-3 text-xs text-slate-400">
             <span className="font-semibold text-white">Underwriting Actions:</span>
             <span className="hidden md:inline text-slate-500">
               Review documents and verify details before confirming live processing.
             </span>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+          <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-row sm:items-center sm:gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               disabled={reviewLoading}
               onClick={() => onDecision('rejected')}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[42px]"
+              className="w-full sm:w-auto px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-[11px] sm:text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[36px] sm:min-h-[42px]"
             >
-              Decline Application
+              <span className="sm:hidden">Decline</span>
+              <span className="hidden sm:inline">Decline Application</span>
             </button>
 
             <button
               type="button"
               disabled={reviewLoading}
               onClick={onSubmitOffer}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[42px]"
+              className="w-full sm:w-auto px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-[11px] sm:text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_22px_rgba(217,70,239,0.8)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 min-h-[36px] sm:min-h-[42px]"
             >
               {reviewLoading ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-                  <span>Submitting Offer...</span>
+                  <Loader2 className="h-3 w-3 animate-spin text-white" />
+                  <span className="hidden sm:inline">Submitting...</span>
+                  <span className="sm:hidden">Saving...</span>
                 </>
               ) : (
                 <>
-                  <Tag className="h-3.5 w-3.5" />
-                  <span>{app.offer?.isAvailable ? 'Update Processing Offer' : 'Submit Processing Offer'}</span>
+                  <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+                  <span className="sm:hidden">Offer</span>
+                  <span className="hidden sm:inline">{app.offer?.isAvailable ? 'Update Processing Offer' : 'Submit Processing Offer'}</span>
                 </>
               )}
             </button>
@@ -963,17 +966,19 @@ export default function ApplicationReviewModal({
               type="button"
               disabled={reviewLoading}
               onClick={() => onDecision('approved')}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[42px]"
+              className="w-full sm:w-auto px-2.5 sm:px-6 py-2 sm:py-2.5 rounded-xl sm:rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_16px_rgba(16,185,129,0.6)] hover:shadow-[0_0_25px_rgba(16,185,129,0.85)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 min-h-[36px] sm:min-h-[42px]"
             >
               {reviewLoading ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                  <span>Broadcasting Approval...</span>
+                  <Loader2 className="h-3 w-3 animate-spin text-slate-950" />
+                  <span className="hidden sm:inline">Broadcasting...</span>
+                  <span className="sm:hidden">Approving...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
-                  <span>Approve Application</span>
+                  <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
+                  <span className="sm:hidden">Approve</span>
+                  <span className="hidden sm:inline">Approve Application</span>
                 </>
               )}
             </button>
