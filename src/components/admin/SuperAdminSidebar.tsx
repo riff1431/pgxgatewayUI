@@ -97,9 +97,9 @@ export default function SuperAdminSidebar({
   ]
 
   return (
-    <aside className={`w-full select-none ${className}`}>
+    <aside className={`w-full max-w-full min-w-0 select-none ${className}`}>
       {/* MOBILE (< lg): Compact Admin Identity & Horizontal Tab Rail */}
-      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
+      <div className="block lg:hidden w-full max-w-full min-w-0 overflow-hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
         <div className="flex items-center justify-between gap-3 pb-2 border-b border-amber-500/20">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.35)]">
@@ -139,7 +139,7 @@ export default function SuperAdminSidebar({
         </div>
 
         {/* Mobile Horizontal Tab Rail */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+        <div className="w-full max-w-full min-w-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = activeTab === item.id

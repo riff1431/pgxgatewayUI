@@ -32,17 +32,17 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4.5rem)] max-w-[1440px] mx-auto p-4 sm:p-6 lg:p-8 relative">
+    <div className="w-full max-w-[1440px] min-w-0 min-h-[calc(100vh-4.5rem)] mx-auto p-3.5 sm:p-6 lg:p-8 relative overflow-x-hidden">
       
       {/* Background Radial Glows */}
       <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-cyan-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-fuchsia-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
 
       {/* Main Grid: Sidebar on Left, Content on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <div className="w-full max-w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
         
         {/* Left Sidebar (Col 3 on desktop) */}
-        <div className="lg:col-span-3 w-full">
+        <div className="lg:col-span-3 w-full max-w-full min-w-0">
           <Sidebar
             activeTab={activeTab}
             onTabChange={handleTabChange}
@@ -50,16 +50,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Content Area (Col 9 on desktop) */}
-        <div className="lg:col-span-9 space-y-6">
+        <div className="lg:col-span-9 w-full max-w-full min-w-0 space-y-5 sm:space-y-6">
           
           {/* TAB 1: Dashboard (Overview) */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-5 sm:space-y-6 animate-fade-in w-full min-w-0">
               {/* Welcome Header + Hologram Card Visual */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 relative">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 relative w-full min-w-0">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                   {merchant?.avatarUrl ? (
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-blue-500 shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-blue-500 shadow-[0_0_20px_rgba(0,240,255,0.4)] shrink-0">
                       <div className="w-full h-full rounded-full overflow-hidden bg-[#050a1d]">
                         <img
                           src={merchant.avatarUrl}
@@ -69,18 +69,18 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   ) : null}
-                  <div className="space-y-1">
-                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
+                  <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
+                    <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] break-words">
                       Welcome, {displayName}
                     </h1>
-                    <p className="text-sm sm:text-base text-slate-300">
+                    <p className="text-xs sm:text-base text-slate-300">
                       Track your application, configure website integration, and view your processing offer.
                     </p>
                   </div>
                 </div>
 
                 {/* Hologram Card (right aligned) */}
-                <div className="hidden md:flex justify-end pr-4">
+                <div className="hidden md:flex justify-end pr-4 shrink-0">
                   <HologramCard size="sm" />
                 </div>
               </div>

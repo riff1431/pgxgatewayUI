@@ -74,21 +74,21 @@ export default function ResellerSidebar({
   ]
 
   return (
-    <aside className={`w-full select-none ${className}`}>
+    <aside className={`w-full max-w-full min-w-0 select-none ${className}`}>
       
       {/* MOBILE (< lg): Compact Partner Header & Horizontal Tab Rail */}
-      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
+      <div className="block lg:hidden w-full max-w-full min-w-0 overflow-hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
         {/* Mobile Top Row: Identity + Quick Referral Copy */}
-        <div className="flex items-center justify-between gap-3 pb-2 border-b border-cyan-500/20">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center justify-between gap-2.5 pb-2 border-b border-cyan-500/20 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-blue-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
               <div className="w-full h-full rounded-[9px] bg-[#040819] flex items-center justify-center text-cyan-300">
                 <Building2 className="h-4 w-4" />
               </div>
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-white truncate flex items-center gap-1">
-                <span>{adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Admin' : (adminUser?.name || 'Reseller Gateway')}</span>
+                <span className="truncate">{adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Admin' : (adminUser?.name || 'Reseller Gateway')}</span>
                 <ShieldCheck className="h-3 w-3 text-cyan-400 shrink-0" />
               </div>
               <div className="text-[10px] font-mono text-cyan-300 truncate">
@@ -117,7 +117,7 @@ export default function ResellerSidebar({
         </div>
 
         {/* Mobile Horizontal Tab Rail */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+        <div className="w-full max-w-full min-w-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = activeSection === item.id

@@ -53,13 +53,13 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
   }
 
   return (
-    <aside className={`w-full lg:w-64 select-none ${className}`}>
+    <aside className={`w-full max-w-full min-w-0 lg:w-64 select-none ${className}`}>
       
       {/* MOBILE (< lg): Sleek Horizontal Sticky Nav Header */}
-      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-4">
+      <div className="block lg:hidden w-full max-w-full min-w-0 overflow-hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-4">
         {/* Mobile Top Row: Merchant Identity + Sign Out */}
-        <div className="flex items-center justify-between gap-3 pb-2 border-b border-cyan-500/20">
-          <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center justify-between gap-3 pb-2 border-b border-cyan-500/20 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <div className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 to-fuchsia-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
               <div className="w-full h-full rounded-full overflow-hidden bg-[#040819] flex items-center justify-center">
                 {merchant?.avatarUrl ? (
@@ -73,7 +73,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                 )}
               </div>
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-white truncate">
                 {merchant?.fullName || 'Merchant Account'}
               </div>
@@ -95,7 +95,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
         </div>
 
         {/* Mobile Tab Rail: Horizontally Scrollable Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+        <div className="w-full max-w-full min-w-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = currentTab === item.id

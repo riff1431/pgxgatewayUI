@@ -507,7 +507,7 @@ Status: ${reseller.status.toUpperCase()}`
 
   // AUTHENTICATED SUPER ADMIN COMMAND CENTER
   return (
-    <div className="min-h-screen pb-16 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto space-y-6 pt-4 animate-fade-in relative">
+    <div className="w-full max-w-[1440px] min-w-0 min-h-screen pb-16 px-3.5 sm:px-6 lg:px-8 mx-auto space-y-5 sm:space-y-6 pt-4 animate-fade-in relative overflow-x-hidden">
       {/* Toast Notification */}
       {toastMessage && (
         <div
@@ -530,17 +530,17 @@ Status: ${reseller.status.toUpperCase()}`
       )}
 
       {/* Top Header Bar */}
-      <header className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-[#060b20]/90 border border-amber-400/40 backdrop-blur-2xl shadow-[0_0_30px_rgba(251,191,36,0.15)]">
-        <div className="flex items-center gap-4">
+      <header className="w-full min-w-0 flex flex-wrap items-center justify-between gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-3xl bg-[#060b20]/90 border border-amber-400/40 backdrop-blur-2xl shadow-[0_0_30px_rgba(251,191,36,0.15)]">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <Logo size="sm" />
-          <div className="h-8 w-px bg-amber-500/20" />
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/80 text-amber-300 text-xs font-mono font-bold">
-            <ShieldCheck className="h-4 w-4" />
-            <span>SUPER ADMIN COMMAND CENTER</span>
+          <div className="h-8 w-px bg-amber-500/20 hidden xs:block" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-400/80 text-amber-300 text-[11px] sm:text-xs font-mono font-bold truncate">
+            <ShieldCheck className="h-4 w-4 shrink-0" />
+            <span className="truncate">SUPER ADMIN COMMAND CENTER</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={() => {
               fetchSuperAdminData()
@@ -570,10 +570,10 @@ Status: ${reseller.status.toUpperCase()}`
 
       
       {/* Super Admin Dashboard Grid: Sidebar (3 Cols) + Main Content (9 Cols) */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-7 items-start">
+      <div className="w-full max-w-full min-w-0 flex flex-col lg:flex-row gap-5 lg:gap-7 items-start">
         
         {/* Left Sidebar (Col 3 on desktop) */}
-        <div className="w-full lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-4">
+        <div className="w-full max-w-full min-w-0 lg:w-72 xl:w-80 shrink-0 lg:sticky lg:top-4">
           <SuperAdminSidebar
             activeTab={activeTab}
             onTabChange={(tab) => setActiveTab(tab)}
@@ -594,7 +594,7 @@ Status: ${reseller.status.toUpperCase()}`
         </div>
 
         {/* Main Content Area (Col 9 on desktop) */}
-        <div className="flex-1 min-w-0 w-full space-y-6">
+        <div className="w-full max-w-full min-w-0 flex-1 space-y-5 sm:space-y-6">
           {/* Telemetry Hero Bar in Main Content */}
           <SuperAdminAnalyticsBar
             onRefresh={() => {
