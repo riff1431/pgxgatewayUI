@@ -42,72 +42,18 @@ The platform owner manages gateway-wide Stripe keys, white-glove onboarding, int
 
 ---
 
-### 2. 🤝 Reseller (Pure Affiliate Partner — Zero Stripe Requirement)
-Resellers function purely as affiliate growth partners with zero Stripe integration required, eliminating account ban risks.
-
-- **Live URL:** [https://pgxgateway.com/admin](https://pgxgateway.com/admin)
-- **Email:** `reseller@demo.com`
-- **Password:** `ResellerPass2026!`
-- **Reseller ID:** `reseller_demo_partner`
-- **Unique Live Referral Link:** [https://pgxgateway.com/register?reseller=reseller_demo_partner](https://pgxgateway.com/register?reseller=reseller_demo_partner)
-
-#### Economics & Commissions to Verify on Live Domain:
-- **Setup Fee Commission (20%):** Automatically earns **$90.00** when a referred merchant pays the standard $450 setup fee.
-- **Weekly Volume Commission (2%):** Earns **$200.00** per $10,000 weekly volume processed by referred merchants.
-- **Affiliate Portal View:**
-  - View total referred merchants (`merchant.new@demo.com`, `merchant.paid@demo.com`).
-  - Track accrued affiliate profit and current prepaid balance ($90.00+).
-
----
-
-### 3. 🔒 Merchant 1: Unpaid Account (Paywall & Setup Fee Testing)
-A registered merchant awaiting initial setup fee payment to test the lock state and Stripe checkout paywall.
-
-- **Live URL:** [https://pgxgateway.com/login](https://pgxgateway.com/login)
-- **Email:** `merchant.new@demo.com`
-- **Password:** `MerchantPass2026!`
-- **Current Milestone:** `payment_pending` (Stage 1)
-- **Referred By:** `reseller_demo_partner`
-
-#### Flow to Test on Live Domain:
-1. Log in and navigate to the **Integration** tab (`https://pgxgateway.com/dashboard?tab=integration`).
-2. Verify the **$450.00 Setup Fee Paywall** is active and locks the GitHub collaboration desk and `.env` vault.
-3. Click **"Pay $450.00 Setup Fee via Stripe"** to initiate the Stripe checkout session.
-
----
-
-### 4. 🚀 Merchant 2: Paid & Active (Full White-Glove Desk & Invoices Testing)
-A paid merchant actively undergoing integration with full access to the white-glove collaboration desk, live chat, and weekly invoicing engine.
-
-- **Live URL:** [https://pgxgateway.com/login](https://pgxgateway.com/login)
-- **Email:** `merchant.paid@demo.com`
-- **Password:** `MerchantPass2026!`
-- **Current Milestone:** `in_development` (Stage 4 of 7)
-- **Hosting Provider:** `Vercel`
-- **Tech Stack:** `Next.js / React`
-- **Preferred Domain:** `https://davidbrandstore.com`
-- **Git Repo:** `https://github.com/david-merchant/luxury-store.git`
-
-#### Key Capabilities to Test on Live Domain:
-1. **White-Glove Integration Desk (`https://pgxgateway.com/dashboard?tab=integration`):**
-   - Active 7-stage visual milestone stepper highlighting `In Development`.
-   - **GitHub Collaborator Card:** 1-click copy `huipper-dev` and mark collaboration invite sent.
-   - **PRD Metadata Form:** Update hosting provider, tech stack, and integration notes.
-   - **Secure `.env` Credential Vault:** View masked environment secrets, toggle show/hide, edit and save securely.
-2. **Live Integration Chat:**
-   - Real-time conversation thread between Merchant and Super Admin via WebSockets.
-3. **Weekly Invoices Tab (`https://pgxgateway.com/dashboard?tab=invoices`):**
-   - View issued invoice `INV-2026-WK45-001` ($10,000 volume $\times$ 9% = **$900.00** payable fee).
-   - Test **"Pay with Stripe"** online checkout.
-   - Test **"Upload Bank Wire Transfer Proof"** modal to submit transfer receipt for manual verification.
-
----
-
-### 5. ⚙️ Root Administrator (Alternative Admin Console)
+### 2. ⚙️ Root Administrator (Alternative Admin Console)
 - **Live URL:** [https://pgxgateway.com/admin](https://pgxgateway.com/admin)
 - **Email:** `admin@pgxgateway.com`
 - **Password:** `AdminSecurePass2026!`
 - **Role:** `admin` / `admin_root`
+
+---
+
+## 🔒 Production Clean State Status
+- **Demo Reseller (`reseller@demo.com`):** Permanently Suspended & Access Revoked.
+- **Demo Merchants (`merchant.new@demo.com`, `merchant.paid@demo.com`):** Permanently Deleted from MongoDB Atlas.
+- **Active Real Merchants:** 5 verified live registrations under Primary Root Gateway.
 
 ---
 
