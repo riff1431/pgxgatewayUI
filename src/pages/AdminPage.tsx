@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
   ShieldCheck,
-  Users,
+  ShieldAlert,
   Clock,
-  CheckCircle2,
   XCircle,
   Search,
   Lock,
@@ -25,6 +24,16 @@ import {
   EyeOff,
   Trash2,
   AlertTriangle,
+  BrainCircuit,
+  Sparkles,
+  Cpu,
+  Radar,
+  ScanFace,
+  Activity,
+  Terminal,
+  Zap,
+  Boxes,
+  Fingerprint,
 } from 'lucide-react'
 import {
   adminApi,
@@ -702,73 +711,80 @@ export default function AdminPage() {
           {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Merchants */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between group hover:border-cyan-300 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Applicants</div>
+            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Total Applicants</span>
+            </div>
             <div className="text-2xl sm:text-3xl font-black text-white mt-1">{stats.totalMerchants}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
-            <Users className="h-5 w-5" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+            <Cpu className="h-5 w-5 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
           </div>
         </div>
 
         {/* Pending Review */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.3)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.3)] flex items-center justify-between group hover:border-amber-300 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider">Pending Review</div>
+            <div className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+              <span>Pending Review</span>
+            </div>
             <div className="text-2xl sm:text-3xl font-black text-amber-300 mt-1">{stats.pendingReview}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300">
-            <Clock className="h-5 w-5" />
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)]">
+            <Radar className="h-5 w-5 animate-[spin_6s_linear_infinite] drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
           </div>
         </div>
 
         {/* Approved */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.3)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.3)] flex items-center justify-between group hover:border-emerald-300 transition-all">
           <div>
             <div className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider">Approved Active</div>
             <div className="text-2xl sm:text-3xl font-black text-emerald-300 mt-1">{stats.approved}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300">
-            <CheckCircle2 className="h-5 w-5" />
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
+            <ShieldCheck className="h-5 w-5 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
           </div>
         </div>
 
         {/* Rejected */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.25)] flex items-center justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.25)] flex items-center justify-between group hover:border-red-400 transition-all">
           <div>
             <div className="text-[11px] font-semibold text-red-400 uppercase tracking-wider">Declined</div>
             <div className="text-2xl sm:text-3xl font-black text-red-400 mt-1">{stats.rejected}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-400/60 flex items-center justify-center text-red-400">
-            <XCircle className="h-5 w-5" />
+          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-400/60 flex items-center justify-center text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
+            <ShieldAlert className="h-5 w-5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
           </div>
         </div>
       </div>
 
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Tabs */}
+        {/* Tabs with AI & Cyberpunk Icons */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {[
-            { id: 'all', label: `All Applications (${stats.totalMerchants})` },
-            { id: 'under_review', label: `Pending Review (${stats.pendingReview})` },
-            { id: 'approved', label: `Approved (${stats.approved})` },
-            { id: 'rejected', label: `Declined (${stats.rejected})` },
+            { id: 'all', label: `All Applications (${stats.totalMerchants})`, icon: Boxes },
+            { id: 'under_review', label: `Pending Review (${stats.pendingReview})`, icon: Radar },
+            { id: 'approved', label: `Approved (${stats.approved})`, icon: ShieldCheck },
+            { id: 'rejected', label: `Declined (${stats.rejected})`, icon: XCircle },
           ].map((tab) => {
+            const Icon = tab.icon
             const isActive = statusFilter === tab.id
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setStatusFilter(tab.id as typeof statusFilter)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
                   isActive
                     ? 'bg-gradient-to-r from-purple-700 to-fuchsia-600 text-white shadow-[0_0_15px_rgba(217,70,239,0.6)] border border-fuchsia-400'
                     : 'bg-[#08102a] text-slate-400 hover:text-white border border-cyan-500/20 hover:border-cyan-400/40'
                 }`}
               >
-                {tab.label}
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-cyan-400/70'}`} />
+                <span>{tab.label}</span>
               </button>
             )
           })}
@@ -795,13 +811,48 @@ export default function AdminPage() {
           <table className="w-full text-left text-xs min-w-[1050px]">
             <thead className="bg-[#091332] border-b border-cyan-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-5 py-3.5 whitespace-nowrap min-w-[230px]">Company & Legal Name</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Merchant Contact</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">Est. Volume</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">KYC Docs</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">Status</th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">Offer</th>
-                <th className="px-5 py-3.5 whitespace-nowrap text-right min-w-[170px]">Actions</th>
+                <th className="px-5 py-3.5 whitespace-nowrap min-w-[230px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <BrainCircuit className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    Company & Legal Name
+                  </span>
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <Fingerprint className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    Merchant Contact
+                  </span>
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <Zap className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    Est. Volume
+                  </span>
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <ScanFace className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    AI KYC Docs
+                  </span>
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <Activity className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    Status
+                  </span>
+                </th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">
+                  <span className="flex items-center gap-1.5 text-cyan-300/90">
+                    <Sparkles className="h-3.5 w-3.5 text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.7)]" />
+                    Offer
+                  </span>
+                </th>
+                <th className="px-5 py-3.5 whitespace-nowrap text-right min-w-[170px]">
+                  <span className="flex items-center justify-end gap-1.5 text-cyan-300/90">
+                    <Terminal className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
+                    Actions
+                  </span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
@@ -900,7 +951,7 @@ export default function AdminPage() {
                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 cursor-pointer transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] hover:shadow-[0_0_15px_rgba(16,185,129,0.35)]"
                             title="Click to inspect all uploaded KYC documents"
                           >
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                            <ScanFace className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                             <span>{uploadedDocsCount}/3 Verified</span>
                           </button>
                         ) : (
@@ -986,7 +1037,7 @@ export default function AdminPage() {
                             className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:brightness-110 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] cursor-pointer transition-all inline-flex items-center gap-1.5"
                             title="Review Merchant Dossier & Manage Underwriting Offer"
                           >
-                            <Tag className="h-3 w-3" />
+                            <Sparkles className="h-3.5 w-3.5 text-fuchsia-200 animate-pulse" />
                             <span>Review & Offer</span>
                           </button>
 
@@ -1118,7 +1169,7 @@ export default function AdminPage() {
                           onClick={() => openReviewModal(app, 'documents')}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 cursor-pointer"
                         >
-                          <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                          <ScanFace className="h-3 w-3 text-emerald-400" />
                           <span>{uploadedDocsCount}/3 Verified</span>
                         </button>
                       ) : (
@@ -1171,7 +1222,7 @@ export default function AdminPage() {
                     onClick={() => openReviewModal(app)}
                     className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all shadow-[0_0_12px_rgba(217,70,239,0.5)]"
                   >
-                    <Tag className="h-3.5 w-3.5" />
+                    <Sparkles className="h-3.5 w-3.5 text-fuchsia-200" />
                     <span>Review & Offer</span>
                   </button>
 

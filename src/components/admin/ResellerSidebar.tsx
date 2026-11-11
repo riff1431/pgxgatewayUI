@@ -1,7 +1,7 @@
 import {
-  Users,
+  BrainCircuit,
   Coins,
-  Receipt,
+  Activity,
   Building2,
   Copy,
   Check,
@@ -55,7 +55,7 @@ export default function ResellerSidebar({
     {
       id: 'applications',
       label: 'Merchant Applications',
-      icon: Users,
+      icon: BrainCircuit,
       badge: pendingCount > 0 ? pendingCount : totalMerchants > 0 ? totalMerchants : undefined,
       badgeColor: pendingCount > 0 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : undefined,
     },
@@ -69,7 +69,7 @@ export default function ResellerSidebar({
     {
       id: 'transactions',
       label: 'Gateway Transactions',
-      icon: Receipt,
+      icon: Activity,
     },
   ]
 
