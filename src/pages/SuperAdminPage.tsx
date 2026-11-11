@@ -1488,7 +1488,7 @@ Status: ${reseller.status.toUpperCase()}`
                   <Calculator className="h-3.5 w-3.5 text-amber-400" />
                   <span>Projected Monthly Income Split by Volume</span>
                 </div>
-                <div className="min-w-[320px]">
+                <div className="w-full min-w-[280px]">
                   <div className="grid grid-cols-4 gap-2 text-[10px] border-b border-slate-800 pb-1.5 font-bold text-slate-400 uppercase font-mono">
                     <div>Volume</div>
                     <div className="text-amber-300">You ({editBasePlatformFee.toFixed(1)}%)</div>

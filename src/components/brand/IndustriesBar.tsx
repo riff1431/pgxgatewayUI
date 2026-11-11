@@ -26,7 +26,7 @@ const industries = [
 export default function IndustriesBar({ className = '' }: { className?: string }) {
   return (
     <div className={`w-full max-w-full min-w-0 overflow-hidden ${className}`}>
-      <div className="w-full max-w-full rounded-2xl bg-[#070d24]/90 border border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 sm:p-4 backdrop-blur-md overflow-x-auto">
+      <div className="w-full max-w-full rounded-2xl bg-[#070d24]/90 border border-cyan-400/60 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 sm:p-4 backdrop-blur-md overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
         <div className="flex items-center justify-between min-w-[950px] gap-4">
           
           {/* Header Title with Checkmark */}

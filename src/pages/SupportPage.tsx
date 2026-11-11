@@ -261,7 +261,7 @@ export default function SupportPage() {
 
       {/* Support Ticket Submission Form */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="rounded-3xl bg-[#060c28]/95 border-2 border-cyan-500/40 p-6 sm:p-10 shadow-[0_0_35px_rgba(0,240,255,0.2)]">
+        <div className="rounded-3xl bg-[#060c28]/95 border-2 border-cyan-500/40 p-4 sm:p-8 lg:p-10 shadow-[0_0_35px_rgba(0,240,255,0.2)]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
             {/* Left Col: Info */}

@@ -549,7 +549,7 @@ export default function SolutionsPage() {
           </p>
         </div>
 
-        <div className="overflow-x-auto rounded-3xl border border-cyan-500/30 bg-[#060c24]/90 shadow-[0_0_25px_rgba(0,240,255,0.15)]">
+        <div className="w-full max-w-full min-w-0 overflow-x-auto rounded-3xl border border-cyan-500/30 bg-[#060c24]/90 shadow-[0_0_25px_rgba(0,240,255,0.15)]">
           <table className="w-full text-left border-collapse text-xs sm:text-sm min-w-[650px]">
             <thead>
               <tr className="border-b border-cyan-500/20 bg-[#091338]/80 text-slate-300">
