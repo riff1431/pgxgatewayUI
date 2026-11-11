@@ -21,13 +21,13 @@ interface NavbarProps {
   isDashboard?: boolean
 }
 
-export interface NavItem {
+interface NavItem {
   label: string
   path: string
   icon: LucideIcon
 }
 
-export const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   { label: 'Home', path: '/', icon: HomeIcon },
   { label: 'Solutions', path: '/solutions', icon: Zap },
   { label: 'Industries', path: '/industries', icon: Building2 },

@@ -39,11 +39,8 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
 
   const { register, login, updateProfile, logout, merchant, isAuthenticated } = useAuth()
   
-  const [isSignInMode, setIsSignInMode] = useState(isSignInRoute)
+  const isSignInMode = isSignInRoute
 
-  useEffect(() => {
-    setIsSignInMode(isSignInRoute)
-  }, [isSignInRoute])
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
@@ -251,7 +248,6 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
 
   const handleSwitchToSignInWithEmail = () => {
     navigate('/login')
-    setIsSignInMode(true)
     setGlobalError(null)
     setErrors({})
     setTimeout(() => {

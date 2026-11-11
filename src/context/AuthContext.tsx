@@ -369,14 +369,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const logout = () => {
+  const logout = useCallback(() => {
     removeStoredToken()
     setToken(null)
     setMerchant(null)
     setOffer(defaultOffer)
     disconnectSocket()
     addToast('Signed Out', 'You have been signed out.', 'info')
-  }
+  }, [addToast])
+
+  // Listen for global merchant authentication failure (401 token expiry)
+  useEffect(() => {
+    const handleAuthFailed = () => {
+      logout()
+    }
+    window.addEventListener('pgx_merchant_auth_failed', handleAuthFailed)
+    return () => {
+      window.removeEventListener('pgx_merchant_auth_failed', handleAuthFailed)
+    }
+  }, [logout])
 
   const acceptOffer = useCallback(async () => {
     try {

@@ -133,6 +133,12 @@ async function request<T = unknown>(
   const json = await response.json().catch(() => ({}))
 
   if (!response.ok) {
+    if (response.status === 401) {
+      removeStoredToken()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pgx_merchant_auth_failed'))
+      }
+    }
     throw new Error(json.message || `Request failed with status ${response.status}`)
   }
 
