@@ -64,102 +64,102 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
   const succeededCount = transactions.filter((t) => t.status === 'succeeded').length
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 sm:space-y-6 animate-fade-in w-full max-w-full min-w-0">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 w-full min-w-0">
         {/* Gross Volume */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between gap-2 min-w-0 overflow-hidden">
+          <div className="min-w-0 flex-1">
+            <div className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider truncate">
               {isSuperAdmin ? 'Global Gross Volume' : 'Gateway Volume'}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-white mt-1">
+            <div className="text-base sm:text-xl lg:text-2xl font-black text-white mt-0.5 sm:mt-1 truncate">
               ${totalGross.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5">{transactions.length} records</div>
+            <div className="text-[10px] text-slate-400 mt-0.5 truncate">{transactions.length} records</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
-            <DollarSign className="h-5 w-5" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shrink-0">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
         </div>
 
         {/* Card 2: Conditional between Super Admin 9% Fee vs Succeeded Txn Count */}
         {isSuperAdmin ? (
-          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-950/40 to-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.25)] flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-amber-300 uppercase tracking-wider">Super Admin 9% Cut</div>
-              <div className="text-xl sm:text-2xl font-black text-amber-300 mt-1">
+          <div className="p-3 sm:p-5 rounded-2xl bg-gradient-to-b from-amber-950/40 to-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.25)] flex items-center justify-between gap-2 min-w-0 overflow-hidden">
+            <div className="min-w-0 flex-1">
+              <div className="text-[9px] sm:text-[10px] font-semibold text-amber-300 uppercase tracking-wider truncate">Super Admin 9% Cut</div>
+              <div className="text-base sm:text-xl lg:text-2xl font-black text-amber-300 mt-0.5 sm:mt-1 truncate">
                 ${totalPlatformFees.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
-              <div className="text-[10px] text-amber-300/80 mt-0.5">Hardwired Platform Fee</div>
+              <div className="text-[10px] text-amber-300/80 mt-0.5 truncate">Hardwired Platform Fee</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
-              <TrendingUp className="h-5 w-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </div>
         ) : (
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)] flex items-center justify-between">
-            <div>
-              <div className="text-[10px] font-semibold text-emerald-300 uppercase tracking-wider">Succeeded Sales</div>
-              <div className="text-xl sm:text-2xl font-black text-emerald-300 mt-1">
+          <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)] flex items-center justify-between gap-2 min-w-0 overflow-hidden">
+            <div className="min-w-0 flex-1">
+              <div className="text-[9px] sm:text-[10px] font-semibold text-emerald-300 uppercase tracking-wider truncate">Succeeded Sales</div>
+              <div className="text-base sm:text-xl lg:text-2xl font-black text-emerald-300 mt-0.5 sm:mt-1 truncate">
                 {succeededCount}
               </div>
-              <div className="text-[10px] text-slate-400 mt-0.5">Completed Payments</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 truncate">Completed Payments</div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/50 flex items-center justify-center text-emerald-300 shrink-0">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/50 flex items-center justify-center text-emerald-300 shrink-0">
+              <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
           </div>
         )}
 
         {/* Reseller Profit Margin */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-fuchsia-400/60 shadow-[0_0_18px_rgba(217,70,239,0.25)] flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-semibold text-fuchsia-300 uppercase tracking-wider">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-fuchsia-400/60 shadow-[0_0_18px_rgba(217,70,239,0.25)] flex items-center justify-between gap-2 min-w-0 overflow-hidden">
+          <div className="min-w-0 flex-1">
+            <div className="text-[9px] sm:text-[10px] font-semibold text-fuchsia-300 uppercase tracking-wider truncate">
               {isSuperAdmin ? 'Resellers Total Margin' : 'Your Profit Margin'}
             </div>
-            <div className="text-xl sm:text-2xl font-black text-fuchsia-300 mt-1">
+            <div className="text-base sm:text-xl lg:text-2xl font-black text-fuchsia-300 mt-0.5 sm:mt-1 truncate">
               ${totalResellerProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-fuchsia-400/80 mt-0.5">Spread Income</div>
+            <div className="text-[10px] text-fuchsia-400/80 mt-0.5 truncate">Spread Income</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300 shrink-0">
-            <Coins className="h-5 w-5" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300 shrink-0">
+            <Coins className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
         </div>
 
         {/* Merchant Net Payout */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.25)] flex items-center justify-between">
-          <div>
-            <div className="text-[10px] font-semibold text-emerald-300 uppercase tracking-wider">Merchant Net Pool</div>
-            <div className="text-xl sm:text-2xl font-black text-emerald-300 mt-1">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.25)] flex items-center justify-between gap-2 min-w-0 overflow-hidden">
+          <div className="min-w-0 flex-1">
+            <div className="text-[9px] sm:text-[10px] font-semibold text-emerald-300 uppercase tracking-wider truncate">Merchant Net Pool</div>
+            <div className="text-base sm:text-xl lg:text-2xl font-black text-emerald-300 mt-0.5 sm:mt-1 truncate">
               ${totalMerchantNet.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
-            <div className="text-[10px] text-emerald-400/80 mt-0.5">Net Owed to Merchants</div>
+            <div className="text-[10px] text-emerald-400/80 mt-0.5 truncate">Net Owed to Merchants</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shrink-0">
-            <CheckCircle2 className="h-5 w-5" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shrink-0">
+            <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
         </div>
       </div>
 
       {/* Main Ledger Table Card */}
-      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl overflow-hidden">
+      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl overflow-hidden w-full max-w-full min-w-0">
         {/* Header Strip with Search & Filters */}
-        <div className="p-5 border-b border-cyan-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Receipt className="h-5 w-5 text-cyan-400" />
-            <h3 className="text-base font-bold text-white tracking-tight">
+        <div className="p-4 sm:p-5 border-b border-cyan-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 w-full min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <Receipt className="h-5 w-5 text-cyan-400 shrink-0" />
+            <h3 className="text-base font-bold text-white tracking-tight break-words">
               {isSuperAdmin ? 'Master Platform Transaction Ledger' : 'Reseller Transaction Ledger'}
             </h3>
-            <span className="text-xs font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-full ml-1">
+            <span className="text-xs font-mono text-cyan-300 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded-full shrink-0">
               {transactions.length} Records
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
             {/* Search Input */}
-            <div className="relative w-full sm:w-64">
+            <div className="relative w-full sm:w-64 min-w-0">
               <Search className="h-3.5 w-3.5 absolute left-3 top-3 text-slate-400" />
               <input
                 type="text"
@@ -171,7 +171,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
             </div>
 
             {/* Status Filter */}
-            <div className="flex items-center gap-1 bg-[#050a20] p-1 rounded-xl border border-cyan-500/30 text-xs font-semibold">
+            <div className="flex items-center gap-1 bg-[#050a20] p-1 rounded-xl border border-cyan-500/30 text-xs font-semibold overflow-x-auto max-w-full">
               {(['all', 'succeeded', 'pending', 'failed'] as const).map((s) => (
                 <button
                   key={s}
@@ -192,7 +192,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
               type="button"
               onClick={fetchTransactions}
               disabled={loading}
-              className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-400/50 text-cyan-300 hover:bg-cyan-500/20 cursor-pointer transition-all"
+              className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-400/50 text-cyan-300 hover:bg-cyan-500/20 cursor-pointer transition-all shrink-0"
               title="Refresh Transactions"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -201,7 +201,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
         </div>
 
         {/* Transactions Table with Horizontal Scrolling */}
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent w-full max-w-full min-w-0">
           <table className="w-full text-left border-collapse text-xs min-w-[950px]">
             <thead>
               <tr className="border-b border-cyan-500/20 bg-[#09153d]/50 text-slate-300 font-bold uppercase tracking-wider text-[10px]">

@@ -156,9 +156,9 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in w-full max-w-full min-w-0">
       {/* Top Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full max-w-full min-w-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
             White-Glove Integration Desk
@@ -190,7 +190,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-3.5 sm:p-4 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 w-full max-w-full min-w-0">
         {/* Status Filters */}
         <div className="flex-1 min-w-0 overflow-x-auto no-scrollbar py-0.5"><div className="flex items-center gap-1.5 whitespace-nowrap">
           {[
@@ -220,7 +220,7 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
         </div>
 
         {/* Search Input */}
-        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-72">
+        <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full md:w-72 shrink-0">
           <div className="relative w-full">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -241,8 +241,8 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
       </div>
 
       {/* Merchants Table */}
-      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
-        <div className="overflow-x-auto table-scrollbar">
+      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)] w-full max-w-full min-w-0">
+        <div className="overflow-x-auto table-scrollbar w-full max-w-full min-w-0">
           <table className="w-full text-left text-xs min-w-[850px]">
             <thead className="bg-[#091332] text-slate-300 font-semibold border-b border-cyan-500/20 uppercase tracking-wider text-[11px]">
               <tr>
@@ -385,8 +385,8 @@ export default function SuperAdminIntegrationDesk({ onSuccessToast, onErrorToast
 
       {/* ACTIVE WORKSPACE MODAL / DRAWER */}
       {activeMerchant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#050a1f] border-[1.5px] border-cyan-400/80 shadow-[0_0_40px_rgba(0,240,255,0.3)] p-6 sm:p-8 space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#050a1f] border-[1.5px] border-cyan-400/80 shadow-[0_0_40px_rgba(0,240,255,0.3)] p-4 sm:p-6 sm:p-8 space-y-6">
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-cyan-500/20">
               <div className="flex items-center gap-3">

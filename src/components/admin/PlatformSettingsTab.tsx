@@ -145,9 +145,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-8 animate-fade-in">
+    <form onSubmit={handleSave} className="space-y-6 sm:space-y-8 animate-fade-in w-full max-w-full min-w-0">
       {/* Header */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#091a45] to-[#071330] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#091a45] to-[#071330] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full max-w-full min-w-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
             Super Admin Platform & Payment Configuration
@@ -167,9 +167,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full max-w-full min-w-0">
         {/* Section 1: Super Admin Stripe Gateway (Left 7 Cols) */}
-        <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 sm:p-8 space-y-6">
+        <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-4 sm:p-6 sm:p-8 space-y-6 w-full max-w-full min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
@@ -361,7 +361,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         </div>
 
         {/* Section 2: Onboarding Setup Fee & GitHub Handle (Right 5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-5 space-y-6 w-full max-w-full min-w-0">
           {/* GitHub Handle Card */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
             <div className="flex items-center gap-3">

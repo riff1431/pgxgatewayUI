@@ -32,6 +32,8 @@ interface SuperAdminSidebarProps {
   onLogout?: () => void
   isRefreshing?: boolean
   className?: string
+  mobileOpen?: boolean
+  onMobileOpenChange?: (open: boolean) => void
 }
 
 export default function SuperAdminSidebar({
@@ -43,8 +45,18 @@ export default function SuperAdminSidebar({
   onLogout,
   isRefreshing = false,
   className = '',
+  mobileOpen,
+  onMobileOpenChange,
 }: SuperAdminSidebarProps) {
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [internalMobileOpen, setInternalMobileOpen] = useState(false)
+  const isDrawerOpen = mobileOpen !== undefined ? mobileOpen : internalMobileOpen
+  const setDrawerOpen = (open: boolean) => {
+    if (onMobileOpenChange) {
+      onMobileOpenChange(open)
+    } else {
+      setInternalMobileOpen(open)
+    }
+  }
   const navItems: Array<{
     id: SuperAdminTabId
     label: string
@@ -105,7 +117,7 @@ export default function SuperAdminSidebar({
 
   const handleTabClick = (tabId: SuperAdminTabId) => {
     onTabChange(tabId)
-    setIsMobileOpen(false)
+    setDrawerOpen(false)
   }
 
   return (
@@ -115,7 +127,7 @@ export default function SuperAdminSidebar({
         <div className="flex items-center justify-between gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] backdrop-blur-xl">
           <button
             type="button"
-            onClick={() => setIsMobileOpen(true)}
+            onClick={() => setDrawerOpen(true)}
             className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer group"
           >
             <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.35)]">
@@ -155,7 +167,7 @@ export default function SuperAdminSidebar({
 
             <button
               type="button"
-              onClick={() => setIsMobileOpen(true)}
+              onClick={() => setDrawerOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-[0_0_15px_rgba(251,191,36,0.5)] border border-amber-300 cursor-pointer shrink-0 transition-transform active:scale-95"
               aria-label="Open Navigation Menu"
             >
@@ -167,12 +179,12 @@ export default function SuperAdminSidebar({
       </div>
 
       {/* MOBILE (< lg): Slide-over Drawer with Backdrop */}
-      {isMobileOpen && (
+      {isDrawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity animate-fade-in"
-            onClick={() => setIsMobileOpen(false)}
+            onClick={() => setDrawerOpen(false)}
           />
 
           {/* Slide-out Menu Panel */}
@@ -194,7 +206,7 @@ export default function SuperAdminSidebar({
 
                 <button
                   type="button"
-                  onClick={() => setIsMobileOpen(false)}
+                  onClick={() => setDrawerOpen(false)}
                   className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
                   aria-label="Close menu"
                 >
@@ -262,7 +274,7 @@ export default function SuperAdminSidebar({
                   type="button"
                   onClick={() => {
                     onRefresh()
-                    setIsMobileOpen(false)
+                    setDrawerOpen(false)
                   }}
                   disabled={isRefreshing}
                   className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-[#091332] hover:bg-[#0d1a45] border border-amber-500/30 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"

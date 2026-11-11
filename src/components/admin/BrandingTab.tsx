@@ -143,9 +143,9 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
           </div>
         </div>
 
-        <form onSubmit={handleSaveBranding} className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <form onSubmit={handleSaveBranding} className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 w-full max-w-full min-w-0">
           {/* Form Fields (7 Cols) */}
-          <div className="lg:col-span-7 space-y-5">
+          <div className="lg:col-span-7 space-y-5 w-full max-w-full min-w-0">
             {/* Website / Platform Name */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-200 flex items-center justify-between">
@@ -360,7 +360,7 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
           </div>
 
           {/* WYSIWYG Real-Time Preview Card (5 Cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-4 w-full max-w-full min-w-0">
             <div className="p-4 rounded-2xl bg-[#040819] border border-amber-500/30 space-y-3 sticky top-6">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 border-b border-slate-800 pb-2">
                 <span>LIVE REAL-TIME BRAND PREVIEW</span>

@@ -25,6 +25,7 @@ import {
   Sliders,
   Calculator,
   Coins,
+  Menu,
 } from 'lucide-react'
 import {
   adminApi,
@@ -48,6 +49,7 @@ export default function SuperAdminPage() {
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<SuperAdminTabId>('overview')
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Super Admin Merchant Routing State
   const [superMerchants, setSuperMerchants] = useState<ApplicationItem[]>([])
@@ -541,6 +543,17 @@ Status: ${reseller.status.toUpperCase()}`
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          {/* Mobile Hamburger Menu Trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="lg:hidden px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(251,191,36,0.6)] border border-amber-300 transition-all shrink-0 active:scale-95"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="h-3.5 w-3.5" />
+            <span>Menu</span>
+          </button>
+
           <button
             onClick={() => {
               fetchSuperAdminData()
@@ -579,6 +592,8 @@ Status: ${reseller.status.toUpperCase()}`
             onTabChange={(tab) => setActiveTab(tab)}
             resellerCount={resellersList.length || analytics?.resellers?.length || 1}
             merchantCount={superMerchants.length}
+            mobileOpen={mobileSidebarOpen}
+            onMobileOpenChange={setMobileSidebarOpen}
             onRefresh={() => {
               fetchSuperAdminData()
               if (activeTab === 'resellers') fetchResellers()
@@ -605,17 +620,17 @@ Status: ${reseller.status.toUpperCase()}`
 
           {/* TAB 1: OVERVIEW & 9% AUDIT */}
       {activeTab === 'overview' && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-fade-in w-full max-w-full min-w-0">
           {/* Revenue Forecast Matrix */}
-          <div className="p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
-              <div className="flex items-center gap-2">
-                <Landmark className="h-5 w-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white tracking-tight">
+          <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-4 w-full max-w-full min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-amber-500/20">
+              <div className="flex items-center gap-2 min-w-0">
+                <Landmark className="h-5 w-5 text-amber-400 shrink-0" />
+                <h3 className="text-base font-bold text-white tracking-tight break-words">
                   Super Admin Commission Matrix (Hardwired 9.0%)
                 </h3>
               </div>
-              <span className="text-xs font-mono text-amber-300 bg-amber-950/70 border border-amber-500/40 px-3 py-1 rounded-full font-bold">
+              <span className="text-xs font-mono text-amber-300 bg-amber-950/70 border border-amber-500/40 px-3 py-1 rounded-full font-bold self-start sm:self-auto shrink-0">
                 Platform Cut: 9.0% Exact
               </span>
             </div>
@@ -666,10 +681,10 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* TAB 2: CONNECTED RESELLERS */}
       {activeTab === 'resellers' && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6 animate-fade-in w-full max-w-full min-w-0">
           {/* Credentials Card Banner (Appears on Provisioning or Password Reset) */}
           {provisionedReceipt && (
-            <div className="p-6 rounded-3xl bg-emerald-950/50 border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(52,211,153,0.35)] backdrop-blur-xl space-y-4 animate-scale-in">
+            <div className="p-4 sm:p-6 rounded-3xl bg-emerald-950/50 border-2 border-emerald-400/90 shadow-[0_0_35px_rgba(52,211,153,0.35)] backdrop-blur-xl space-y-4 animate-scale-in w-full max-w-full min-w-0">
               <div className="flex items-center justify-between pb-3 border-b border-emerald-500/30">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="h-6 w-6 text-emerald-400 shrink-0" />
@@ -690,7 +705,7 @@ Status: ${reseller.status.toUpperCase()}`
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-black/50 border border-emerald-500/30">
                   <div className="text-[10px] font-bold uppercase text-slate-400">Company / Partner</div>
                   <div className="font-bold text-white font-mono mt-0.5 truncate">{provisionedReceipt.name}</div>
@@ -735,15 +750,15 @@ Status: ${reseller.status.toUpperCase()}`
           )}
 
           {/* Resellers Table Container */}
-          <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl overflow-hidden">
-            <div className="p-5 border-b border-amber-500/20 flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
+          <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl overflow-hidden w-full max-w-full min-w-0">
+            <div className="p-4 sm:p-5 border-b border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 w-full min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
                 <Building2 className="h-5 w-5 text-amber-400 shrink-0" />
-                <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-white tracking-tight break-words">
                     Provisioned Reseller Tenants & Connected Stripe Accounts
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 break-words">
                     Each reseller operates their isolated Stripe gateway with independent sub-merchants. Scroll horizontally if needed.
                   </p>
                 </div>
@@ -752,7 +767,7 @@ Status: ${reseller.status.toUpperCase()}`
               <button
                 type="button"
                 onClick={handleOpenProvisionModal}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-black text-xs shadow-[0_0_20px_rgba(251,191,36,0.6)] cursor-pointer transition-all"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-black font-black text-xs shadow-[0_0_20px_rgba(251,191,36,0.6)] cursor-pointer transition-all w-full sm:w-auto shrink-0"
               >
                 <UserPlus className="h-4 w-4 stroke-[2.5]" />
                 <span>Provision New Reseller</span>
@@ -760,7 +775,7 @@ Status: ${reseller.status.toUpperCase()}`
             </div>
 
             {/* Responsive Table Wrapper with Horizontal Scrollbar */}
-            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent w-full max-w-full min-w-0">
               <table className="w-full text-left text-xs border-collapse min-w-[1150px]">
                 <thead>
                   <tr className="border-b border-amber-500/20 bg-[#09153d]/70 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
@@ -923,25 +938,25 @@ Status: ${reseller.status.toUpperCase()}`
 
       {/* TAB 3: SUB-MERCHANT ROUTING & TENANT REASSIGNMENT DESK */}
       {activeTab === 'merchants' && (
-        <div className="space-y-6 animate-fade-in">
-          <div className="p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-500/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+        <div className="space-y-6 animate-fade-in w-full max-w-full min-w-0">
+          <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.25)] backdrop-blur-xl space-y-5 w-full max-w-full min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-amber-500/20 w-full min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.3)] shrink-0">
                   <Users className="h-5 w-5" />
                 </div>
-                <div>
-                  <h3 className="text-base font-bold text-white tracking-tight">
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold text-white tracking-tight break-words">
                     Platform Sub-Merchant Tenant Routing Desk
                   </h3>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 break-words">
                     Audit and reassign sub-merchants to any reseller tenant node. Direct organic registrations default to Root.
                   </p>
                 </div>
               </div>
 
               {/* Search Input */}
-              <div className="relative w-full sm:w-72">
+              <div className="relative w-full sm:w-72 shrink-0 min-w-0">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="text"
@@ -954,7 +969,7 @@ Status: ${reseller.status.toUpperCase()}`
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-amber-500/30 scrollbar-track-transparent w-full max-w-full min-w-0">
               <table className="w-full text-left text-xs border-collapse min-w-[950px]">
                 <thead>
                   <tr className="border-b border-amber-500/20 bg-[#09153d]/70 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
