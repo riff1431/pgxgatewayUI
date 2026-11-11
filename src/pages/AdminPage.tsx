@@ -808,46 +808,46 @@ export default function AdminPage() {
       {/* DESKTOP TABLE VIEW (Screens >= 1024px) */}
       <div className="hidden lg:block rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_20px_rgba(0,240,255,0.3)] overflow-hidden backdrop-blur-xl">
         <div className="overflow-x-auto table-scrollbar">
-          <table className="w-full text-left text-xs min-w-[1050px]">
+          <table className="w-full text-left text-xs min-w-[890px]">
             <thead className="bg-[#091332] border-b border-cyan-500/20 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-5 py-3.5 whitespace-nowrap min-w-[230px]">
+                <th className="px-3.5 py-3 whitespace-nowrap min-w-[170px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <BrainCircuit className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
-                    Company & Legal Name
+                    Company
                   </span>
                 </th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">
+                <th className="px-3 py-3 whitespace-nowrap min-w-[150px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <Fingerprint className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
-                    Merchant Contact
+                    Contact
                   </span>
                 </th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[140px]">
+                <th className="px-2.5 py-3 whitespace-nowrap min-w-[105px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <Zap className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
-                    Est. Volume
+                    Volume
                   </span>
                 </th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">
+                <th className="px-2.5 py-3 whitespace-nowrap min-w-[110px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <ScanFace className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
-                    AI KYC Docs
+                    KYC Docs
                   </span>
                 </th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[130px]">
+                <th className="px-2.5 py-3 whitespace-nowrap min-w-[105px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <Activity className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
                     Status
                   </span>
                 </th>
-                <th className="px-4 py-3.5 whitespace-nowrap min-w-[160px]">
+                <th className="px-2.5 py-3 whitespace-nowrap min-w-[115px]">
                   <span className="flex items-center gap-1.5 text-cyan-300/90">
                     <Sparkles className="h-3.5 w-3.5 text-fuchsia-400 drop-shadow-[0_0_6px_rgba(217,70,239,0.7)]" />
                     Offer
                   </span>
                 </th>
-                <th className="px-5 py-3.5 whitespace-nowrap text-right min-w-[170px]">
+                <th className="px-3 py-3 whitespace-nowrap text-right min-w-[135px] sticky right-0 z-20 bg-[#091332] shadow-[-10px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20">
                   <span className="flex items-center justify-end gap-1.5 text-cyan-300/90">
                     <Terminal className="h-3.5 w-3.5 text-cyan-400 drop-shadow-[0_0_6px_rgba(0,240,255,0.7)]" />
                     Actions
@@ -875,12 +875,12 @@ export default function AdminPage() {
                   return (
                     <tr key={app._id} className="group hover:bg-[#0c1538]/70 border-b border-slate-800/60 hover:border-cyan-500/30 transition-all">
                       {/* Company Name with Cyber Monogram Avatar */}
-                      <td className="px-5 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
+                      <td className="px-3.5 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2.5">
                           <button
                             type="button"
                             onClick={() => openReviewModal(app, 'dossier')}
-                            className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-950 via-[#0b183f] to-purple-950/80 border border-cyan-400/40 flex items-center justify-center font-black text-xs text-cyan-300 shadow-[0_0_10px_rgba(0,240,255,0.2)] shrink-0 group-hover:border-cyan-300 group-hover:shadow-[0_0_14px_rgba(0,240,255,0.4)] transition-all cursor-pointer"
+                            className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-950 via-[#0b183f] to-purple-950/80 border border-cyan-400/40 flex items-center justify-center font-black text-[11px] text-cyan-300 shadow-[0_0_10px_rgba(0,240,255,0.2)] shrink-0 group-hover:border-cyan-300 group-hover:shadow-[0_0_14px_rgba(0,240,255,0.4)] transition-all cursor-pointer"
                             title="Open Dossier"
                           >
                             {getInitials(app.legalName)}
@@ -892,7 +892,7 @@ export default function AdminPage() {
                               className="text-left group/name block cursor-pointer"
                               title="Click to view full merchant dossier & underwriting details"
                             >
-                              <div className="font-bold text-white text-sm group-hover/name:text-cyan-300 transition-colors truncate max-w-[190px]">
+                              <div className="font-bold text-white text-xs group-hover/name:text-cyan-300 transition-colors truncate max-w-[130px]">
                                 {app.legalName || 'Unnamed Entity'}
                               </div>
                             </button>
@@ -901,7 +901,7 @@ export default function AdminPage() {
                                 <button
                                   type="button"
                                   onClick={(e) => handleCopyRefId(e, app.refId!)}
-                                  className="font-mono text-[9px] text-cyan-300/90 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 hover:border-cyan-400/60 px-1.5 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer"
+                                  className="font-mono text-[9px] text-cyan-300/90 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/30 hover:border-cyan-400/60 px-1 py-0.2 rounded flex items-center gap-1 transition-colors cursor-pointer"
                                   title="Click to copy Reference ID"
                                 >
                                   <span>{app.refId}</span>
@@ -912,7 +912,7 @@ export default function AdminPage() {
                                   )}
                                 </button>
                               )}
-                              <span className="text-[10px] text-slate-400 capitalize truncate max-w-[110px]">
+                              <span className="text-[10px] text-slate-400 capitalize truncate max-w-[80px]">
                                 {app.industry?.replace('-', ' ') || 'General'}
                               </span>
                             </div>
@@ -921,111 +921,111 @@ export default function AdminPage() {
                       </td>
 
                       {/* Contact */}
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="font-semibold text-slate-200 text-xs">{app.fullName || 'Unknown Contact'}</div>
-                        <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                          <Mail className="h-3 w-3 text-cyan-400/70 shrink-0" />
-                          <span className="truncate max-w-[160px]" title={app.businessEmail}>{app.businessEmail}</span>
+                      <td className="px-3 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-slate-200 text-xs truncate max-w-[140px]">{app.fullName || 'Unknown Contact'}</div>
+                        <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                          <Mail className="h-2.5 w-2.5 text-cyan-400/70 shrink-0" />
+                          <span className="truncate max-w-[130px]" title={app.businessEmail}>{app.businessEmail}</span>
                         </div>
                         {app.phone && (
-                          <div className="text-[10px] text-slate-500 font-mono mt-0.5">{app.phone}</div>
+                          <div className="text-[9px] text-slate-500 font-mono mt-0.5">{app.phone}</div>
                         )}
                       </td>
 
                       {/* Volume */}
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="inline-flex items-center px-2 py-0.5 rounded-md bg-cyan-950/50 border border-cyan-500/30 text-white font-bold text-xs">
-                          {app.monthlyVolume === 'under-10k' ? '< $10k / mo' : (app.monthlyVolume?.replace('-', ' ') || 'Not Specified')}
+                      <td className="px-2.5 py-3 whitespace-nowrap">
+                        <div className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-cyan-950/50 border border-cyan-500/30 text-white font-bold text-[11px]">
+                          {app.monthlyVolume === 'under-10k' ? '< $10k' : (app.monthlyVolume?.replace('-', ' ') || 'Not Specified')}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-1 truncate max-w-[130px]">
+                        <div className="text-[9px] text-slate-400 mt-0.5 truncate max-w-[100px]">
                           <span className="text-slate-500">Proc:</span> {app.currentProcessor || 'None'}
                         </div>
                       </td>
 
                       {/* Documents */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2.5 py-3 whitespace-nowrap">
                         {uploadedDocsCount > 0 ? (
                           <button
                             type="button"
                             onClick={() => openReviewModal(app, 'documents')}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 cursor-pointer transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] hover:shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 cursor-pointer transition-all shadow-[0_0_8px_rgba(16,185,129,0.2)]"
                             title="Click to inspect all uploaded KYC documents"
                           >
-                            <ScanFace className="h-3.5 w-3.5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+                            <ScanFace className="h-3 w-3 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
                             <span>{uploadedDocsCount}/3 Verified</span>
                           </button>
                         ) : (
                           <button
                             type="button"
                             onClick={() => openReviewModal(app, 'documents')}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold text-amber-300/90 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 cursor-pointer transition-all"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-amber-300/90 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 cursor-pointer transition-all"
                             title="Pending Upload - Click to inspect or request files"
                           >
-                            <Clock className="h-3.5 w-3.5 text-amber-400" />
+                            <Clock className="h-3 w-3 text-amber-400" />
                             <span>Pending Docs</span>
                           </button>
                         )}
                       </td>
 
                       {/* Status */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2.5 py-3 whitespace-nowrap">
                         {isUnderReview && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_10px_rgba(251,191,36,0.25)]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_8px_rgba(251,191,36,0.2)]">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                             <span>Under Review</span>
                           </span>
                         )}
                         {isApproved && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/70 shadow-[0_0_10px_rgba(16,185,129,0.25)]">
-                            <Check className="h-3 w-3 stroke-[3]" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/70 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+                            <Check className="h-2.5 w-2.5 stroke-[3]" />
                             <span>Approved</span>
                           </span>
                         )}
                         {app.applicationStatus === 'rejected' && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-rose-300 bg-rose-500/15 border border-rose-400/70 shadow-[0_0_10px_rgba(244,63,94,0.25)]">
-                            <X className="h-3 w-3 stroke-[2.5]" />
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-rose-300 bg-rose-500/15 border border-rose-400/70 shadow-[0_0_8px_rgba(244,63,94,0.2)]">
+                            <X className="h-2.5 w-2.5 stroke-[2.5]" />
                             <span>Declined</span>
                           </span>
                         )}
                         {(app.applicationStatus === 'draft' || !app.applicationStatus) && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-400 bg-slate-500/10 border border-slate-400/40">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-400 bg-slate-500/10 border border-slate-400/40">
                             <span>Draft</span>
                           </span>
                         )}
                       </td>
 
                       {/* Offer Status */}
-                      <td className="px-4 py-4 whitespace-nowrap">
+                      <td className="px-2.5 py-3 whitespace-nowrap">
                         {app.offer?.isAvailable ? (
                           app.offer.accepted ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/50 shadow-[0_0_10px_rgba(0,240,255,0.25)]">
-                              <Check className="h-3 w-3 stroke-[3]" />
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.2)]">
+                              <Check className="h-2.5 w-2.5 stroke-[3]" />
                               <span>Accepted ({app.offer.rate || 'Live'})</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-purple-300 bg-purple-500/15 border border-purple-400/50 shadow-[0_0_10px_rgba(217,70,239,0.25)]">
-                              <Tag className="h-3 w-3" />
-                              <span>Offer Sent ({app.offer.rate || 'Custom'})</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-purple-300 bg-purple-500/15 border border-purple-400/50 shadow-[0_0_8px_rgba(217,70,239,0.2)]">
+                              <Tag className="h-2.5 w-2.5" />
+                              <span>Offer Sent</span>
                             </span>
                           )
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold text-slate-400 bg-slate-800/60 border border-slate-700/60">
-                            <Clock className="h-3 w-3 text-amber-400/70" />
-                            <span>No Offer Sent</span>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-slate-400 bg-slate-800/60 border border-slate-700/60">
+                            <Clock className="h-2.5 w-2.5 text-amber-400/70" />
+                            <span>No Offer</span>
                           </span>
                         )}
                       </td>
 
-                      {/* Compact Modern Fintech Actions */}
-                      <td className="px-5 py-4 text-right whitespace-nowrap">
+                      {/* Sticky Compact Fintech Actions */}
+                      <td className="px-3 py-2.5 text-right whitespace-nowrap sticky right-0 z-10 bg-[#060b20] group-hover:bg-[#0c1538] shadow-[-10px_0_15px_rgba(4,8,26,0.95)] border-l border-cyan-500/20 transition-colors">
                         <div className="inline-flex items-center gap-1.5">
                           {/* Message Button */}
                           <button
                             type="button"
                             onClick={() => openMessageModal(app)}
-                            className="p-2 rounded-xl bg-[#081335] hover:bg-[#0e2158] border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white shadow-[0_0_10px_rgba(0,240,255,0.15)] hover:shadow-[0_0_14px_rgba(0,240,255,0.35)] cursor-pointer transition-all"
-                            title="Direct Real-Time Message with Merchant"
-                            aria-label="Direct Real-Time Message"
+                            className="p-1.5 rounded-lg bg-[#081335] hover:bg-[#0e2158] border border-cyan-400/50 hover:border-cyan-300 text-cyan-300 hover:text-white shadow-[0_0_8px_rgba(0,240,255,0.15)] cursor-pointer transition-all"
+                            title="Direct Real-Time Message"
+                            aria-label="Direct Message"
                           >
                             <MessageSquare className="h-3.5 w-3.5 text-cyan-400" />
                           </button>
@@ -1034,18 +1034,18 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => openReviewModal(app)}
-                            className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:brightness-110 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] cursor-pointer transition-all inline-flex items-center gap-1.5"
+                            className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:brightness-110 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.5)] hover:shadow-[0_0_16px_rgba(217,70,239,0.75)] cursor-pointer transition-all inline-flex items-center gap-1"
                             title="Review Merchant Dossier & Manage Underwriting Offer"
                           >
-                            <Sparkles className="h-3.5 w-3.5 text-fuchsia-200 animate-pulse" />
-                            <span>Review & Offer</span>
+                            <Sparkles className="h-3 w-3 text-fuchsia-200 animate-pulse" />
+                            <span>Review</span>
                           </button>
 
                           {/* Delete Button */}
                           <button
                             type="button"
                             onClick={() => setDeletingApp(app)}
-                            className="p-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 hover:border-rose-400 text-rose-300 hover:text-white shadow-[0_0_8px_rgba(244,63,94,0.15)] hover:shadow-[0_0_14px_rgba(244,63,94,0.35)] cursor-pointer transition-all"
+                            className="p-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 hover:border-rose-400 text-rose-300 hover:text-white shadow-[0_0_8px_rgba(244,63,94,0.15)] cursor-pointer transition-all"
                             title="Permanently Delete Merchant & Associated Test Data"
                             aria-label="Delete Merchant"
                           >
