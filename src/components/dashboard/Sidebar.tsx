@@ -54,8 +54,85 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
   return (
     <aside className={`w-full lg:w-64 select-none ${className}`}>
-      {/* Outer Glowing Neon Container */}
-      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.12)] p-4 sm:p-5 flex flex-col justify-between h-full backdrop-blur-xl space-y-4">
+      
+      {/* MOBILE (< lg): Sleek Horizontal Sticky Nav Header */}
+      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-4">
+        {/* Mobile Top Row: Merchant Identity + Sign Out */}
+        <div className="flex items-center justify-between gap-3 pb-2 border-b border-cyan-500/20">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 to-fuchsia-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
+              <div className="w-full h-full rounded-full overflow-hidden bg-[#040819] flex items-center justify-center">
+                {merchant?.avatarUrl ? (
+                  <img
+                    src={merchant.avatarUrl}
+                    alt={merchant.fullName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="h-3.5 w-3.5 text-cyan-300" />
+                )}
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white truncate">
+                {merchant?.fullName || 'Merchant Account'}
+              </div>
+              <div className="text-[10px] text-cyan-300 truncate">
+                {merchant?.legalName || 'PGX Direct Gateway'}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="px-2.5 py-1 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all font-semibold text-xs flex items-center gap-1.5 cursor-pointer shrink-0 border border-slate-800"
+            title="Sign Out"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="text-[11px]">Sign Out</span>
+          </button>
+        </div>
+
+        {/* Mobile Tab Rail: Horizontally Scrollable Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = currentTab === item.id
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleTabClick(item.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition-all duration-300 cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.7)] scale-[1.02]'
+                    : 'text-slate-300 hover:text-white bg-[#091332]/80 border border-cyan-500/20'
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-cyan-400'}`} />
+                <span>{item.label}</span>
+
+                {Boolean(item.badge && item.badge > 0) && (
+                  <span className="w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_6px_rgba(217,70,239,0.9)]">
+                    {item.badge}
+                  </span>
+                )}
+
+                {item.isOfferNew && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[9px] font-bold">
+                    Ready
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* DESKTOP (>= lg): Original Cyberpunk Full Vertical Sidebar */}
+      <div className="hidden lg:flex rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.12)] p-4 sm:p-5 flex-col justify-between h-full backdrop-blur-xl space-y-4">
         
         {/* Merchant Identity Pill */}
         <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-[#091332] border border-cyan-500/30 shadow-[0_0_12px_rgba(0,240,255,0.15)]">

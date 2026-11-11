@@ -75,8 +75,87 @@ export default function ResellerSidebar({
 
   return (
     <aside className={`w-full select-none ${className}`}>
-      {/* Outer Glowing Neon Container (Cyan & Purple Reseller Aesthetics) */}
-      <div className="rounded-3xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.12)] p-4 sm:p-5 flex flex-col justify-between h-full backdrop-blur-2xl space-y-5">
+      
+      {/* MOBILE (< lg): Compact Partner Header & Horizontal Tab Rail */}
+      <div className="block lg:hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.25)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
+        {/* Mobile Top Row: Identity + Quick Referral Copy */}
+        <div className="flex items-center justify-between gap-3 pb-2 border-b border-cyan-500/20">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-blue-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
+              <div className="w-full h-full rounded-[9px] bg-[#040819] flex items-center justify-center text-cyan-300">
+                <Building2 className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white truncate flex items-center gap-1">
+                <span>{adminUser?.name === 'Primary Gateway Administrator' ? 'Primary Admin' : (adminUser?.name || 'Reseller Gateway')}</span>
+                <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
+              </div>
+              <div className="text-[10px] font-mono text-cyan-300 truncate">
+                Tenant: {resellerId}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onCopyReferral}
+            className="px-2.5 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0"
+          >
+            {copiedReferral ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-emerald-300" />
+                <span className="text-[11px] text-emerald-300">Copied</span>
+              </>
+            ) : (
+              <>
+                <LinkIcon className="h-3.5 w-3.5 text-purple-400" />
+                <span className="text-[11px]">Referral</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Horizontal Tab Rail */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeSection === item.id
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSectionChange(item.id)}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition-all duration-300 cursor-pointer shrink-0 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.7)] scale-[1.02]'
+                    : 'text-slate-300 hover:text-white bg-[#091332]/80 border border-cyan-500/20'
+                }`}
+              >
+                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-white' : 'text-purple-400'}`} />
+                <span>{item.label}</span>
+
+                {item.badge !== undefined && item.badge !== null ? (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold shrink-0 border ${
+                      item.badgeColor ||
+                      (isActive
+                        ? 'bg-black/30 text-white border-white/30'
+                        : 'bg-purple-500/20 text-purple-300 border-purple-500/40')
+                    }`}
+                  >
+                    {item.badge}
+                  </span>
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* DESKTOP (>= lg): Original Glowing Neon Container (Cyan & Purple Reseller Aesthetics) */}
+      <div className="hidden lg:flex rounded-3xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/90 shadow-[0_0_20px_rgba(0,240,255,0.35),inset_0_0_12px_rgba(0,240,255,0.12)] p-4 sm:p-5 flex-col justify-between h-full backdrop-blur-2xl space-y-5">
         
         {/* Top: Identity Pill */}
         <div className="space-y-3">

@@ -145,38 +145,38 @@ export default function InvoicesTab() {
       )}
 
       {/* KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Invoiced (9% Fees)
             </span>
             <Receipt className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-3xl font-black text-white">${summary.totalInvoiced.toFixed(2)}</div>
-          <p className="text-[11px] text-slate-400">Cumulative weekly statements issued</p>
+          <div className="text-2xl sm:text-3xl font-black text-white">${summary.totalInvoiced.toFixed(2)}</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-400">Cumulative weekly statements issued</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Settled / Paid
             </span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-3xl font-black text-emerald-400">${summary.totalPaid.toFixed(2)}</div>
-          <p className="text-[11px] text-slate-400">Settled via Stripe or verified bank wire</p>
+          <div className="text-2xl sm:text-3xl font-black text-emerald-400">${summary.totalPaid.toFixed(2)}</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-400">Settled via Stripe or verified bank wire</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
+        <div className="p-4 sm:p-6 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Current Outstanding Due
             </span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-3xl font-black text-amber-300">${summary.totalOutstanding.toFixed(2)}</div>
-          <p className="text-[11px] text-slate-400">Due within upcoming billing cycle</p>
+          <div className="text-2xl sm:text-3xl font-black text-amber-300">${summary.totalOutstanding.toFixed(2)}</div>
+          <p className="text-[10px] sm:text-[11px] text-slate-400">Due within upcoming billing cycle</p>
         </div>
       </div>
 
@@ -191,8 +191,154 @@ export default function InvoicesTab() {
         </p>
       </div>
 
-      {/* Invoices List Table */}
-      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
+      {/* MOBILE INVOICE CARDS VIEW (< lg screens) */}
+      <div className="block lg:hidden space-y-4">
+        {loading ? (
+          <div className="p-8 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 text-center text-slate-400">
+            <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mx-auto mb-2" />
+            <span className="text-xs">Loading weekly invoices...</span>
+          </div>
+        ) : invoices.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 text-center text-slate-400 text-xs">
+            No weekly invoices issued yet. Statements generate after transaction processing starts.
+          </div>
+        ) : (
+          invoices.map((inv) => {
+            const isPaid = inv.status === 'paid'
+            const isPaying = payingInvoiceId === inv._id
+
+            return (
+              <div
+                key={inv._id}
+                className="p-4 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 shadow-[0_0_15px_rgba(0,240,255,0.1)] space-y-3"
+              >
+                {/* Header: Invoice # + Type + Status */}
+                <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-cyan-500/15">
+                  <div>
+                    <div className="font-mono font-bold text-white text-sm">{inv.invoiceNumber}</div>
+                    <div className="mt-1">
+                      {inv.invoiceType === 'monthly_maintenance' ? (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-purple-300 bg-purple-500/15 border border-purple-400/40 px-2 py-0.5 rounded-full">
+                          Monthly Maintenance
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/40 px-2 py-0.5 rounded-full">
+                          Weekly Volume (9%)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    {inv.status === 'issued' && (
+                      <span className="px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 text-[10px] font-semibold">
+                        Issued
+                      </span>
+                    )}
+                    {inv.status === 'pending' && (
+                      <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[10px] font-semibold">
+                        Payment Pending
+                      </span>
+                    )}
+                    {inv.status === 'under_review' && (
+                      <span className="px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-semibold">
+                        Proof Under Review
+                      </span>
+                    )}
+                    {inv.status === 'paid' && (
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-semibold">
+                        Paid & Settled
+                      </span>
+                    )}
+                    {inv.status === 'overdue' && (
+                      <span className="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/30 text-[10px] font-semibold">
+                        Overdue
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded-xl bg-[#091332]/60 border border-cyan-500/10">
+                    <span className="text-[10px] text-slate-400 block uppercase">Billing Cycle</span>
+                    <span className="font-mono text-[11px] text-slate-200">
+                      {new Date(inv.billingCycleStart).toLocaleDateString()} - {new Date(inv.billingCycleEnd).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#091332]/60 border border-cyan-500/10">
+                    <span className="text-[10px] text-slate-400 block uppercase">Amount Due</span>
+                    <span className="font-bold text-white text-sm">
+                      ${inv.payableAmount.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#091332]/60 border border-cyan-500/10">
+                    <span className="text-[10px] text-slate-400 block uppercase">Processed Volume</span>
+                    <span className="font-mono text-white text-xs">
+                      {inv.invoiceType === 'monthly_maintenance' ? 'Fixed Plan' : `$${inv.eligibleVolume.toFixed(2)}`}
+                    </span>
+                  </div>
+
+                  <div className="p-2 rounded-xl bg-[#091332]/60 border border-cyan-500/10">
+                    <span className="text-[10px] text-slate-400 block uppercase">Fee Rate</span>
+                    <span className="font-semibold text-cyan-300 text-xs">
+                      {inv.invoiceType === 'monthly_maintenance' ? '$99 / mo' : `${inv.feeRate}%`}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="pt-1 flex flex-col gap-2">
+                  {isPaid ? (
+                    <div className="w-full text-emerald-400 font-semibold text-xs flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                      <CheckCircle2 className="w-4 h-4" /> Paid & Verified
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handlePayStripe(inv._id)}
+                        disabled={isPaying}
+                        className="w-full py-2.5 px-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.4)]"
+                      >
+                        {isPaying ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CreditCard className="w-3.5 h-3.5" />}
+                        Pay Online
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedInvoice(inv)}
+                        className="w-full py-2.5 px-3 rounded-xl bg-[#091332] hover:bg-[#0e1d4a] border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        <UploadCloud className="w-3.5 h-3.5" /> Wire Proof
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPdf(inv._id, inv.invoiceNumber)}
+                    disabled={downloadingInvoiceId === inv._id}
+                    className="w-full py-2 px-3 rounded-xl bg-[#070e24] border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  >
+                    {downloadingInvoiceId === inv._id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Download className="w-3.5 h-3.5 text-cyan-400" />
+                    )}
+                    <span>Download Official PDF Invoice</span>
+                  </button>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* DESKTOP INVOICES TABLE (>= lg screens) */}
+      <div className="hidden lg:block rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden shadow-[0_0_20px_rgba(0,240,255,0.1)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#091332] text-slate-300 font-semibold uppercase tracking-wider text-[11px] border-b border-cyan-500/20">

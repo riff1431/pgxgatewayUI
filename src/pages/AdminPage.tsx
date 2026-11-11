@@ -589,13 +589,13 @@ export default function AdminPage() {
                 Tenant: {resellerId}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
               Merchant Applications & Underwriting Desk
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Link
             to="/"
             className="px-3.5 py-1.5 rounded-full border border-slate-700 hover:border-cyan-400/60 bg-[#070f28] text-xs font-semibold text-slate-300 hover:text-cyan-200 flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(0,0,0,0.3)] cursor-pointer"
@@ -674,19 +674,19 @@ export default function AdminPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-80">
               <input
                 type="text"
                 readOnly
                 value={referralLink}
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-950/80 border border-purple-500/30 font-mono text-xs text-purple-200 select-all focus:outline-none focus:border-purple-400"
+                className="w-full px-3.5 py-2.5 sm:py-2 rounded-xl bg-slate-950/80 border border-purple-500/30 font-mono text-xs text-purple-200 select-all focus:outline-none focus:border-purple-400"
               />
             </div>
             <button
               type="button"
               onClick={handleCopyReferralLink}
-              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all shrink-0"
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all shrink-0 min-h-[42px] sm:min-h-0"
             >
               {copiedReferral ? (
                 <>
@@ -709,53 +709,53 @@ export default function AdminPage() {
           {adminSection === 'applications' && (
         <div className="space-y-6">
           {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Merchants */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between group hover:border-cyan-300 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-400/50 shadow-[0_0_15px_rgba(0,240,255,0.25)] flex items-center justify-between group hover:border-cyan-300 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <span>Total Applicants</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white mt-1">{stats.totalMerchants}</div>
+            <div className="text-xl sm:text-3xl font-black text-white mt-1">{stats.totalMerchants}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
-            <Cpu className="h-5 w-5 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.2)] shrink-0">
+            <Cpu className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
           </div>
         </div>
 
         {/* Pending Review */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.3)] flex items-center justify-between group hover:border-amber-300 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-400/70 shadow-[0_0_18px_rgba(251,191,36,0.3)] flex items-center justify-between group hover:border-amber-300 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="text-[10px] sm:text-[11px] font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
               <span>Pending Review</span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-300 mt-1">{stats.pendingReview}</div>
+            <div className="text-xl sm:text-3xl font-black text-amber-300 mt-1">{stats.pendingReview}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)]">
-            <Radar className="h-5 w-5 animate-[spin_6s_linear_infinite] drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-400/60 flex items-center justify-center text-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.25)] shrink-0">
+            <Radar className="h-4 w-4 sm:h-5 sm:w-5 animate-[spin_6s_linear_infinite] drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
           </div>
         </div>
 
         {/* Approved */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.3)] flex items-center justify-between group hover:border-emerald-300 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.3)] flex items-center justify-between group hover:border-emerald-300 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider">Approved Active</div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-300 mt-1">{stats.approved}</div>
+            <div className="text-[10px] sm:text-[11px] font-semibold text-emerald-300 uppercase tracking-wider">Approved Active</div>
+            <div className="text-xl sm:text-3xl font-black text-emerald-300 mt-1">{stats.approved}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]">
-            <ShieldCheck className="h-5 w-5 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)] shrink-0">
+            <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
           </div>
         </div>
 
         {/* Rejected */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.25)] flex items-center justify-between group hover:border-red-400 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.25)] flex items-center justify-between group hover:border-red-400 transition-all">
           <div>
-            <div className="text-[11px] font-semibold text-red-400 uppercase tracking-wider">Declined</div>
-            <div className="text-2xl sm:text-3xl font-black text-red-400 mt-1">{stats.rejected}</div>
+            <div className="text-[10px] sm:text-[11px] font-semibold text-red-400 uppercase tracking-wider">Declined</div>
+            <div className="text-xl sm:text-3xl font-black text-red-400 mt-1">{stats.rejected}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-400/60 flex items-center justify-center text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
-            <ShieldAlert className="h-5 w-5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-500/10 border border-red-400/60 flex items-center justify-center text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)] shrink-0">
+            <ShieldAlert className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
           </div>
         </div>
       </div>
@@ -1301,8 +1301,8 @@ export default function AdminPage() {
 
       {/* Direct Merchant Messaging Modal */}
       {messagingApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-6 sm:p-7 space-y-5 my-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.45)] p-4 sm:p-7 space-y-4 sm:space-y-5 my-auto max-h-[92vh] overflow-y-auto">
             
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
@@ -1448,7 +1448,7 @@ export default function AdminPage() {
               </div>
 
               {/* Send Button */}
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
                 <span className="text-[10px] text-slate-400">
                   ⚡ Pushes instant WebSocket notification to merchant
                 </span>
@@ -1456,7 +1456,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={messageSending}
-                  className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[42px]"
                 >
                   {messageSending ? (
                     <>

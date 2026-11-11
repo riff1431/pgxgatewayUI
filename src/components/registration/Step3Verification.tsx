@@ -277,12 +277,12 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
                 </div>
               </div>
 
-              <div className="sm:self-center shrink-0">
+              <div className="sm:self-center shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
                 <button
                   type="button"
                   disabled={doc.isUploading}
                   onClick={() => triggerUpload(doc.id)}
-                  className={`px-5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.25)] ${
+                  className={`w-full sm:w-auto px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.25)] min-h-[42px] ${
                     isUploaded
                       ? 'border border-cyan-400 bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/25'
                       : 'border border-cyan-400/90 bg-[#09153d] text-white hover:border-cyan-300 hover:shadow-[0_0_16px_rgba(0,240,255,0.5)]'
@@ -331,11 +331,11 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-cyan-500/20">
         <button
           type="button"
           onClick={onBack}
-          className="px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)]"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)] min-h-[44px]"
         >
           <span>&larr;</span> Back
         </button>
@@ -343,7 +343,7 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
         <button
           type="submit"
           disabled={submitting}
-          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          className="w-full sm:w-auto px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none min-h-[44px]"
         >
           {submitting ? (
             <>

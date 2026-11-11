@@ -745,19 +745,19 @@ export default function IntegrationTab() {
             </div>
 
             {/* Message Input Form */}
-            <form onSubmit={handleSendMessage} className="flex items-center gap-3">
+            <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-3">
               <input
                 type="text"
                 placeholder="Type your message to the Super Admin..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 disabled={sendingMsg}
-                className="flex-1 px-4 py-3 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
+                className="flex-1 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-base sm:text-xs focus:outline-none focus:border-cyan-400 min-h-[44px]"
               />
               <button
                 type="submit"
                 disabled={sendingMsg || !newMessage.trim()}
-                className="px-5 py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 min-h-[44px] shrink-0"
               >
                 {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Send

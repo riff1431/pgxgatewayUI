@@ -70,14 +70,14 @@ const session = await pgx.checkouts.create({
 
             {/* Main Headline */}
             <div className="space-y-3">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_15px_rgba(255,255,255,0.25)]">
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_15px_rgba(255,255,255,0.25)]">
                 The Next-Gen Global{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-fuchsia-400">
                   Payment Gateway
                 </span>{' '}
                 for Modern Commerce
               </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+              <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
                 Empowering high-growth merchants with intelligent multi-acquirer cascades, sub-second global settlements, and frictionless 3DS2 checkout. Approved and live in under 24 hours.
               </p>
             </div>
@@ -145,8 +145,8 @@ const session = await pgx.checkouts.create({
 
       {/* Global Processing Stats Banner */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_25px_rgba(0,240,255,0.25)] p-6 sm:p-8 backdrop-blur-xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-cyan-500/20">
+        <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_25px_rgba(0,240,255,0.25)] p-4 sm:p-8 backdrop-blur-xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-cyan-500/20">
             
             <div className="space-y-1 pt-4 md:pt-0">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">

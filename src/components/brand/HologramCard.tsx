@@ -5,9 +5,9 @@ interface HologramCardProps {
 
 export default function HologramCard({ className = '', size = 'md' }: HologramCardProps) {
   const sizeClasses = {
-    sm: 'max-w-[260px] sm:max-w-[300px]',
-    md: 'max-w-[340px] sm:max-w-[390px] lg:max-w-[430px]',
-    lg: 'max-w-[460px] sm:max-w-[540px] lg:max-w-[620px]',
+    sm: 'max-w-[240px] xs:max-w-[280px] sm:max-w-[300px]',
+    md: 'max-w-[280px] xs:max-w-[320px] sm:max-w-[390px] lg:max-w-[430px]',
+    lg: 'max-w-[300px] xs:max-w-[360px] sm:max-w-[500px] lg:max-w-[620px]',
   }
 
   return (

@@ -8,9 +8,9 @@ interface RegistrationStepperProps {
 }
 
 const steps = [
-  { step: 1, label: 'Account & Contact' },
-  { step: 2, label: 'Business & Processing' },
-  { step: 3, label: 'Verification & Documents' },
+  { step: 1, label: 'Account & Contact', shortLabel: 'Account' },
+  { step: 2, label: 'Business & Processing', shortLabel: 'Business' },
+  { step: 3, label: 'Verification & Documents', shortLabel: 'Verify' },
 ]
 
 export default function RegistrationStepper({ 
@@ -86,7 +86,7 @@ export default function RegistrationStepper({
 
               {/* Step Label */}
               <span 
-                className={`text-[11px] font-semibold tracking-tight transition-colors whitespace-nowrap mt-2 ${
+                className={`text-[10px] sm:text-[11px] font-semibold tracking-tight transition-colors text-center mt-2 px-1 ${
                   isActive 
                     ? 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]' 
                     : isCompleted
@@ -96,7 +96,8 @@ export default function RegistrationStepper({
                     : 'text-slate-400 group-hover:text-slate-300'
                 }`}
               >
-                {s.label}
+                <span className="hidden sm:inline whitespace-nowrap">{s.label}</span>
+                <span className="inline sm:hidden whitespace-nowrap">{s.shortLabel}</span>
               </span>
             </div>
           )

@@ -922,20 +922,20 @@ export default function ApplicationReviewModal({
         </div>
 
         {/* Persistent Bottom Underwriter Action Bar (Visible across all tabs) */}
-        <div className="px-6 py-4 border-t border-cyan-500/20 bg-[#040817] flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-t border-cyan-500/20 bg-[#040817] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400">
             <span className="font-semibold text-white">Underwriting Actions:</span>
-            <span className="hidden sm:inline text-slate-500">
+            <span className="hidden md:inline text-slate-500">
               Review documents and verify details before confirming live processing.
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               disabled={reviewLoading}
               onClick={() => onDecision('rejected')}
-              className="px-4 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[42px]"
             >
               Decline Application
             </button>
@@ -944,7 +944,7 @@ export default function ApplicationReviewModal({
               type="button"
               disabled={reviewLoading}
               onClick={onSubmitOffer}
-              className="px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_25px_rgba(217,70,239,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[42px]"
             >
               {reviewLoading ? (
                 <>
@@ -963,7 +963,7 @@ export default function ApplicationReviewModal({
               type="button"
               disabled={reviewLoading}
               onClick={() => onDecision('approved')}
-              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(16,185,129,0.7)] hover:shadow-[0_0_28px_rgba(16,185,129,0.9)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[42px]"
             >
               {reviewLoading ? (
                 <>

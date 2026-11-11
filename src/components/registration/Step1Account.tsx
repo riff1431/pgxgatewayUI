@@ -383,7 +383,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 onChange={(e) => handleChange('fullName', e.target.value)}
                 onBlur={() => handleBlur('fullName')}
                 placeholder="Enter your full name"
-                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px]"
               />
             </div>
             {touched.fullName && errors.fullName && (
@@ -423,7 +423,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
               onBlur={() => handleBlur('businessEmail')}
               placeholder="name@company.com"
               disabled={isAuthenticated}
-              className={`w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none ${
+              className={`w-full bg-transparent px-3 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px] ${
                 isAuthenticated ? 'opacity-80 cursor-not-allowed' : ''
               }`}
             />
@@ -475,7 +475,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 onChange={(e) => handleChange('phone', e.target.value)}
                 onBlur={() => handleBlur('phone')}
                 placeholder="+1 (555) 019-2834"
-                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px]"
               />
             </div>
             {touched.phone && errors.phone && (
@@ -509,7 +509,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 onChange={(e) => handleChange('whatsapp', e.target.value)}
                 onBlur={() => handleBlur('whatsapp')}
                 placeholder="+1 (555) 019-2834"
-                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px]"
               />
             </div>
             {touched.whatsapp && errors.whatsapp && (
@@ -543,7 +543,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 onChange={(e) => handleChange('telegram', e.target.value)}
                 onBlur={() => handleBlur('telegram')}
                 placeholder="@yourhandle"
-                className="w-full bg-transparent px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                className="w-full bg-transparent px-3 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px]"
               />
             </div>
             {touched.telegram && errors.telegram && (
@@ -587,7 +587,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 onChange={(e) => handleChange('password', e.target.value)}
                 onBlur={() => handleBlur('password')}
                 placeholder="Minimum 8 characters"
-                className="w-full bg-transparent pl-3 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                className="w-full bg-transparent pl-3 pr-10 py-2.5 text-base sm:text-sm text-white placeholder-slate-500 focus:outline-none min-h-[44px]"
               />
               <button
                 type="button"
@@ -633,7 +633,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-cyan-500/20">
         <button
           type="button"
           onClick={() => {
@@ -645,7 +645,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
               navigate('/')
             }
           }}
-          className="px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)]"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)] min-h-[44px]"
         >
           <span>&larr;</span> {isSignInMode ? 'Back to Home' : 'Back'}
         </button>
@@ -653,7 +653,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
         <button
           type="submit"
           disabled={submitting}
-          className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          className="w-full sm:w-auto px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none min-h-[44px]"
         >
           {submitting ? (
             <>

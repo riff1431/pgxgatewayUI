@@ -147,7 +147,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#040819]/95 border-b border-cyan-500/30 px-4 py-4 space-y-3 backdrop-blur-2xl">
+        <div className="md:hidden bg-[#040819]/98 border-b border-cyan-500/30 px-4 py-4 space-y-3 backdrop-blur-2xl shadow-[0_20px_40px_rgba(0,0,0,0.85)] animate-fade-in">
           <div className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon
@@ -158,9 +158,9 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3 py-2 text-sm font-semibold flex items-center gap-2.5 transition-all ${
+                  className={`px-3 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2.5 transition-all min-h-[44px] ${
                     isActive
-                      ? 'text-cyan-300 font-bold bg-cyan-500/10'
+                      ? 'text-cyan-300 font-bold bg-cyan-500/10 border border-cyan-500/30 shadow-[0_0_10px_rgba(0,240,255,0.15)]'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                   }`}
                 >
@@ -177,7 +177,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#070e28] border border-cyan-500/30 text-white text-xs font-semibold hover:border-cyan-400 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#070e28] border border-cyan-500/30 text-white text-xs font-semibold hover:border-cyan-400 transition-all min-h-[44px]"
                 >
                   <User className="h-4 w-4 text-cyan-400" />
                   <span>Sign In to Merchant Portal</span>
@@ -185,7 +185,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 <Link
                   to="/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)]"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)] min-h-[44px]"
                 >
                   <ArrowRight className="h-4 w-4" />
                   <span>Start Merchant Application</span>
@@ -195,7 +195,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#081335] border border-cyan-400/60 text-white text-xs font-bold"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#081335] border border-cyan-400/60 text-white text-xs font-bold min-h-[44px]"
               >
                 <User className="h-4 w-4 text-cyan-400" />
                 <span>Go to Dashboard ({merchantName})</span>

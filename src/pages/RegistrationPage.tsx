@@ -122,48 +122,48 @@ export default function RegistrationPage() {
             <div className="text-[11px] font-black tracking-[0.25em] text-cyan-400 uppercase">
               {isSignInRoute ? 'MERCHANT PORTAL' : 'MERCHANT'}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-black italic tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 drop-shadow-[0_2px_10px_rgba(255,255,255,0.3)]">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black italic tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-300 drop-shadow-[0_2px_10px_rgba(255,255,255,0.3)]">
               {isSignInRoute ? 'SIGN IN' : 'REGISTRATION'}
             </h1>
-            <p className="mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
+            <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-300 leading-relaxed">
               {isSignInRoute
                 ? 'Sign in to access your merchant portal, view underwriting status, and manage payment processing.'
                 : 'Get a customized payment processing solution for your business with PGX Gateway.'}
             </p>
           </div>
 
-          {/* Value Propositions (Unified Glowing Purple Badges) */}
-          <div className="space-y-4">
+          {/* Value Propositions (Compact 3-Pill Grid on Mobile, Stacked on Desktop) */}
+          <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 lg:space-y-4 lg:gap-0">
             {/* Fast */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <Clock className="h-5 w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white leading-tight">Fast</div>
-                <div className="text-[11px] text-slate-400 leading-tight">Quick application & review</div>
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Fast</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">Quick review</div>
               </div>
             </div>
 
             {/* Easy */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <Layers className="h-5 w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white leading-tight">Easy</div>
-                <div className="text-[11px] text-slate-400 leading-tight">Simple 3-step registration</div>
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Easy</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">3-step apply</div>
               </div>
             </div>
 
             {/* Secured */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <ShieldCheck className="h-5 w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white leading-tight">Secured</div>
-                <div className="text-[11px] text-slate-400 leading-tight">Bank-grade data protection & compliance</div>
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Secured</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">Bank-grade</div>
               </div>
             </div>
           </div>
