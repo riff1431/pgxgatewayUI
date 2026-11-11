@@ -45,9 +45,9 @@ export default function ResellerAffiliateTab({
   const estimatedEarned = paidSetups * 9.8
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in w-full max-w-full min-w-0">
       {/* Top Affiliate Link Banner */}
-      <div className="p-4 sm:p-8 rounded-3xl bg-gradient-to-r from-[#09153a] via-[#102766] to-[#09153a] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] space-y-4 sm:space-y-6">
+      <div className="p-4 sm:p-8 rounded-3xl bg-gradient-to-r from-[#09153a] via-[#102766] to-[#09153a] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] space-y-4 sm:space-y-6 w-full max-w-full min-w-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold">
@@ -133,7 +133,7 @@ export default function ResellerAffiliateTab({
       </div>
 
       {/* Referred Merchants Breakdown */}
-      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden space-y-4 p-4 sm:p-6">
+      <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 overflow-hidden space-y-4 p-4 sm:p-6 w-full max-w-full min-w-0">
         <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
           <div>
             <h3 className="text-lg font-bold text-white">Your Referred Merchant Roster</h3>
@@ -148,7 +148,7 @@ export default function ResellerAffiliateTab({
             No merchants have signed up with your referral link yet. Share your link above to begin earning commissions!
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full max-w-full min-w-0">
             <table className="w-full text-left text-xs min-w-[600px]">
               <thead className="bg-[#091332] text-slate-300 font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
