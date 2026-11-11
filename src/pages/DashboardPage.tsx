@@ -88,18 +88,18 @@ export default function DashboardPage() {
               {/* White-Glove Integration Banner */}
               <div 
                 onClick={() => handleTabChange('integration')}
-                className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#09153a] via-[#0f235e] to-[#09153a] border border-cyan-400/50 shadow-[0_0_20px_rgba(0,240,255,0.2)] flex items-center justify-between gap-4 cursor-pointer hover:border-cyan-300 transition-all group"
+                className="p-3.5 sm:p-5 rounded-2xl bg-gradient-to-r from-[#09153a] via-[#0f235e] to-[#09153a] border border-cyan-400/50 shadow-[0_0_20px_rgba(0,240,255,0.2)] flex items-center justify-between gap-4 cursor-pointer hover:border-cyan-300 transition-all group w-full min-w-0"
               >
-                <div className="flex items-center gap-3.5">
-                  <div className="p-2.5 rounded-xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 group-hover:scale-105 transition-transform">
-                    <Code2 className="w-5 h-5" />
+                <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                  <div className="p-2 sm:p-2.5 rounded-xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 group-hover:scale-105 transition-transform shrink-0">
+                    <Code2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div>
-                    <div className="text-white font-bold text-sm flex items-center gap-2">
-                      White-Glove GitHub & Website Integration Desk
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40">Action Desk</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                      <span className="break-words">White-Glove GitHub & Website Integration Desk</span>
+                      <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40 shrink-0">Action Desk</span>
                     </div>
-                    <p className="text-xs text-slate-300">
+                    <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 line-clamp-2 sm:line-clamp-none">
                       Pay setup fee, invite our official GitHub account, submit .env secrets, and chat directly with Super Admin.
                     </p>
                   </div>

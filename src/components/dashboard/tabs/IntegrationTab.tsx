@@ -220,25 +220,25 @@ export default function IntegrationTab() {
   const currentMilestoneIdx = getMilestoneIndex(normalizedStatus)
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in w-full min-w-0">
       {/* Top Header Banner */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.15)] space-y-5">
+      <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#0b1b46] to-[#071330] border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.15)] space-y-4 sm:space-y-5 w-full min-w-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-400">
-              <Code2 className="w-6 h-6" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-2 sm:p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-400 shrink-0">
+              <Code2 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2 flex-wrap">
                 White-Glove Integration Desk
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300">
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
                 Managed Payment Gateway Integration: 5-Business-Day Delivery Target after verified repository access.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#040819]/80 border border-cyan-400/30 shrink-0 text-xs text-cyan-300 font-semibold">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#040819]/80 border border-cyan-400/30 shrink-0 text-xs text-cyan-300 font-semibold self-start md:self-auto">
             <Clock className="w-3.5 h-3.5" /> Target Delivery: 5 Business Days
           </div>
         </div>
@@ -287,9 +287,9 @@ export default function IntegrationTab() {
 
       {/* STATE 1: UNPAID (SHOW SETUP PAYWALL & PAYMENT CARD) */}
       {!isPaid ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-stretch w-full min-w-0">
           {/* Left Column: Value Proposition */}
-          <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+          <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-4 sm:p-6 lg:p-8 space-y-6 flex flex-col justify-between w-full min-w-0">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold">
                 <ShieldCheck className="w-3.5 h-3.5" /> 1-on-1 Engineering Setup
@@ -343,7 +343,7 @@ export default function IntegrationTab() {
           </div>
 
           {/* Right Column: Checkout Paywall Form */}
-          <div className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#091332] to-[#040819] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-3xl bg-gradient-to-b from-[#091332] to-[#040819] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.25)] p-4 sm:p-6 lg:p-8 space-y-6 flex flex-col justify-between w-full min-w-0">
             <div className="space-y-5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">

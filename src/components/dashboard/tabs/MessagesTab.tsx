@@ -391,10 +391,10 @@ export default function MessagesTab() {
       </div>
 
       {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full min-w-0">
         
         {/* Dynamic Label & Category Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent w-full min-w-0 flex-1">
           {[
             { id: 'all', label: `All (${notifications.length})`, icon: Mail },
             { id: 'unread', label: `Unread (${unreadCount})`, icon: Bell },

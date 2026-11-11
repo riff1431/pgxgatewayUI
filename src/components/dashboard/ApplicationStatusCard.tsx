@@ -55,9 +55,9 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
       </div>
 
       {/* Progress Stepper Display */}
-      <div className="py-6 sm:py-8 relative">
+      <div className="py-6 sm:py-8 relative w-full min-w-0">
         {/* Connector Line */}
-        <div className="absolute top-10 sm:top-12 left-10 right-10 h-[2.5px] bg-slate-800 -z-0">
+        <div className="absolute top-9 sm:top-12 left-6 right-6 sm:left-10 sm:right-10 h-[2.5px] bg-slate-800 -z-0">
           <div
             className={`h-full ${
               currentStep >= 2
@@ -75,30 +75,30 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
         </div>
 
         {/* Step Nodes */}
-        <div className="flex items-start justify-between relative z-10">
+        <div className="flex items-start justify-between relative z-10 w-full min-w-0">
           
           {/* Step 1 */}
-          <div className="flex flex-col items-center text-center max-w-[100px]">
+          <div className="flex flex-col items-center text-center flex-1 min-w-0 max-w-[90px] sm:max-w-[110px]">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 border-2 border-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.8)]">
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2">
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2 break-words">
               Account & Contact
             </span>
           </div>
 
           {/* Step 2 */}
-          <div className="flex flex-col items-center text-center max-w-[100px]">
+          <div className="flex flex-col items-center text-center flex-1 min-w-0 max-w-[90px] sm:max-w-[110px]">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 border-2 border-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.8)]">
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
-            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2">
+            <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2 break-words">
               Business & Processing
             </span>
           </div>
 
           {/* Step 3 */}
-          <div className="flex flex-col items-center text-center max-w-[100px]">
+          <div className="flex flex-col items-center text-center flex-1 min-w-0 max-w-[90px] sm:max-w-[110px]">
             {isApproved ? (
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-500 border-2 border-emerald-300 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(16,185,129,0.8)]">
                 <Check className="h-5 w-5 stroke-[3]" />
