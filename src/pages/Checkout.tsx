@@ -27,9 +27,9 @@ import { checkoutApi, type PublicMerchantProfile } from '@/lib/checkoutApi'
 export default function Checkout() {
   const [searchParams] = useSearchParams()
 
-  const refParam = searchParams.get('ref') || 'PGX_REF_DEMO'
-  const amountParam = parseFloat(searchParams.get('amount') || '129.00')
-  const amount = isNaN(amountParam) || amountParam <= 0 ? 129.0 : amountParam
+  const refParam = searchParams.get('ref') || ''
+  const amountParam = parseFloat(searchParams.get('amount') || '100.00')
+  const amount = isNaN(amountParam) || amountParam <= 0 ? 100.0 : amountParam
   const currencyParam = (searchParams.get('currency') || 'USD').toUpperCase()
   const [orderIdParam] = useState(
     () => searchParams.get('orderId') || `ORD-${Date.now().toString().slice(-5)}`
@@ -150,7 +150,7 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between items-center text-slate-400">
                 <span>Merchant Ref ID</span>
-                <span className="font-mono text-cyan-300 font-bold">{refParam}</span>
+                <span className="font-mono text-cyan-300 font-bold">{refParam || '—'}</span>
               </div>
               <div className="flex justify-between items-center text-slate-400">
                 <span>Order Reference</span>
@@ -194,7 +194,7 @@ export default function Checkout() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[10px] font-mono tracking-widest uppercase text-cyan-400 bg-cyan-950/70 border border-cyan-500/40 px-2 py-0.5 rounded-full">
-                    Ref: {refParam}
+                    {refParam ? `Ref: ${refParam}` : 'Direct Checkout'}
                   </span>
                   {merchantProfile?.isVerified && (
                     <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1 bg-emerald-950/50 border border-emerald-500/40 px-1.5 py-0.5 rounded-full">
