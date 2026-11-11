@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DollarSign,
   Building2,
@@ -9,6 +10,8 @@ import {
   ShieldCheck,
   LogOut,
   RefreshCw,
+  Menu,
+  X,
 } from 'lucide-react'
 
 export type SuperAdminTabId =
@@ -41,6 +44,7 @@ export default function SuperAdminSidebar({
   isRefreshing = false,
   className = '',
 }: SuperAdminSidebarProps) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
   const navItems: Array<{
     id: SuperAdminTabId
     label: string
@@ -96,22 +100,45 @@ export default function SuperAdminSidebar({
     },
   ]
 
+  const activeItem = navItems.find((i) => i.id === activeTab) || navItems[0]
+  const ActiveIcon = activeItem.icon
+
+  const handleTabClick = (tabId: SuperAdminTabId) => {
+    onTabChange(tabId)
+    setIsMobileOpen(false)
+  }
+
   return (
     <aside className={`w-full max-w-full min-w-0 select-none ${className}`}>
-      {/* MOBILE (< lg): Compact Admin Identity & Horizontal Tab Rail */}
-      <div className="block lg:hidden w-full max-w-full min-w-0 overflow-hidden rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] p-3 backdrop-blur-xl space-y-2.5 mb-2">
-        <div className="flex items-center justify-between gap-3 pb-2 border-b border-amber-500/20">
-          <div className="flex items-center gap-2.5 min-w-0">
+      {/* MOBILE (< lg): Compact Admin Identity & Hamburger Trigger */}
+      <div className="block lg:hidden w-full max-w-full min-w-0 mb-3">
+        <div className="flex items-center justify-between gap-2.5 p-2.5 sm:p-3 rounded-2xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_20px_rgba(251,191,36,0.2)] backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen(true)}
+            className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer group"
+          >
             <div className="w-8 h-8 rounded-xl p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.35)]">
               <div className="w-full h-full rounded-[9px] bg-[#050a1d] flex items-center justify-center text-amber-300">
-                <ShieldCheck className="h-4 w-4" />
+                <ActiveIcon className="h-4 w-4 group-hover:scale-110 transition-transform" />
               </div>
             </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-white truncate">Super Administrator</div>
-              <div className="text-[10px] font-mono text-amber-300/80 truncate">Root Platform Controller</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
+                <span className="truncate">{activeItem.label}</span>
+                {activeItem.badge !== undefined &&
+                  activeItem.badge !== null &&
+                  (typeof activeItem.badge === 'number' ? activeItem.badge > 0 : Boolean(activeItem.badge)) && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold shrink-0 border bg-amber-500/20 text-amber-300 border-amber-500/40">
+                      {activeItem.badge}
+                    </span>
+                  )}
+              </div>
+              <div className="text-[10px] font-mono text-amber-300/80 truncate">
+                Super Admin • Tap for menu
+              </div>
             </div>
-          </div>
+          </button>
 
           <div className="flex items-center gap-1.5 shrink-0">
             {onRefresh && (
@@ -125,57 +152,140 @@ export default function SuperAdminSidebar({
                 <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               </button>
             )}
-            {onLogout && (
-              <button
-                type="button"
-                onClick={onLogout}
-                className="p-1.5 rounded-lg bg-red-950/40 border border-red-500/40 text-red-300 hover:text-white cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
-            )}
+
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-[0_0_15px_rgba(251,191,36,0.5)] border border-amber-300 cursor-pointer shrink-0 transition-transform active:scale-95"
+              aria-label="Open Navigation Menu"
+            >
+              <Menu className="h-4 w-4" />
+              <span>Menu</span>
+            </button>
           </div>
         </div>
-
-        {/* Mobile Horizontal Tab Rail */}
-        <div className="w-full max-w-full min-w-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            const isActive = activeTab === item.id
-
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onTabChange(item.id)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-bold text-xs whitespace-nowrap transition-all duration-300 cursor-pointer shrink-0 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 shadow-[0_0_15px_rgba(251,191,36,0.6)] border border-amber-300 scale-[1.02] font-black'
-                    : 'text-slate-300 hover:text-white bg-[#091332]/80 border border-amber-500/20'
-                }`}
-              >
-                <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-slate-950' : 'text-amber-400'}`} />
-                <span>{item.shortLabel}</span>
-
-                {item.badge !== undefined &&
-                item.badge !== null &&
-                (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) ? (
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold shrink-0 border ${
-                      isActive
-                        ? 'bg-black/30 text-slate-950 border-black/30'
-                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                ) : null}
-              </button>
-            )
-          })}
-        </div>
       </div>
+
+      {/* MOBILE (< lg): Slide-over Drawer with Backdrop */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity animate-fade-in"
+            onClick={() => setIsMobileOpen(false)}
+          />
+
+          {/* Slide-out Menu Panel */}
+          <div className="fixed inset-y-0 left-0 w-[88vw] max-w-xs sm:max-w-sm bg-[#060b20] border-r-[1.5px] border-amber-400/90 shadow-[0_0_50px_rgba(251,191,36,0.45)] p-4 sm:p-5 flex flex-col justify-between overflow-y-auto z-50">
+            <div className="space-y-4">
+              {/* Drawer Top Row */}
+              <div className="flex items-center justify-between pb-3 border-b border-amber-500/20">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl p-0.5 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-600 shrink-0 shadow-[0_0_10px_rgba(251,191,36,0.4)]">
+                    <div className="w-full h-full rounded-[9px] bg-[#050a1d] flex items-center justify-center text-amber-300">
+                      <ShieldCheck className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-white truncate">Super Administrator</div>
+                    <div className="text-[10px] font-mono text-amber-300/80 truncate">Root Platform Controller</div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsMobileOpen(false)}
+                  className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Navigation Items in Drawer */}
+              <div className="space-y-1.5 pt-1">
+                <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Command Center Navigation
+                </div>
+
+                {navItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = activeTab === item.id
+
+                  return (
+                    <button
+                      key={`drawer-${item.id}`}
+                      type="button"
+                      onClick={() => handleTabClick(item.id)}
+                      className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl font-bold text-xs transition-all duration-300 cursor-pointer ${
+                        isActive
+                          ? 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 shadow-[0_0_20px_rgba(251,191,36,0.7)] border-2 border-amber-300 scale-[1.01] font-black'
+                          : 'text-slate-300 hover:text-white bg-[#091332]/80 hover:bg-[#0e1c4a] border border-amber-500/20'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`p-1.5 rounded-xl transition-all ${
+                            isActive
+                              ? 'bg-black/20 text-slate-950'
+                              : 'bg-amber-500/10 text-amber-400 border border-amber-400/20'
+                          }`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                        </div>
+                        <span className="whitespace-nowrap text-left">{item.label}</span>
+                      </div>
+
+                      {item.badge !== undefined &&
+                      item.badge !== null &&
+                      (typeof item.badge === 'number' ? item.badge > 0 : Boolean(item.badge)) ? (
+                        <span
+                          className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0 border whitespace-nowrap ${
+                            isActive
+                              ? 'bg-black/30 text-slate-950 border-black/30'
+                              : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                          }`}
+                        >
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Actions inside Drawer */}
+            <div className="pt-4 border-t border-amber-500/20 space-y-2 mt-6">
+              {onRefresh && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onRefresh()
+                    setIsMobileOpen(false)
+                  }}
+                  disabled={isRefreshing}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-[#091332] hover:bg-[#0d1a45] border border-amber-500/30 text-amber-300 hover:text-amber-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span>{isRefreshing ? 'Syncing...' : 'Sync Platform Ledger'}</span>
+                </button>
+              )}
+
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 text-red-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>End Session</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DESKTOP (>= lg): Original Glowing Neon Container (Amber/Gold Root Aesthetics) */}
       <div className="hidden lg:flex rounded-3xl bg-[#060b20]/95 border-[1.5px] border-amber-400/80 shadow-[0_0_25px_rgba(251,191,36,0.22),inset_0_0_12px_rgba(251,191,36,0.08)] p-4 sm:p-5 flex-col justify-between h-full backdrop-blur-2xl space-y-5">

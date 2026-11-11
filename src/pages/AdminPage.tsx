@@ -33,6 +33,7 @@ import {
   Zap,
   Boxes,
   Fingerprint,
+  Menu,
 } from 'lucide-react'
 import {
   adminApi,
@@ -66,6 +67,7 @@ export default function AdminPage() {
 
   const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(() => getStoredAdminUser())
   const [adminSection, setAdminSection] = useState<ResellerSectionId>('applications')
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [copiedReferral, setCopiedReferral] = useState(false)
   const [copiedRefId, setCopiedRefId] = useState<string | null>(null)
 
@@ -597,6 +599,20 @@ export default function AdminPage() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto justify-start sm:justify-end shrink-0">
+          {/* Mobile Hamburger Menu Trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="lg:hidden px-3.5 py-1.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:to-fuchsia-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(217,70,239,0.5)] border border-fuchsia-400 transition-all shrink-0 active:scale-95"
+            aria-label="Open Partner Navigation"
+          >
+            <Menu className="h-3.5 w-3.5" />
+            <span>Menu</span>
+            {stats.pendingReview > 0 && (
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+            )}
+          </button>
+
           <Link
             to="/"
             className="px-3 py-1.5 rounded-full border border-slate-700 hover:border-cyan-400/60 bg-[#070f28] text-xs font-semibold text-slate-300 hover:text-cyan-200 flex items-center gap-1.5 transition-all shadow-[0_0_10px_rgba(0,0,0,0.3)] cursor-pointer"
@@ -649,6 +665,8 @@ export default function AdminPage() {
             onRefresh={fetchData}
             onLogout={handleLogout}
             isRefreshing={loading}
+            mobileOpen={mobileSidebarOpen}
+            onMobileOpenChange={setMobileSidebarOpen}
           />
         </div>
 
