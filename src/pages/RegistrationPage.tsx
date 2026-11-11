@@ -106,17 +106,17 @@ export default function RegistrationPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4.5rem)] flex flex-col justify-between p-4 sm:p-6 lg:p-8 max-w-[1440px] mx-auto relative">
+    <div className="w-full max-w-[1440px] min-w-0 min-h-[calc(100vh-4.5rem)] flex flex-col justify-between p-3.5 sm:p-6 lg:p-8 mx-auto relative overflow-x-hidden">
       
       {/* Background Ambient Radial Lights */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-600/10 blur-[120px] rounded-full pointer-events-none -z-10" />
       <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-fuchsia-600/10 blur-[130px] rounded-full pointer-events-none -z-10" />
 
       {/* Main Grid: Left Column, Center Form Card, Right Column */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start my-auto">
+      <div className="w-full max-w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start my-auto">
         
         {/* Left Column: Title, Benefits & 3D Laptop */}
-        <div className="lg:col-span-3 flex flex-col justify-between space-y-6 pt-2">
+        <div className="w-full max-w-full min-w-0 lg:col-span-3 flex flex-col justify-between space-y-4 sm:space-y-6 pt-2">
           {/* Main Title & Tagline */}
           <div>
             <div className="text-[11px] font-black tracking-[0.25em] text-cyan-400 uppercase">
@@ -133,37 +133,37 @@ export default function RegistrationPage() {
           </div>
 
           {/* Value Propositions (Compact 3-Pill Grid on Mobile, Stacked on Desktop) */}
-          <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 lg:space-y-4 lg:gap-0">
+          <div className="w-full min-w-0 grid grid-cols-3 lg:grid-cols-1 gap-1.5 xs:gap-2 sm:gap-3 lg:space-y-4 lg:gap-0">
             {/* Fast */}
-            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1 sm:gap-2 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left min-w-0">
+              <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <Clock className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Fast</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">Quick review</div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight truncate">Fast</div>
+                <div className="text-[9px] xs:text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block truncate">Quick review</div>
               </div>
             </div>
 
             {/* Easy */}
-            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1 sm:gap-2 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left min-w-0">
+              <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <Layers className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Easy</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">3-step apply</div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight truncate">Easy</div>
+                <div className="text-[9px] xs:text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block truncate">3-step apply</div>
               </div>
             </div>
 
             {/* Secured */}
-            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1.5 sm:gap-2.5 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
-                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
+            <div className="flex flex-col lg:flex-row items-center lg:items-center gap-1 sm:gap-2 lg:gap-3 p-2 sm:p-2.5 lg:p-0 rounded-2xl bg-[#081232]/60 lg:bg-transparent border border-purple-500/25 lg:border-none text-center lg:text-left min-w-0">
+              <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_15px_rgba(217,70,239,0.55)] shrink-0">
+                <ShieldCheck className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-sm font-bold text-white leading-tight">Secured</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block">Bank-grade</div>
+              <div className="min-w-0">
+                <div className="text-xs sm:text-sm font-bold text-white leading-tight truncate">Secured</div>
+                <div className="text-[9px] xs:text-[10px] sm:text-[11px] text-slate-400 leading-tight hidden xs:block truncate">Bank-grade</div>
               </div>
             </div>
           </div>
@@ -175,8 +175,8 @@ export default function RegistrationPage() {
         </div>
 
         {/* Center Column: The Glowing Registration Form Card */}
-        <div className="lg:col-span-6 w-full">
-          <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.35),inset_0_0_15px_rgba(0,240,255,0.1)] p-5 sm:p-7 backdrop-blur-xl">
+        <div className="w-full max-w-full min-w-0 lg:col-span-6">
+          <div className="w-full rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.35),inset_0_0_15px_rgba(0,240,255,0.1)] p-4 sm:p-7 backdrop-blur-xl">
             
             {/* Top Stepper (Hidden on dedicated Sign In route) */}
             {!isSignInRoute && (
@@ -216,7 +216,7 @@ export default function RegistrationPage() {
         </div>
 
         {/* Right Column: Holographic Card & Approval Crest */}
-        <div className="lg:col-span-3 flex flex-col justify-between space-y-6 pt-2">
+        <div className="w-full max-w-full min-w-0 lg:col-span-3 flex flex-col justify-between space-y-4 sm:space-y-6 pt-2">
           {/* Top Approval Crest Badge */}
           <div className="flex justify-center">
             <ApprovalBadge />
@@ -231,7 +231,7 @@ export default function RegistrationPage() {
       </div>
 
       {/* Bottom Ticker: Industries We Approve */}
-      <div className="mt-6 pt-4 border-t border-cyan-500/15">
+      <div className="w-full max-w-full min-w-0 overflow-hidden mt-6 pt-4 border-t border-cyan-500/15">
         <IndustriesBar />
       </div>
 

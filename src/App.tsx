@@ -38,7 +38,7 @@ function AppContent() {
       {!isAdmin && !isSuperAdmin && <Navbar isDashboard={isDashboard} />}
 
       {/* Main Content View with Suspense boundary */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden">
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />

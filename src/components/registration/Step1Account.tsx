@@ -263,11 +263,11 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
     <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* Step Header with Dual-Ring Purple Glow */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-cyan-500/20 gap-3">
-        <div className="flex items-center gap-3.5">
+        <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-12 h-12 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.6),inset_0_0_10px_rgba(217,70,239,0.3)] shrink-0">
             <User className="h-6 w-6" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             {!isSignInMode && (
               <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
                 Step 1 of 3
@@ -325,7 +325,7 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
       (searchParams.get('reseller') || searchParams.get('ref')) && (
         <div className="mb-4 p-3 rounded-2xl bg-cyan-950/60 border border-cyan-400/60 text-cyan-200 text-xs flex items-center gap-2.5 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
           <ShieldCheck className="h-4 w-4 text-cyan-400 shrink-0" />
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="font-bold text-white">Partner Onboarding Program</div>
             <div className="text-[11px] text-cyan-300 font-mono">
               Registering under Authorized Partner: <strong>{searchParams.get('reseller') || searchParams.get('ref')}</strong>
