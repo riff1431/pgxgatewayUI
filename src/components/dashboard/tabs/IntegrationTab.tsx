@@ -469,7 +469,7 @@ export default function IntegrationTab() {
                 <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#091332] border border-cyan-400/30">
                   <div className="flex items-center gap-2 text-cyan-300 font-mono text-sm font-bold truncate">
                     <GithubIcon className="w-4 h-4 text-cyan-400" />
-                    @{setupData?.officialGithubHandle || 'huipper-dev'}
+                    @{setupData?.officialGithubHandle || 'pgxgateway'}
                   </div>
                   <button
                     type="button"

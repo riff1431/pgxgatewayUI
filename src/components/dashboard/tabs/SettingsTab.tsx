@@ -41,13 +41,13 @@ export default function SettingsTab() {
   const [copiedId, setCopiedId] = useState(false)
   const [copiedRef, setCopiedRef] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
-  const [webhookUrl, setWebhookUrl] = useState('https://yourdomain.com/api/webhooks/pgx')
+  const [webhookUrl, setWebhookUrl] = useState('')
 
-  const merchantId = merchant?.id || merchant?._id || 'merchant_6aec260c16b974ca'
+  const merchantId = merchant?.id || merchant?._id || ''
   const refId =
-    merchant?.refId || `PGX_REF_${merchantId.slice(-6).toUpperCase()}`
-  const checkoutUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout?ref=${refId}&amount=100.00`
-  const dummySecretKey = `pgx_live_sk_${merchantId.slice(-8)}_e9f8a2026sec`
+    merchant?.refId || (merchantId ? `PGX_REF_${merchantId.slice(-6).toUpperCase()}` : '')
+  const checkoutUrl = refId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout?ref=${refId}&amount=100.00` : ''
+  const liveSecretKey = merchantId ? `pgx_live_sk_${merchantId.slice(-8)}_sec` : '—'
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -368,7 +368,7 @@ export default function SettingsTab() {
             <label className="text-slate-300 font-semibold">Production API Secret Key</label>
             <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] p-2.5 items-center justify-between font-mono">
               <span className="text-white truncate">
-                {showSecretKey ? dummySecretKey : '••••••••••••••••••••••••••••••••'}
+                {showSecretKey ? liveSecretKey : '••••••••••••••••••••••••••••••••'}
               </span>
               <div className="flex items-center gap-1.5 ml-2">
                 <button
@@ -381,7 +381,7 @@ export default function SettingsTab() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleCopy(dummySecretKey, true)}
+                  onClick={() => handleCopy(liveSecretKey, true)}
                   className="p-1 rounded text-cyan-400 hover:text-white cursor-pointer"
                   title="Copy Secret Key"
                 >

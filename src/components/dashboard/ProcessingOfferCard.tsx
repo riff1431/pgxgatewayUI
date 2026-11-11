@@ -14,20 +14,20 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
 
   // Split rate string (e.g. "2.1% + $0.20")
   const rateParts = offer?.rate ? offer.rate.split('+') : []
-  const baseRate = rateParts[0]?.trim() || (isAvailable ? '2.1%' : '—')
-  const perTxFee = rateParts[1]?.trim() ? `+ $${rateParts[1].replace(/[$]/g, '').trim()}` : (isAvailable ? '+ $0.20' : '—')
+  const baseRate = rateParts[0]?.trim() || '—'
+  const perTxFee = rateParts[1]?.trim() ? `+ $${rateParts[1].replace(/[$]/g, '').trim()}` : (offer?.rate ? '' : '—')
 
   // Clean Volume (e.g. "$250,000 / month", "Up to $250,000", "$250,000")
   const rawVolume = offer?.volume || ''
   const cleanVol = rawVolume.replace(/up\s*to/i, '').trim()
   const volParts = cleanVol.split('/')
-  const volumeAmount = volParts[0]?.trim() || (isAvailable ? '$250,000' : '—')
-  const volumePeriod = volParts[1]?.trim() ? `/${volParts[1].trim()}` : (isAvailable ? '/ month' : '—')
+  const volumeAmount = volParts[0]?.trim() || '—'
+  const volumePeriod = volParts[1]?.trim() ? `/${volParts[1].trim()}` : ''
 
   // Clean Settlement (e.g. "Daily T+2", "Daily T+2 (Next Day)", "Daily")
   const rawSettlement = offer?.settlement || ''
-  let settlementMain = isAvailable ? 'Daily' : '—'
-  let settlementSub = isAvailable ? 'T+2 (Next Day)' : '—'
+  let settlementMain = '—'
+  let settlementSub = ''
   if (rawSettlement) {
     if (rawSettlement.toLowerCase().includes('daily')) {
       settlementMain = 'Daily'
@@ -36,24 +36,24 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
     } else {
       const parts = rawSettlement.split('(')
       settlementMain = parts[0]?.trim() || rawSettlement
-      settlementSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : 'Rolling'
+      settlementSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : ''
     }
   }
 
   // Clean Reserve (e.g. "5% Rolling (90 days)", "5% Rolling", "5%")
   const rawReserve = offer?.reserve || ''
-  let reserveMain = isAvailable ? '5%' : '—'
-  let reserveSub = isAvailable ? 'Rolling (90d)' : '—'
+  let reserveMain = '—'
+  let reserveSub = ''
   if (rawReserve) {
     const pctMatch = rawReserve.match(/^(\d+(\.\d+)?%)/)
     if (pctMatch) {
       reserveMain = pctMatch[1]
       const rest = rawReserve.replace(pctMatch[1], '').replace(/[()]/g, '').trim()
-      reserveSub = rest || 'Rolling (90d)'
+      reserveSub = rest || ''
     } else {
       const parts = rawReserve.split('(')
       reserveMain = parts[0]?.trim() || rawReserve
-      reserveSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : 'Rolling'
+      reserveSub = parts[1] ? parts[1].replace(/[()]/g, '').trim() : ''
     }
   }
 

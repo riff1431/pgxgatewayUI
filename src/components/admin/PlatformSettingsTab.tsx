@@ -48,7 +48,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [isConfigured, setIsConfigured] = useState(false)
 
   const [setupFeePriceUSD, setSetupFeePriceUSD] = useState<number>(49.0)
-  const [officialGithubHandle, setOfficialGithubHandle] = useState('huipper-dev')
+  const [officialGithubHandle, setOfficialGithubHandle] = useState('pgxgateway')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
   const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (437) 577-8785')
 
@@ -94,7 +94,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       setStripeMode(data.stripe?.mode || 'test')
       setIsConfigured(Boolean(data.stripe?.isConfigured))
       setSetupFeePriceUSD(data.setupFeePriceUSD ?? 49.0)
-      setOfficialGithubHandle(data.officialGithubHandle || 'huipper-dev')
+      setOfficialGithubHandle(data.officialGithubHandle || 'pgxgateway')
       setAffiliateCommissionRate(data.affiliateCommissionRate ?? 20.0)
       setSupportWhatsapp(data.supportWhatsapp && data.supportWhatsapp !== '+1 (800) 749-4283' ? data.supportWhatsapp : '+1 (437) 577-8785')
     } catch (err: unknown) {
@@ -380,7 +380,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                 <span className="px-3 text-cyan-400 font-mono text-sm font-bold">@</span>
                 <input
                   type="text"
-                  placeholder="huipper-dev"
+                  placeholder="pgxgateway"
                   value={officialGithubHandle}
                   onChange={(e) => setOfficialGithubHandle(e.target.value)}
                   className="w-full pr-4 py-2.5 bg-transparent text-white font-mono text-sm focus:outline-none"

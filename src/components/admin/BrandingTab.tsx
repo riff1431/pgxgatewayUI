@@ -367,7 +367,7 @@ export default function BrandingTab({ onShowToast }: BrandingTabProps) {
                 <span className="text-amber-400 font-mono">WYSIWYG</span>
               </div>
 
-              {/* Mock Browser Header */}
+              {/* Interactive Browser Preview Header */}
               <div className="rounded-xl border border-slate-800 bg-[#070e28] p-3 space-y-2.5">
                 <div className="flex items-center gap-1.5 border-b border-slate-800/80 pb-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />

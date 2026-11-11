@@ -101,12 +101,12 @@ export default function ApplicationTab() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Legal Company Name</span>
-              <span className="font-bold text-white text-sm">{merchant?.legalName || 'Huipper Technology Ltd.'}</span>
+              <span className="font-bold text-white text-sm">{merchant?.legalName || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Industry</span>
-              <span className="font-bold text-cyan-300 capitalize text-sm">{merchant?.industry?.replace('-', ' ') || 'E-Commerce'}</span>
+              <span className="font-bold text-cyan-300 capitalize text-sm">{merchant?.industry ? merchant.industry.replace('-', ' ') : '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
@@ -117,24 +117,24 @@ export default function ApplicationTab() {
                     {merchant.website}
                   </a>
                 ) : (
-                  'https://pgxgateway.com'
+                  '—'
                 )}
               </span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Years in Business</span>
-              <span className="font-bold text-white">{merchant?.yearsInBusiness || '3-5 Years'}</span>
+              <span className="font-bold text-white">{merchant?.yearsInBusiness || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Monthly Volume</span>
-              <span className="font-bold text-white">{merchant?.monthlyVolume || '$50,000 - $250,000'}</span>
+              <span className="font-bold text-white">{merchant?.monthlyVolume || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <span className="text-slate-400 block text-[10px] uppercase font-semibold">Current Processor</span>
-              <span className="font-bold text-white">{merchant?.currentProcessor || 'Stripe'}</span>
+              <span className="font-bold text-white">{merchant?.currentProcessor || '—'}</span>
             </div>
           </div>
 
@@ -142,7 +142,7 @@ export default function ApplicationTab() {
           <div className="p-3 rounded-xl bg-[#091332]/60 border border-cyan-500/25 text-xs">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">Reason for Applying</span>
             <p className="text-slate-200 mt-1">
-              {merchant?.switchReason || 'Higher processing limits, multi-currency settlement, and direct underwriting approval.'}
+              {merchant?.switchReason || '—'}
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function ApplicationTab() {
                 <User className="h-4 w-4 text-cyan-400" />
                 <span>Full Name:</span>
               </div>
-              <span className="font-bold text-white">{merchant?.fullName || 'Tanvir Ahmed'}</span>
+              <span className="font-bold text-white">{merchant?.fullName || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
@@ -172,7 +172,7 @@ export default function ApplicationTab() {
                 <Mail className="h-4 w-4 text-cyan-400" />
                 <span>Business Email:</span>
               </div>
-              <span className="font-bold text-white">{merchant?.businessEmail || 'tanvir@pgxgateway.com'}</span>
+              <span className="font-bold text-white">{merchant?.businessEmail || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
@@ -180,7 +180,7 @@ export default function ApplicationTab() {
                 <Phone className="h-4 w-4 text-cyan-400" />
                 <span>Phone:</span>
               </div>
-              <span className="font-bold text-white">{merchant?.phone || '+880 1712 345678'}</span>
+              <span className="font-bold text-white">{merchant?.phone || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
@@ -188,7 +188,7 @@ export default function ApplicationTab() {
                 <Send className="h-4 w-4 text-sky-400" />
                 <span>Telegram:</span>
               </div>
-              <span className="font-bold text-white">{merchant?.telegram || '@tanvir_pgx'}</span>
+              <span className="font-bold text-white">{merchant?.telegram || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">

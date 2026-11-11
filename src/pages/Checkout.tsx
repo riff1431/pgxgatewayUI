@@ -40,8 +40,8 @@ export default function Checkout() {
   const [merchantProfile, setMerchantProfile] = useState<PublicMerchantProfile | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [method, setMethod] = useState<'card' | 'mfs' | 'wallet'>('card')
-  const [cardName, setCardName] = useState('Tanvir Ahmed')
-  const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242')
+  const [cardName, setCardName] = useState('')
+  const [cardNumber, setCardNumber] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [paidSuccess, setPaidSuccess] = useState<boolean>(statusParam === 'success')
@@ -307,7 +307,6 @@ export default function Checkout() {
                     <label className="text-xs font-semibold text-slate-300">Expires</label>
                     <Input
                       placeholder="MM/YY"
-                      defaultValue="12/28"
                       className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
                     />
                   </div>
@@ -315,7 +314,6 @@ export default function Checkout() {
                     <label className="text-xs font-semibold text-slate-300">Security CVC</label>
                     <Input
                       placeholder="CVC"
-                      defaultValue="888"
                       type="password"
                       maxLength={4}
                       className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
@@ -329,7 +327,7 @@ export default function Checkout() {
               <div className="space-y-3 p-4 rounded-2xl bg-[#060c24] border border-cyan-500/30 text-xs">
                 <div className="space-y-1.5">
                   <label className="font-semibold text-slate-300">Mobile Account Number</label>
-                  <Input placeholder="017XXXXXXXX" defaultValue="01812345678" className="bg-[#040817] text-base sm:text-sm min-h-[44px]" />
+                  <Input placeholder="01XXXXXXXXX" className="bg-[#040817] text-base sm:text-sm min-h-[44px]" />
                 </div>
                 <p className="text-slate-400 text-[11px]">
                   An authorization prompt will be pushed to your verified mobile handset.
