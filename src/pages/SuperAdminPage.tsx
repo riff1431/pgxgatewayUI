@@ -48,7 +48,14 @@ export default function SuperAdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredSuperAdminToken())
   const [analytics, setAnalytics] = useState<SuperAdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<SuperAdminTabId>('overview')
+  const [activeTab, setActiveTab] = useState<SuperAdminTabId>(() => {
+    const path = window.location.pathname.toLowerCase()
+    if (path.includes('transaction')) return 'transactions'
+    if (path.includes('setting')) return 'settings'
+    if (path.includes('branding')) return 'branding'
+    if (path.includes('merchant') || path.includes('routing')) return 'merchants'
+    return 'overview'
+  })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   // Super Admin Merchant Routing State

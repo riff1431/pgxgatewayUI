@@ -51,7 +51,9 @@ function AppContent() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/*" element={<AdminPage />} />
             <Route path="/super-admin" element={<SuperAdminPage />} />
+            <Route path="/super-admin/*" element={<SuperAdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

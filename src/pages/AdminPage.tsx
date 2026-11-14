@@ -66,7 +66,12 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(() => getStoredAdminUser())
-  const [adminSection, setAdminSection] = useState<ResellerSectionId>('applications')
+  const [adminSection, setAdminSection] = useState<ResellerSectionId>(() => {
+    const path = window.location.pathname.toLowerCase()
+    if (path.includes('transaction')) return 'transactions'
+    if (path.includes('stripe')) return 'stripe'
+    return 'applications'
+  })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [copiedReferral, setCopiedReferral] = useState(false)
   const [copiedRefId, setCopiedRefId] = useState<string | null>(null)
