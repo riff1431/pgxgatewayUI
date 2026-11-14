@@ -69,6 +69,7 @@ export default function IntegrationTab() {
   const [copiedBaseUrl, setCopiedBaseUrl] = useState(false)
   const [copiedEndpoint, setCopiedEndpoint] = useState(false)
   const [copiedSnippet, setCopiedSnippet] = useState(false)
+  const [copiedEnv, setCopiedEnv] = useState(false)
   const [copiedCard, setCopiedCard] = useState(false)
 
   // Form states for White-Glove Desk
@@ -460,6 +461,48 @@ if data.get("success") and data.get("checkoutUrl"):
                 <span className="text-xs font-bold text-white truncate">E-Commerce Storefront Bridge</span>
               </div>
               <p className="text-[11px] text-slate-400">Zero Stripe keys or KYC needed on merchant side.</p>
+            </div>
+          </div>
+
+          {/* Quick .env File Configuration Card */}
+          <div className="p-4 sm:p-6 rounded-3xl bg-[#030614] border border-cyan-500/30 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                  <FileCode className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span>Developer Environment Configuration (.env)</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">
+                      Copy &amp; Paste
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Add these two variables into your project&apos;s <code className="text-cyan-300 font-mono">.env</code> file. No Stripe API keys required.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  handleCopy(
+                    `# PGX Gateway API Configuration\nPGX_API_URL=https://api.pgxgateway.com/api/v1\nPGX_MERCHANT_REF_ID=${merchantRef}`,
+                    setCopiedEnv
+                  )
+                }
+                className="px-3.5 py-1.5 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.3)] self-start sm:self-auto"
+              >
+                {copiedEnv ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedEnv ? 'Copied .env' : 'Copy .env Variables'}</span>
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#060b20] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto shadow-inner">
+              <pre>{`# PGX Gateway API Configuration
+PGX_API_URL=https://api.pgxgateway.com/api/v1
+PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
             </div>
           </div>
 
