@@ -33,7 +33,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'integration', label: 'Integration & Collab', icon: Code2 },
+    { id: 'integration', label: 'API & Integration', icon: Code2 },
     { id: 'invoices', label: 'Weekly Invoices', icon: Receipt },
     { id: 'application', label: 'My Application', icon: FileText },
     { id: 'documents', label: 'Documents', icon: Folder },

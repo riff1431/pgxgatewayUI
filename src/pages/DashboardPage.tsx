@@ -96,11 +96,11 @@ export default function DashboardPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <span className="break-words">White-Glove GitHub & Website Integration Desk</span>
-                      <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40 shrink-0">Action Desk</span>
+                      <span className="break-words">Developer API & Website Integration Hub</span>
+                      <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40 shrink-0">Developer Hub</span>
                     </div>
                     <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 line-clamp-2 sm:line-clamp-none">
-                      Pay setup fee, invite our official GitHub account, submit .env secrets, and chat directly with Super Admin.
+                      Get your Merchant Ref ID, 1-endpoint Checkout API docs, ready-to-run code snippets (Node, PHP, Python, cURL), or request white-glove setup.
                     </p>
                   </div>
                 </div>
