@@ -217,20 +217,21 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
                   {isSuperAdmin ? 'Reseller Profit' : 'Your Profit'}
                 </th>
                 <th className="px-4 py-3.5 whitespace-nowrap text-right text-emerald-400">Merchant Net</th>
+                <th className="px-4 py-3.5 whitespace-nowrap text-cyan-300">Hold & Reserve Schedule</th>
                 <th className="px-4 py-3.5 whitespace-nowrap text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-cyan-500/15">
               {loading && transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={isSuperAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
+                  <td colSpan={isSuperAdmin ? 10 : 9} className="p-8 text-center text-slate-400">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto text-cyan-400 mb-2" />
                     <span>Loading transaction ledger...</span>
                   </td>
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={isSuperAdmin ? 9 : 8} className="p-12 text-center space-y-2">
+                  <td colSpan={isSuperAdmin ? 10 : 9} className="p-12 text-center space-y-2">
                     <Receipt className="h-10 w-10 text-slate-600 mx-auto" />
                     <div className="text-slate-300 font-bold text-sm">No transactions found</div>
                     <div className="text-slate-500 text-xs max-w-sm mx-auto">
@@ -306,6 +307,34 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
                       {/* Merchant Net */}
                       <td className="px-4 py-3.5 whitespace-nowrap text-right font-black text-emerald-400 font-mono">
                         ${txn.merchantNetAmount.toFixed(2)}
+                      </td>
+
+                      {/* Hold & Reserve Schedule */}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5 text-[11px]">
+                            <span className="font-semibold text-slate-300">
+                              {txn.settlementHoldDays || 14}d Hold:
+                            </span>
+                            <span className="text-cyan-400 font-mono">
+                              {txn.settlementEligibleAt ? new Date(txn.settlementEligibleAt).toLocaleDateString() : 'Pending'}
+                            </span>
+                            <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold border ${
+                              txn.settlementStatus === 'available' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                            }`}>
+                              {txn.settlementStatus === 'available' ? 'Available' : 'On Hold'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                            <span>Reserve ({txn.rollingReserveRate ?? 10}%):</span>
+                            <span className="text-fuchsia-300 font-mono font-semibold">
+                              ${(txn.rollingReserveAmount ?? (txn.grossAmount * 0.1)).toFixed(2)}
+                            </span>
+                            <span className="text-slate-500">
+                              (Matures {txn.rollingReserveReleaseAt ? new Date(txn.rollingReserveReleaseAt).toLocaleDateString() : '60d'})
+                            </span>
+                          </div>
+                        </div>
                       </td>
 
                       {/* Status */}

@@ -228,6 +228,14 @@ export interface TransactionItem {
   resellerFeeAmount: number
   resellerProfitAmount: number
   merchantNetAmount: number
+  tier?: 1 | 2
+  settlementHoldDays?: number
+  settlementEligibleAt?: string
+  settlementStatus?: 'on_hold' | 'available' | 'paid_out'
+  rollingReserveRate?: number
+  rollingReserveAmount?: number
+  rollingReserveReleaseAt?: string
+  rollingReserveStatus?: 'locked' | 'released'
   status: 'pending' | 'succeeded' | 'failed' | 'refunded'
   customerEmail?: string
   customerName?: string
