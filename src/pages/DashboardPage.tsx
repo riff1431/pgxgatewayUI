@@ -15,6 +15,7 @@ import OfferTab from '@/components/dashboard/tabs/OfferTab'
 import SettingsTab from '@/components/dashboard/tabs/SettingsTab'
 import IntegrationTab from '@/components/dashboard/tabs/IntegrationTab'
 import InvoicesTab from '@/components/dashboard/tabs/InvoicesTab'
+import MerchantTransactionsTab from '@/components/dashboard/tabs/MerchantTransactionsTab'
 
 export default function DashboardPage() {
   const { merchant } = useAuth()
@@ -23,7 +24,7 @@ export default function DashboardPage() {
   const displayName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
 
   // Derive active tab from searchParams (default: 'dashboard')
-  const validTabs = ['dashboard', 'integration', 'invoices', 'application', 'documents', 'messages', 'offer', 'settings']
+  const validTabs = ['dashboard', 'transactions', 'integration', 'invoices', 'application', 'documents', 'messages', 'offer', 'settings']
   const tabParam = searchParams.get('tab') || 'dashboard'
   const activeTab = validTabs.includes(tabParam) ? tabParam : 'dashboard'
 
@@ -124,6 +125,9 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* TAB: Merchant Transaction Ledger */}
+          {activeTab === 'transactions' && <MerchantTransactionsTab />}
 
           {/* TAB: Integration & Collab */}
           {activeTab === 'integration' && <IntegrationTab />}

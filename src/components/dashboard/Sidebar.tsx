@@ -11,6 +11,7 @@ import {
   User,
   Code2,
   Receipt,
+  CreditCard,
   Menu,
   X
 } from 'lucide-react'
@@ -33,6 +34,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'transactions', label: 'Transactions', icon: CreditCard },
     { id: 'integration', label: 'API & Integration', icon: Code2 },
     { id: 'invoices', label: 'Weekly Invoices', icon: Receipt },
     { id: 'application', label: 'My Application', icon: FileText },
