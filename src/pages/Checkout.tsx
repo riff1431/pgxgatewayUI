@@ -7,7 +7,6 @@ import {
   Lock,
   ShieldCheck,
   Coins,
-  Wallet,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
@@ -39,7 +38,7 @@ export default function Checkout() {
 
   const [merchantProfile, setMerchantProfile] = useState<PublicMerchantProfile | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
-  const [method, setMethod] = useState<'card' | 'mfs' | 'wallet'>('card')
+  const [method, setMethod] = useState<'card' | 'wallet'>('card')
   const [cardName, setCardName] = useState('')
   const [cardNumber, setCardNumber] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
@@ -228,11 +227,11 @@ export default function Checkout() {
             {/* Payment Method Selector */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-300">Select Payment Rails</label>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
                   variant={method === 'card' ? 'default' : 'outline'}
-                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
+                  className={`gap-1.5 sm:gap-2 h-auto py-2.5 sm:py-3 px-2 flex-col items-center justify-center text-xs font-bold transition-all min-h-[44px] ${
                     method === 'card'
                       ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
                       : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
@@ -244,21 +243,8 @@ export default function Checkout() {
                 </Button>
                 <Button
                   type="button"
-                  variant={method === 'mfs' ? 'default' : 'outline'}
-                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
-                    method === 'mfs'
-                      ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
-                      : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
-                  }`}
-                  onClick={() => setMethod('mfs')}
-                >
-                  <Wallet className="h-4 w-4" />
-                  <span>MFS / Direct</span>
-                </Button>
-                <Button
-                  type="button"
                   variant={method === 'wallet' ? 'default' : 'outline'}
-                  className={`gap-1 sm:gap-2 h-auto py-2.5 sm:py-3 px-1 sm:px-2 flex-col items-center justify-center text-[11px] sm:text-xs font-bold transition-all min-h-[44px] ${
+                  className={`gap-1.5 sm:gap-2 h-auto py-2.5 sm:py-3 px-2 flex-col items-center justify-center text-xs font-bold transition-all min-h-[44px] ${
                     method === 'wallet'
                       ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
                       : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
@@ -320,18 +306,6 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
-              </div>
-            )}
-
-            {method === 'mfs' && (
-              <div className="space-y-3 p-4 rounded-2xl bg-[#060c24] border border-cyan-500/30 text-xs">
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-300">Mobile Account Number</label>
-                  <Input placeholder="01XXXXXXXXX" className="bg-[#040817] text-base sm:text-sm min-h-[44px]" />
-                </div>
-                <p className="text-slate-400 text-[11px]">
-                  An authorization prompt will be pushed to your verified mobile handset.
-                </p>
               </div>
             )}
 
