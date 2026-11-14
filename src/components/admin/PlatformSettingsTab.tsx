@@ -1,21 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  CreditCard,
   DollarSign,
   CheckCircle2,
-  XCircle,
   Loader2,
-  Eye,
-  EyeOff,
   Phone,
   MessageSquare,
-  Zap,
-  ShieldCheck,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react'
 import {
   fetchPlatformSettings,
   updatePlatformSettings,
-  testStripeConnection,
 } from '@/lib/setupApi'
 
 interface PlatformSettingsTabProps {
@@ -38,65 +33,25 @@ function GithubIcon({ className = 'w-4 h-4' }: { className?: string }) {
 export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: PlatformSettingsTabProps) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [showSecretKey, setShowSecretKey] = useState(false)
 
   // Settings state
-  const [publishableKey, setPublishableKey] = useState('')
-  const [secretKey, setSecretKey] = useState('')
-  const [webhookSecret, setWebhookSecret] = useState('')
-  const [stripeMode, setStripeMode] = useState<'test' | 'live'>('test')
-  const [isConfigured, setIsConfigured] = useState(false)
-
-  const [setupFeePriceUSD, setSetupFeePriceUSD] = useState<number>(49.0)
+  const [setupFeePriceUSD, setSetupFeePriceUSD] = useState<number>(450.0)
   const [officialGithubHandle, setOfficialGithubHandle] = useState('pgxgateway')
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
   const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (437) 577-8785')
-
-  // Stripe Connection Test State
-  const [testingStripe, setTestingStripe] = useState(false)
-  const [testResult, setTestResult] = useState<{
-    success: boolean
-    message: string
-    livemode?: boolean
-    currencies?: string[]
-  } | null>(null)
-
-  const handleTestConnection = async () => {
-    setTestingStripe(true)
-    setTestResult(null)
-    try {
-      const res = await testStripeConnection(secretKey)
-      setTestResult(res)
-      if (res.success) {
-        onSuccessToast?.(
-          'Stripe Connection Verified',
-          res.message || 'Successfully authenticated with Stripe.'
-        )
-      } else {
-        onErrorToast?.('Stripe Connection Failed', res.message)
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Connection test failed'
-      setTestResult({ success: false, message: msg })
-      onErrorToast?.('Stripe Connection Failed', msg)
-    } finally {
-      setTestingStripe(false)
-    }
-  }
 
   const loadSettings = useCallback(async () => {
     setLoading(true)
     try {
       const data = await fetchPlatformSettings()
-      setPublishableKey(data.stripe?.publishableKey || '')
-      setSecretKey(data.stripe?.secretKey || '')
-      setWebhookSecret(data.stripe?.webhookSecret || '')
-      setStripeMode(data.stripe?.mode || 'test')
-      setIsConfigured(Boolean(data.stripe?.isConfigured))
-      setSetupFeePriceUSD(data.setupFeePriceUSD ?? 49.0)
+      setSetupFeePriceUSD(data.setupFeePriceUSD ?? 450.0)
       setOfficialGithubHandle(data.officialGithubHandle || 'pgxgateway')
       setAffiliateCommissionRate(data.affiliateCommissionRate ?? 20.0)
-      setSupportWhatsapp(data.supportWhatsapp && data.supportWhatsapp !== '+1 (800) 749-4283' ? data.supportWhatsapp : '+1 (437) 577-8785')
+      setSupportWhatsapp(
+        data.supportWhatsapp && data.supportWhatsapp !== '+1 (800) 749-4283'
+          ? data.supportWhatsapp
+          : '+1 (437) 577-8785'
+      )
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error connecting to backend'
       onErrorToast?.('Failed to load platform settings', message)
@@ -113,20 +68,16 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
     e.preventDefault()
     setSaving(true)
     try {
-      const updated = await updatePlatformSettings({
+      await updatePlatformSettings({
         setupFeePriceUSD: Number(setupFeePriceUSD),
         officialGithubHandle: officialGithubHandle.trim().replace(/^@/, ''),
         affiliateCommissionRate: Number(affiliateCommissionRate),
         supportWhatsapp: supportWhatsapp.trim(),
-        stripe: {
-          publishableKey: publishableKey.trim(),
-          secretKey: secretKey.trim(),
-          webhookSecret: webhookSecret.trim(),
-          mode: stripeMode,
-        },
       })
-      setIsConfigured(Boolean(updated.stripe?.isConfigured))
-      onSuccessToast?.('Platform Settings Updated', 'Stripe credentials, setup fee, and GitHub configurations saved.')
+      onSuccessToast?.(
+        'Platform Settings Updated',
+        'Setup fee, affiliate commissions, GitHub handle, and support desk saved successfully.'
+      )
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Server error occurred'
       onErrorToast?.('Failed to save settings', message)
@@ -150,10 +101,10 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
       <div className="p-4 sm:p-6 rounded-3xl bg-gradient-to-r from-[#071330] via-[#091a45] to-[#071330] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full max-w-full min-w-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            Super Admin Platform & Payment Configuration
+            Super Admin Platform Configuration
           </h2>
           <p className="text-xs sm:text-sm text-slate-300">
-            Configure your master Stripe payment gateway to receive setup fees, official team GitHub handle, and affiliate commission rates.
+            Configure merchant onboarding setup fees, official team GitHub handle, affiliate commissions, and support desk.
           </p>
         </div>
 
@@ -167,340 +118,176 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full max-w-full min-w-0">
-        {/* Section 1: Super Admin Stripe Gateway (Left 7 Cols) */}
-        <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-4 sm:p-6 sm:p-8 space-y-6 w-full max-w-full min-w-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Platform Stripe Account</h3>
-                <p className="text-xs text-slate-300">Collects setup fees directly into your Super Admin Stripe account</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                  isConfigured
-                    ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
-                    : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                }`}
-              >
-                {isConfigured ? 'Gateway Active' : 'Stripe Pending'}
+      {/* Bridge Engine Notice Card */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-[#06102b] border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shrink-0">
+            <Sparkles className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-white flex items-center gap-2">
+              <span>Payment Processing & Cloaking Engine</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                E-Commerce Bridge Active
               </span>
             </div>
-          </div>
-
-          {/* Mode Switcher */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-[#030614] border border-cyan-500/20">
-            <div className="text-xs font-semibold text-slate-300">Stripe Processing Environment:</div>
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-[#091332] border border-cyan-500/30">
-              <button
-                type="button"
-                onClick={() => setStripeMode('test')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  stripeMode === 'test'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Test Mode
-              </button>
-              <button
-                type="button"
-                onClick={() => setStripeMode('live')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  stripeMode === 'live'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Live Production
-              </button>
-            </div>
-          </div>
-
-          {/* Publishable Key */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-200">Stripe Publishable Key</label>
-            <input
-              type="text"
-              placeholder={stripeMode === 'live' ? 'pk_live_...' : 'pk_test_...'}
-              value={publishableKey}
-              onChange={(e) => {
-                const val = e.target.value
-                setPublishableKey(val)
-                if (val.startsWith('pk_live_') && stripeMode !== 'live') {
-                  setStripeMode('live')
-                }
-              }}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-            />
-          </div>
-
-          {/* Secret Key */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-slate-200">Stripe Secret Key</label>
-              <button
-                type="button"
-                onClick={() => setShowSecretKey(!showSecretKey)}
-                className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
-              >
-                {showSecretKey ? (
-                  <>
-                    <EyeOff className="w-3 h-3" /> Hide
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-3 h-3" /> Reveal
-                  </>
-                )}
-              </button>
-            </div>
-            <input
-              type={showSecretKey ? 'text' : 'password'}
-              placeholder={stripeMode === 'live' ? 'sk_live_...' : 'sk_test_...'}
-              value={secretKey}
-              onChange={(e) => {
-                const val = e.target.value
-                setSecretKey(val)
-                if (val.startsWith('sk_live_') && stripeMode !== 'live') {
-                  setStripeMode('live')
-                }
-              }}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-            />
-          </div>
-
-          {/* Webhook Secret */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-200">Stripe Webhook Signing Secret</label>
-            <input
-              type="text"
-              placeholder="whsec_..."
-              value={webhookSecret}
-              onChange={(e) => setWebhookSecret(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
-            />
-            <p className="text-[11px] text-slate-400">
-              Webhook endpoint to configure in Stripe: <span className="text-cyan-300 font-mono">https://api.pgxgateway.com/api/v1/webhooks/super-admin/stripe</span>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Customer checkouts and Stripe credentials (Test / Live) are securely managed and cloaked via the E-Commerce Storefront Bridge.
             </p>
           </div>
+        </div>
+        <a
+          href="https://pgxdigital.shop"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-cyan-500/30 transition-colors shrink-0"
+        >
+          <span>Storefront Bridge</span>
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
 
-          {/* Test Stripe Connection Action & Live Telemetry Result */}
-          <div className="pt-2 border-t border-cyan-500/20 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Stripe Gateway Verification</span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Directly pings Stripe API to verify that Secret Key is active and authorized.
-                </p>
-              </div>
+      {/* 2-Column Balanced Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-start w-full max-w-full min-w-0">
+        {/* Card 1: Setup Fee & Affiliate Commission */}
+        <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 sm:p-8 space-y-6 w-full max-w-full min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white">Setup Fee & Commissions</h3>
+              <p className="text-xs text-slate-300">Dynamic pricing and affiliate splits</p>
+            </div>
+          </div>
 
-              <button
-                type="button"
-                onClick={handleTestConnection}
-                disabled={testingStripe}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 hover:from-cyan-500/30 hover:to-purple-500/30 border border-cyan-400/60 text-cyan-300 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(0,240,255,0.15)] disabled:opacity-50 shrink-0"
-              >
-                {testingStripe ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-300" />
-                    <span>Verifying with Stripe...</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300/30" />
-                    <span>Test Stripe Connection</span>
-                  </>
-                )}
-              </button>
+          {/* Setup Fee Amount */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-200">Merchant Setup Fee (USD)</label>
+              <span className="text-[10px] text-cyan-300 font-bold">Standard Pricing</span>
+            </div>
+            <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
+              <span className="px-3 text-cyan-400 font-bold text-sm">$</span>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={setupFeePriceUSD}
+                onChange={(e) => setSetupFeePriceUSD(Number(e.target.value))}
+                className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
+              />
             </div>
 
-            {/* Test Connection Result Box */}
-            {testResult && (
-              <div
-                className={`p-3.5 rounded-2xl border transition-all ${
-                  testResult.success
-                    ? 'bg-emerald-950/40 border-emerald-400/70 shadow-[0_0_20px_rgba(52,211,153,0.2)]'
-                    : 'bg-red-950/40 border-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.2)]'
+            {/* Quick Presets */}
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setSetupFeePriceUSD(450)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
+                  setupFeePriceUSD === 450
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400'
+                    : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
                 }`}
               >
-                <div className="flex items-start gap-2.5">
-                  {testResult.success ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  )}
-                  <div className="text-xs space-y-1">
-                    <div className="font-bold flex items-center gap-2">
-                      <span className={testResult.success ? 'text-emerald-300' : 'text-red-300'}>
-                        {testResult.success ? 'Stripe Connection Active & Verified' : 'Authentication Failed'}
-                      </span>
-                      {testResult.success && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 font-mono text-emerald-200">
-                          {testResult.livemode ? 'LIVE PRODUCTION' : 'TEST MODE'}
-                        </span>
-                      )}
-                    </div>
-                    <p className={testResult.success ? 'text-emerald-200/90 text-[11px]' : 'text-red-200/90 text-[11px] font-mono'}>
-                      {testResult.message}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+                $450 (Standard Tier)
+              </button>
+              <button
+                type="button"
+                onClick={() => setSetupFeePriceUSD(565)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
+                  setupFeePriceUSD === 565
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400'
+                    : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
+                }`}
+              >
+                $565 (VIP Turnkey)
+              </button>
+            </div>
+          </div>
+
+          {/* Affiliate Commission Rate */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">Reseller Affiliate Commission</label>
+            <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={affiliateCommissionRate}
+                onChange={(e) => setAffiliateCommissionRate(Number(e.target.value))}
+                className="w-full pl-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
+              />
+              <span className="px-3 text-cyan-400 font-bold text-sm">%</span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Amount credited to reseller: <span className="text-white font-semibold">${((setupFeePriceUSD * affiliateCommissionRate) / 100).toFixed(2)} USD</span> per referred merchant.
+            </p>
           </div>
         </div>
 
-        {/* Section 2: Onboarding Setup Fee & GitHub Handle (Right 5 Cols) */}
-        <div className="lg:col-span-5 space-y-6 w-full max-w-full min-w-0">
-          {/* GitHub Handle Card */}
-          <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                <GithubIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Official GitHub Handle</h3>
-                <p className="text-xs text-slate-300">Merchants copy this username to invite your team</p>
-              </div>
+        {/* Card 2: GitHub Handle & WhatsApp Desk */}
+        <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 sm:p-8 space-y-6 w-full max-w-full min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              <GithubIcon className="w-5 h-5" />
             </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-200">GitHub Organization or Username</label>
-              <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
-                <span className="px-3 text-cyan-400 font-mono text-sm font-bold">@</span>
-                <input
-                  type="text"
-                  placeholder="pgxgateway"
-                  value={officialGithubHandle}
-                  onChange={(e) => setOfficialGithubHandle(e.target.value)}
-                  className="w-full pr-4 py-2.5 bg-transparent text-white font-mono text-sm focus:outline-none"
-                />
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Displayed in the merchant's 1-click collaboration desk.
-              </p>
+            <div>
+              <h3 className="text-base font-bold text-white">Collaboration & Support Desk</h3>
+              <p className="text-xs text-slate-300">GitHub team handle and direct merchant communications</p>
             </div>
           </div>
 
-          {/* Setup Fee & Affiliate Commission Card */}
-          <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-                <DollarSign className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Setup Fee & Commissions</h3>
-                <p className="text-xs text-slate-300">Dynamic pricing and affiliate splits</p>
-              </div>
+          {/* GitHub Organization or Handle */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">GitHub Organization or Username</label>
+            <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
+              <span className="px-3 text-cyan-400 font-mono text-sm font-bold">@</span>
+              <input
+                type="text"
+                placeholder="pgxgateway"
+                value={officialGithubHandle}
+                onChange={(e) => setOfficialGithubHandle(e.target.value)}
+                className="w-full pr-4 py-2.5 bg-transparent text-white font-mono text-sm focus:outline-none"
+              />
             </div>
+            <p className="text-[11px] text-slate-400">
+              Displayed in the merchant&apos;s 1-click collaboration desk to invite your integration team.
+            </p>
+          </div>
 
-            {/* Setup Fee Amount */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-200">Merchant Setup Fee (USD)</label>
-                <span className="text-[10px] text-cyan-300 font-bold">Standard Pricing</span>
-              </div>
-              <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
-                <span className="px-3 text-cyan-400 font-bold text-sm">$</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={setupFeePriceUSD}
-                  onChange={(e) => setSetupFeePriceUSD(Number(e.target.value))}
-                  className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
-                />
-              </div>
-
-              {/* Quick Presets */}
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setSetupFeePriceUSD(450)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
-                    setupFeePriceUSD === 450
-                      ? 'bg-fuchsia-600/30 text-fuchsia-300 border-fuchsia-400'
-                      : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
-                  }`}
-                >
-                  $450 (Standard Tier)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSetupFeePriceUSD(565)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors cursor-pointer ${
-                    setupFeePriceUSD === 565
-                      ? 'bg-fuchsia-600/30 text-fuchsia-300 border-fuchsia-400'
-                      : 'bg-[#030614] text-slate-400 border-slate-700 hover:text-white'
-                  }`}
-                >
-                  $565 (VIP Turnkey)
-                </button>
-              </div>
+          {/* Crypto Payments & Direct WhatsApp Finance Desk */}
+          <div className="space-y-2 pt-4 border-t border-cyan-500/20">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Crypto Payments & Finance WhatsApp</span>
+              </label>
+              <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                Active
+              </span>
             </div>
-
-            {/* Affiliate Commission Rate */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-200">Reseller Affiliate Commission</label>
-              <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={affiliateCommissionRate}
-                  onChange={(e) => setAffiliateCommissionRate(Number(e.target.value))}
-                  className="w-full pl-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
-                />
-                <span className="px-3 text-cyan-400 font-bold text-sm">%</span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Amount credited to reseller: <span className="text-white font-semibold">${((setupFeePriceUSD * affiliateCommissionRate) / 100).toFixed(2)} USD</span> per referred merchant.
-              </p>
+            <p className="text-[11px] text-slate-400">
+              Merchants choosing &ldquo;Pay with Bitcoin&rdquo; for their setup fee will be directed to this WhatsApp number to arrange Bitcoin (BTC) transfer.
+            </p>
+            <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
+              <span className="px-3 text-emerald-400 font-bold text-sm">
+                <Phone className="w-3.5 h-3.5" />
+              </span>
+              <input
+                type="text"
+                placeholder="+1 (437) 577-8785"
+                value={supportWhatsapp}
+                onChange={(e) => setSupportWhatsapp(e.target.value)}
+                className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
+              />
             </div>
-
-            {/* Crypto Payments & Direct WhatsApp Finance Desk */}
-            <div className="space-y-2 pt-3 border-t border-cyan-500/20">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Crypto Payments & Finance WhatsApp</span>
-                </label>
-                <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
-                  Active
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Merchants choosing &ldquo;Pay with Bitcoin&rdquo; for their setup fee will be directed to this WhatsApp number to arrange Bitcoin (BTC) transfer.
-              </p>
-              <div className="flex items-center rounded-xl bg-[#030614] border border-cyan-500/30 overflow-hidden">
-                <span className="px-3 text-emerald-400 font-bold text-sm">
-                  <Phone className="w-3.5 h-3.5" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="+1 (437) 577-8785"
-                  value={supportWhatsapp}
-                  onChange={(e) => setSupportWhatsapp(e.target.value)}
-                  className="w-full pr-4 py-2.5 bg-transparent text-white font-bold text-sm focus:outline-none"
-                />
-              </div>
-              <div className="p-2.5 rounded-xl bg-[#09153a] border border-cyan-500/20 text-[11px] text-slate-300 flex items-center gap-2">
-                <span className="text-emerald-400 font-bold">Auto Message:</span>
-                <span className="text-slate-400 truncate italic">
-                  &ldquo;Hi, I accepted the processing offer and want to pay Setup Fee via Crypto...&rdquo;
-                </span>
-              </div>
+            <div className="p-2.5 rounded-xl bg-[#09153a] border border-cyan-500/20 text-[11px] text-slate-300 flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">Auto Message:</span>
+              <span className="text-slate-400 truncate italic">
+                &ldquo;Hi, I accepted the processing offer and want to pay Setup Fee via Crypto...&rdquo;
+              </span>
             </div>
           </div>
         </div>
