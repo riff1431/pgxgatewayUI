@@ -211,26 +211,26 @@ export default function ApplicationReviewModal({
     : null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
-      <div className="w-full max-w-5xl xl:max-w-6xl rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_50px_rgba(0,240,255,0.4)] flex flex-col max-h-[92vh] overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-5 bg-black/85 backdrop-blur-md animate-fade-in overflow-y-auto">
+      <div className="w-full max-w-5xl xl:max-w-6xl rounded-2xl sm:rounded-3xl bg-[#060b20] border-[1.5px] border-cyan-400 shadow-[0_0_50px_rgba(0,240,255,0.4)] flex flex-col max-h-[94vh] sm:max-h-[92vh] overflow-hidden my-auto">
         
         {/* Top Header Banner */}
-        <div className="px-3.5 sm:px-6 py-2.5 sm:py-4 border-b border-cyan-500/20 bg-gradient-to-r from-[#040819] via-[#091538] to-[#040819] shrink-0">
+        <div className="px-3 sm:px-6 py-2.5 sm:py-3.5 border-b border-cyan-500/20 bg-gradient-to-r from-[#040819] via-[#091538] to-[#040819] shrink-0">
           <div className="flex items-center justify-between gap-2 sm:gap-3">
-            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.25)] shrink-0">
-                <Building2 className="h-4.5 w-4.5 sm:h-6 sm:w-6" />
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-cyan-500/10 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(0,240,255,0.25)] shrink-0">
+                <Building2 className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h2 className="text-base sm:text-xl font-black text-white tracking-tight truncate max-w-[200px] sm:max-w-none">
+                  <h2 className="text-sm sm:text-lg font-black text-white tracking-tight truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
                     {app.legalName || app.fullName}
                   </h2>
                   {app.refId && (
                     <button
                       type="button"
                       onClick={() => handleCopy(app.refId || '', 'refId')}
-                      className="inline-flex items-center gap-1 font-mono text-[10px] sm:text-[11px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-1.5 sm:px-2 py-0.5 rounded-full font-bold hover:bg-cyan-900/50 transition-colors cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1 font-mono text-[10px] text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-1.5 sm:px-2 py-0.5 rounded-full font-bold hover:bg-cyan-900/50 transition-colors cursor-pointer shrink-0"
                       title="Click to copy Ref ID"
                     >
                       <span>{app.refId}</span>
@@ -242,39 +242,39 @@ export default function ApplicationReviewModal({
                   </span>
                 </div>
                 <p className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1.5 sm:gap-2 mt-0.5 flex-wrap">
-                  <span className="truncate max-w-[140px] sm:max-w-none">ID: <span className="font-mono text-cyan-300">{app._id}</span></span>
+                  <span className="truncate max-w-[120px] xs:max-w-none">ID: <span className="font-mono text-cyan-300">{app._id}</span></span>
                   <span className="hidden xs:inline">•</span>
                   <span className="hidden xs:inline">{new Date(app.createdAt).toLocaleDateString()}</span>
                   <span>•</span>
-                  <span className="capitalize text-slate-300">
+                  <span className="capitalize text-slate-300 truncate">
                     Industry: <strong className="text-cyan-300">{app.industry?.replace('-', ' ') || 'General Business'}</strong>
                   </span>
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
               {/* Application Status Pill */}
               {app.applicationStatus === 'approved' && (
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)] flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
                   <span className="hidden xs:inline">Approved Active</span><span className="xs:hidden">Approved</span>
                 </span>
               )}
               {app.applicationStatus === 'under_review' && (
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center gap-1">
-                  <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400 shadow-[0_0_10px_rgba(0,240,255,0.3)] flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
                   <span className="hidden xs:inline">Under Review</span><span className="xs:hidden">Review</span>
                 </span>
               )}
               {app.applicationStatus === 'rejected' && (
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-red-300 bg-red-500/15 border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.3)] flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-red-300 bg-red-500/15 border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.3)] flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
                   Declined
                 </span>
               )}
               {app.applicationStatus === 'draft' && (
-                <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-400 bg-slate-800 border border-slate-700">
+                <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold text-slate-400 bg-slate-800 border border-slate-700">
                   Draft
                 </span>
               )}
@@ -282,17 +282,17 @@ export default function ApplicationReviewModal({
               <button
                 type="button"
                 onClick={() => onOpenMessageModal(app)}
-                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-cyan-950/70 border border-cyan-400/40 text-cyan-300 hover:text-white hover:bg-cyan-900/60 shadow-[0_0_10px_rgba(0,240,255,0.2)] text-[11px] sm:text-xs font-bold transition-all cursor-pointer shrink-0"
+                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl bg-cyan-950/70 border border-cyan-400/40 text-cyan-300 hover:text-white hover:bg-cyan-900/60 shadow-[0_0_10px_rgba(0,240,255,0.2)] text-[10px] sm:text-xs font-bold transition-all cursor-pointer shrink-0"
                 title="Send Real-Time Message to Merchant"
               >
-                <MessageSquare className="h-3.5 w-3.5 text-cyan-400" />
-                <span>Message</span>
+                <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-cyan-400" />
+                <span className="hidden xs:inline">Message</span>
               </button>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="text-slate-400 hover:text-white p-1 sm:p-2 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer"
+                className="text-slate-400 hover:text-white p-1 sm:p-1.5 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer"
                 title="Close Underwriting Window (Esc)"
               >
                 <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -301,11 +301,11 @@ export default function ApplicationReviewModal({
           </div>
 
           {/* Underwriting Navigation Tabs */}
-          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-cyan-500/15 overflow-x-auto no-scrollbar scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5 pt-2 border-t border-cyan-500/15 overflow-x-auto no-scrollbar scrollbar-none">
             <button
               type="button"
               onClick={() => setActiveTab('dossier')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                 activeTab === 'dossier'
                   ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
@@ -318,7 +318,7 @@ export default function ApplicationReviewModal({
             <button
               type="button"
               onClick={() => setActiveTab('documents')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                 activeTab === 'documents'
                   ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-200 shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
@@ -340,14 +340,15 @@ export default function ApplicationReviewModal({
             <button
               type="button"
               onClick={() => setActiveTab('offer')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+              className={`px-3 sm:px-4 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0 ${
                 activeTab === 'offer'
                   ? 'bg-fuchsia-500/20 border border-fuchsia-400 text-fuchsia-200 shadow-[0_0_12px_rgba(217,70,239,0.3)]'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/40 border border-transparent'
               }`}
             >
-              <Tag className="h-4 w-4 text-fuchsia-400" />
-              <span>Underwriting Decision & Offer</span>
+              <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-fuchsia-400" />
+              <span className="xs:hidden">Decision & Offer</span>
+              <span className="hidden xs:inline">Underwriting Decision & Offer</span>
               {app.offer?.isAvailable && (
                 <span className="w-2 h-2 rounded-full bg-fuchsia-400 animate-pulse" />
               )}
@@ -356,7 +357,7 @@ export default function ApplicationReviewModal({
         </div>
 
         {/* Modal Body / Tab Content */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
+        <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
           
           {/* Live Activation Request Alert Banner */}
           {app.liveActivationRequest?.status === 'pending' && (
@@ -1000,38 +1001,53 @@ export default function ApplicationReviewModal({
               )}
 
               {/* Underwriter Quick Tier Presets */}
-              <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-[#08102b] border border-cyan-500/25">
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mr-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-[#08102b] border border-cyan-500/25 space-y-2">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
                   Default Tier Presets:
                 </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOfferRate('9.0% + $0.30')
-                    setOfferVolume('Up to $250,000')
-                    setOfferSettlement('Weekly (14 Days Hold)')
-                    setOfferReserve('10% (60 Days)')
-                    setOfferSetupFee('$1,499')
-                    setOfferMonthlyFee('$499 / month')
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-300 text-xs font-bold cursor-pointer transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)]"
-                >
-                  ★ Tier 1 (Default): 9.0% · 14d Hold · 10% Res · $1,499 Setup · $499/mo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOfferRate('15.0% + $0.30')
-                    setOfferVolume('Up to $250,000')
-                    setOfferSettlement('Bi-Weekly (45 Days Hold)')
-                    setOfferReserve('20% (90 Days)')
-                    setOfferSetupFee('$2,500')
-                    setOfferMonthlyFee('$499 / month')
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/60 text-purple-300 text-xs font-bold cursor-pointer transition-all shadow-[0_0_10px_rgba(217,70,239,0.2)]"
-                >
-                  Tier 2 (Doc Exception): 15.0% · 45d Hold · 20% Res · $2,500 Setup · $499/mo
-                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOfferRate('9.0% + $0.30')
+                      setOfferVolume('Up to $250,000')
+                      setOfferSettlement('Weekly (14 Days Hold)')
+                      setOfferReserve('10% (60 Days)')
+                      setOfferSetupFee('$1,499')
+                      setOfferMonthlyFee('$499 / month')
+                    }}
+                    className="p-2.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-300 text-left cursor-pointer transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between font-bold text-xs">
+                      <span>★ Tier 1 (Default)</span>
+                      <span className="font-mono text-[11px] text-emerald-400">$1,499 Setup</span>
+                    </div>
+                    <div className="text-[11px] text-emerald-200/80 mt-1">
+                      9.0% + $0.30 • 14d Hold • 10% Res • $499/mo
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOfferRate('15.0% + $0.30')
+                      setOfferVolume('Up to $250,000')
+                      setOfferSettlement('Bi-Weekly (45 Days Hold)')
+                      setOfferReserve('20% (90 Days)')
+                      setOfferSetupFee('$2,500')
+                      setOfferMonthlyFee('$499 / month')
+                    }}
+                    className="p-2.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/60 text-purple-300 text-left cursor-pointer transition-all shadow-[0_0_10px_rgba(217,70,239,0.2)] flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between font-bold text-xs">
+                      <span>Tier 2 (Doc Exception)</span>
+                      <span className="font-mono text-[11px] text-purple-300">$2,500 Setup</span>
+                    </div>
+                    <div className="text-[11px] text-purple-200/80 mt-1">
+                      15.0% + $0.30 • 45d Hold • 20% Res • $499/mo
+                    </div>
+                  </button>
+                </div>
               </div>
 
               {/* 6 Term Inputs Grid */}
@@ -1211,25 +1227,25 @@ export default function ApplicationReviewModal({
             )}
           </div>
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end shrink-0">
             {/* If merchant is currently in Trial mode, provide 1-click Extend and Convert to Live */}
             {app.applicationStatus === 'approved' && app.accountMode === 'trial' ? (
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
+              <div className="grid grid-cols-3 sm:flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
                 <button
                   type="button"
                   disabled={reviewLoading}
                   onClick={() => onExtendTrial?.(app._id, 24)}
-                  className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-full border border-cyan-500/60 bg-cyan-500/10 text-cyan-300 font-bold text-[11px] sm:text-xs hover:bg-cyan-500/20 shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap"
+                  className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full border border-cyan-500/60 bg-cyan-500/10 text-cyan-300 font-bold text-xs hover:bg-cyan-500/20 shadow-[0_0_12px_rgba(0,240,255,0.25)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap min-h-[38px] sm:min-h-[40px]"
                 >
                   <Clock className="h-3 w-3" />
-                  <span>+24h Extend</span>
+                  <span>+24h</span>
                 </button>
 
                 <button
                   type="button"
                   disabled={reviewLoading}
                   onClick={onSubmitOffer}
-                  className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap min-h-[38px] sm:min-h-[40px]"
                   title="Send or update commercial processing offer"
                 >
                   {reviewLoading ? (
@@ -1239,7 +1255,7 @@ export default function ApplicationReviewModal({
                     </>
                   ) : (
                     <>
-                      <Tag className="h-3.5 w-3.5 shrink-0" />
+                      <Tag className="h-3 w-3 shrink-0" />
                       <span>{app.offer?.isAvailable ? 'Update Offer' : 'Send Offer'}</span>
                     </>
                   )}
@@ -1250,25 +1266,25 @@ export default function ApplicationReviewModal({
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onConvertToLive?.(app._id)}
-                    className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_16px_rgba(16,185,129,0.6)] hover:shadow-[0_0_25px_rgba(16,185,129,0.85)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap"
+                    className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(16,185,129,0.6)] hover:shadow-[0_0_25px_rgba(16,185,129,0.85)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap min-h-[38px] sm:min-h-[40px]"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
-                    <span>Convert to Live 🚀</span>
+                    <span>Go Live 🚀</span>
                   </button>
                 ) : app.liveActivationRequest?.status === 'pending' ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.2)] whitespace-nowrap">
+                  <span className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.2)] whitespace-nowrap min-h-[38px]">
                     <Clock className="h-3 w-3 text-amber-400 animate-pulse" />
-                    <span>Live Request Pending (&lt;24h)</span>
+                    <span>Pending</span>
                   </span>
                 ) : (
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onRequestLiveActivation?.(app._id)}
-                    className="px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_14px_rgba(251,191,36,0.5)] hover:shadow-[0_0_22px_rgba(251,191,36,0.8)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                    className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-xs shadow-[0_0_14px_rgba(251,191,36,0.5)] hover:shadow-[0_0_22px_rgba(251,191,36,0.8)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap min-h-[38px] sm:min-h-[40px]"
                   >
                     <Zap className="h-3.5 w-3.5 fill-current" />
-                    <span>Request for Live ⚡</span>
+                    <span>Go Live ⚡</span>
                   </button>
                 )}
               </div>
@@ -1278,7 +1294,7 @@ export default function ApplicationReviewModal({
                   type="button"
                   disabled={reviewLoading}
                   onClick={onSubmitOffer}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_22px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_22px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-[40px] whitespace-nowrap"
                 >
                   {reviewLoading ? (
                     <>
@@ -1294,14 +1310,44 @@ export default function ApplicationReviewModal({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-between sm:justify-end">
-                <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end">
+                {isSuperAdmin && (
+                  <div className="inline-flex items-center justify-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-xs shrink-0 self-center sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setApprovalMode('trial')}
+                      className={`px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap text-[11px] sm:text-xs cursor-pointer ${
+                        approvalMode === 'trial'
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_8px_rgba(0,240,255,0.4)]'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      ⏳ 24h Trial
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setApprovalMode('live')}
+                      className={`px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap text-[11px] sm:text-xs cursor-pointer ${
+                        approvalMode === 'live'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      🟢 Full Live
+                    </button>
+                  </div>
+                )}
+
+                {/* Subtle visual divider on desktop */}
+                <div className="h-6 w-px bg-slate-800 hidden sm:block mx-0.5 shrink-0" />
+
+                <div className="grid grid-cols-3 sm:flex items-center gap-2 shrink-0 w-full sm:w-auto">
                   {/* Decline Button */}
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onDecision('rejected')}
-                    className="px-3.5 py-2 rounded-xl sm:rounded-full border border-red-500/70 bg-red-500/10 text-red-300 hover:text-white font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[36px] sm:min-h-[40px] whitespace-nowrap shrink-0"
+                    className="px-3 sm:px-3.5 py-2 rounded-xl sm:rounded-full border border-red-500/70 bg-red-500/10 text-red-300 hover:text-white font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[38px] sm:min-h-[40px] whitespace-nowrap"
                   >
                     <span>Decline</span>
                   </button>
@@ -1311,7 +1357,7 @@ export default function ApplicationReviewModal({
                     type="button"
                     disabled={reviewLoading}
                     onClick={onSubmitOffer}
-                    className="px-3.5 sm:px-4 py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[36px] sm:min-h-[40px] whitespace-nowrap shrink-0"
+                    className="px-3 sm:px-4 py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-[40px] whitespace-nowrap"
                   >
                     {reviewLoading ? (
                       <>
@@ -1326,45 +1372,13 @@ export default function ApplicationReviewModal({
                       </>
                     )}
                   </button>
-                </div>
 
-                {/* Subtle visual divider on desktop */}
-                <div className="h-6 w-px bg-slate-800 hidden sm:block mx-0.5 shrink-0" />
-
-                {/* Grouped Approval Controls: Mode Switcher + Approve Button */}
-                <div className="flex items-center gap-2 shrink-0">
-                  {isSuperAdmin && (
-                    <div className="inline-flex items-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-xs shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setApprovalMode('trial')}
-                        className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
-                          approvalMode === 'trial'
-                            ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_8px_rgba(0,240,255,0.4)]'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        ⏳ 24h Trial
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setApprovalMode('live')}
-                        className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
-                          approvalMode === 'live'
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        🟢 Full Live
-                      </button>
-                    </div>
-                  )}
-
+                  {/* Approve Button */}
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onDecision('approved', isSuperAdmin ? approvalMode : 'trial')}
-                    className={`px-4 sm:px-5 py-2 rounded-xl sm:rounded-full font-black text-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[36px] sm:min-h-[40px] whitespace-nowrap shrink-0 ${
+                    className={`px-3 sm:px-5 py-2 rounded-xl sm:rounded-full font-black text-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-[40px] whitespace-nowrap ${
                       (!isSuperAdmin || approvalMode === 'trial')
                         ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-slate-950 shadow-[0_0_14px_rgba(0,240,255,0.6)] hover:shadow-[0_0_22px_rgba(0,240,255,0.85)]'
                         : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 shadow-[0_0_14px_rgba(16,185,129,0.6)] hover:shadow-[0_0_22px_rgba(16,185,129,0.85)]'
