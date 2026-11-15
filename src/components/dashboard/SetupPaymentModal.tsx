@@ -298,7 +298,7 @@ Thank you!`
               <div className="mt-3">
                 <div className="font-bold text-white text-sm">Pay with Card</div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Stripe Checkout • Visa, MC, Amex (+3% Fee)
+                  Card Checkout • Visa, MC, Amex (PGX Digital Storefront)
                 </div>
               </div>
             </button>
@@ -702,7 +702,7 @@ Thank you!`
                   <span className="font-bold text-cyan-300">+${stripeFee.toFixed(2)} USD</span>
                 </div>
                 <div className="border-t border-cyan-500/20 pt-2 flex justify-between items-center font-bold">
-                  <span className="text-white text-xs">Total Charged via Stripe:</span>
+                  <span className="text-white text-xs">Total Charged via Card:</span>
                   <span className="text-cyan-400 font-mono text-base">${totalCardAmount} USD</span>
                 </div>
               </div>
@@ -716,12 +716,12 @@ Thank you!`
                 {paying ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                    <span>Opening Stripe Checkout...</span>
+                    <span>Opening Card Checkout...</span>
                   </>
                 ) : (
                   <>
                     <CreditCard className="h-4 w-4" />
-                    <span>Pay ${totalCardAmount} USD via Stripe Checkout</span>
+                    <span>Pay ${totalCardAmount} USD via Card Checkout</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -729,7 +729,7 @@ Thank you!`
 
               <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
                 <Lock className="h-3 w-3 text-cyan-400" />
-                <span>256-Bit SSL Encrypted Card Processing via Stripe</span>
+                <span>256-Bit SSL Encrypted Processing via PGX Digital E-Commerce Storefront</span>
               </div>
             </div>
           )}
