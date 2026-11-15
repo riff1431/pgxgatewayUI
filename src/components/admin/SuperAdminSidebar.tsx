@@ -16,6 +16,7 @@ import {
 
 export type SuperAdminTabId =
   | 'overview'
+  | 'pgx_merchants'
   | 'integrations'
   | 'settings'
   | 'resellers'
@@ -28,6 +29,7 @@ interface SuperAdminSidebarProps {
   onTabChange: (tab: SuperAdminTabId) => void
   resellerCount?: number
   merchantCount?: number
+  pendingReviewsCount?: number
   onRefresh?: () => void
   onLogout?: () => void
   isRefreshing?: boolean
@@ -41,6 +43,7 @@ export default function SuperAdminSidebar({
   onTabChange,
   resellerCount = 0,
   merchantCount = 0,
+  pendingReviewsCount = 0,
   onRefresh,
   onLogout,
   isRefreshing = false,
@@ -70,6 +73,14 @@ export default function SuperAdminSidebar({
       label: '9% Revenue Audit',
       shortLabel: 'Revenue Audit',
       icon: DollarSign,
+    },
+    {
+      id: 'pgx_merchants',
+      label: 'PGX Merchants',
+      shortLabel: 'PGX Merchants',
+      icon: ShieldCheck,
+      badge: pendingReviewsCount > 0 ? `${pendingReviewsCount} Pending` : undefined,
+      highlight: true,
     },
     {
       id: 'integrations',

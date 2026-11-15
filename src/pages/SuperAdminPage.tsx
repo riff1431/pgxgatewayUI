@@ -43,6 +43,7 @@ import TransactionsTab from '@/components/admin/TransactionsTab'
 import SuperAdminIntegrationDesk from '@/components/admin/SuperAdminIntegrationDesk'
 import PlatformSettingsTab from '@/components/admin/PlatformSettingsTab'
 import SuperAdminSidebar, { type SuperAdminTabId } from '@/components/admin/SuperAdminSidebar'
+import UnderwritingDesk from '@/components/admin/UnderwritingDesk'
 
 export default function SuperAdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredSuperAdminToken())
@@ -205,7 +206,7 @@ export default function SuperAdminPage() {
     if (activeTab === 'resellers') {
       fetchResellers()
     }
-    if (activeTab === 'merchants') {
+    if (activeTab === 'merchants' || activeTab === 'pgx_merchants') {
       fetchSuperMerchants()
       fetchResellers()
     }
@@ -599,6 +600,7 @@ Status: ${reseller.status.toUpperCase()}`
             onTabChange={(tab) => setActiveTab(tab)}
             resellerCount={resellersList.length || analytics?.resellers?.length || 1}
             merchantCount={superMerchants.length}
+            pendingReviewsCount={superMerchants.filter((m) => m.applicationStatus === 'under_review').length}
             mobileOpen={mobileSidebarOpen}
             onMobileOpenChange={setMobileSidebarOpen}
             onRefresh={() => {
@@ -624,6 +626,13 @@ Status: ${reseller.status.toUpperCase()}`
               fetchResellers()
             }}
           />
+
+          {/* TAB: EMBEDDED UNDERWRITING DESK (PGX MERCHANTS) */}
+          {activeTab === 'pgx_merchants' && (
+            <div className="space-y-6 animate-fade-in w-full max-w-full min-w-0">
+              <UnderwritingDesk isSuperAdmin={true} onShowToast={showToast} />
+            </div>
+          )}
 
           {/* TAB 1: OVERVIEW & 9% AUDIT */}
       {activeTab === 'overview' && (

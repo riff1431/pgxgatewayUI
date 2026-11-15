@@ -8,7 +8,7 @@ const ADMIN_TOKEN_KEY = 'pgx_admin_auth_token'
 const SUPER_ADMIN_TOKEN_KEY = 'pgx_superadmin_auth_token'
 
 export function getStoredAdminToken(): string | null {
-  return localStorage.getItem(ADMIN_TOKEN_KEY)
+  return localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem(SUPER_ADMIN_TOKEN_KEY)
 }
 
 export function setStoredAdminToken(token: string): void {
@@ -29,12 +29,23 @@ export interface AdminUserInfo {
 
 export function getStoredAdminUser(): AdminUserInfo | null {
   const data = localStorage.getItem('pgx_admin_user_info')
-  if (!data) return null
-  try {
-    return JSON.parse(data)
-  } catch {
-    return null
+  if (data) {
+    try {
+      return JSON.parse(data)
+    } catch {
+      // fallback
+    }
   }
+  const superToken = localStorage.getItem(SUPER_ADMIN_TOKEN_KEY)
+  if (superToken) {
+    return {
+      email: 'superadmin@pgxgateway.com',
+      role: 'super_admin',
+      resellerId: 'admin_root',
+      name: 'Super Administrator',
+    }
+  }
+  return null
 }
 
 export function setStoredAdminUser(user: AdminUserInfo): void {
@@ -64,8 +75,8 @@ async function adminRequest<T = unknown>(
 ): Promise<{ success: boolean; data?: T; message?: string; token?: string; [key: string]: unknown }> {
   const isSuperPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/super-admin')
   const token = isSuperPath
-    ? getStoredSuperAdminToken()
-    : (typeof window !== 'undefined' ? getStoredAdminToken() : (getStoredSuperAdminToken() || getStoredAdminToken()))
+    ? (getStoredSuperAdminToken() || getStoredAdminToken())
+    : (getStoredAdminToken() || getStoredSuperAdminToken())
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string>),
@@ -369,6 +380,13 @@ export const adminApi = {
     }
     if (res.token) {
       setStoredSuperAdminToken(res.token)
+      setStoredAdminToken(res.token)
+      setStoredAdminUser({
+        email: payload.email,
+        role: 'super_admin',
+        resellerId: 'admin_root',
+        name: 'Super Administrator',
+      })
     }
     return res
   },
