@@ -654,7 +654,6 @@ Status: ${reseller.status.toUpperCase()}`
                 { volume: 750000, label: '$750,000 Client Goal', highlight: true },
               ].map((tier) => {
                 const superAdminEarnings = tier.volume * 0.09
-                const resellerEarnings = tier.volume * 0.03
 
                 return (
                   <div
@@ -674,9 +673,6 @@ Status: ${reseller.status.toUpperCase()}`
                     </div>
                     <div className="text-[10px] text-slate-400 mt-1">
                       Your 9% Cut / Month
-                    </div>
-                    <div className="text-[10px] text-fuchsia-300 font-semibold border-t border-slate-700/60 pt-1.5 mt-2">
-                      Reseller Profit: ${resellerEarnings.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </div>
                   </div>
                 )
