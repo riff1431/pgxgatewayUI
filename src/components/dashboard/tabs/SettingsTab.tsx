@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import AvatarUploader from '@/components/dashboard/AvatarUploader'
+import SubmitReviewCard from '@/components/dashboard/SubmitReviewCard'
 
 export default function SettingsTab() {
   const { merchant, updateProfile, changePassword, addToast } = useAuth()
@@ -413,6 +414,9 @@ export default function SettingsTab() {
           </div>
         </div>
       </div>
+
+      {/* Merchant Experience & Testimonial Submission */}
+      <SubmitReviewCard />
     </div>
   )
 }

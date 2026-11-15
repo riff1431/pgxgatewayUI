@@ -81,6 +81,24 @@ export interface ApiNotification {
   updatedAt?: string
 }
 
+export interface ReviewItem {
+  _id: string
+  id?: string
+  merchantId?: string
+  merchantRefId?: string
+  authorName: string
+  companyName: string
+  country: string
+  language?: string
+  rating: number
+  headline: string
+  content: string
+  volumeProcessed?: string
+  status: 'pending' | 'approved' | 'rejected'
+  isFeatured?: boolean
+  createdAt?: string
+}
+
 // Token storage helpers
 export const TOKEN_KEY = 'pgx_auth_token'
 export const MERCHANT_KEY = 'pgx_merchant_info'
@@ -414,6 +432,24 @@ export const api = {
           body: JSON.stringify(payload),
         }
       )
+    },
+  },
+
+  reviews: {
+    getPublic: async () => {
+      return request<{ reviews: ReviewItem[] }>('/reviews/public')
+    },
+    submit: async (payload: {
+      rating: number
+      headline?: string
+      content: string
+      companyName?: string
+      country?: string
+    }) => {
+      return request<{ review: ReviewItem; message: string }>('/reviews/submit', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
     },
   },
 }

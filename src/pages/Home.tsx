@@ -17,6 +17,7 @@ import {
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
 import HologramCard from '@/components/brand/HologramCard'
 import IndustriesBar from '@/components/brand/IndustriesBar'
+import ReviewsMarquee from '@/components/brand/ReviewsMarquee'
 
 export default function Home() {
   const [copiedCode, setCopiedCode] = useState(false)
@@ -390,6 +391,9 @@ const session = await pgx.checkouts.create({
           </div>
         </div>
       </section>
+
+      {/* Curated Multi-Language Merchant Reviews Marquee */}
+      <ReviewsMarquee />
 
       {/* Bottom Conversion CTA Banner */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">

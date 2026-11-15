@@ -220,6 +220,24 @@ export interface MerchantMessageItem {
   updatedAt: string
 }
 
+export interface AdminReviewItem {
+  _id: string
+  merchantId?: string
+  merchantRefId?: string
+  authorName: string
+  companyName: string
+  country: string
+  language?: string
+  rating: number
+  headline: string
+  content: string
+  volumeProcessed?: string
+  status: 'pending' | 'approved' | 'rejected'
+  isFeatured?: boolean
+  createdAt: string
+  updatedAt?: string
+}
+
 export interface TransactionItem {
   _id: string
   transactionId: string
@@ -627,6 +645,30 @@ export const adminApi = {
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<MerchantMessageItem[]>(`/admin/messages/all${qs}`, {
       method: 'GET',
+    })
+  },
+
+  // Review & Testimonial Moderation
+  getReviews: async (status?: string) => {
+    const qs = status && status !== 'all' ? `?status=${status}` : ''
+    return adminRequest<{ reviews: AdminReviewItem[] }>(`/reviews/admin${qs}`, {
+      method: 'GET',
+    })
+  },
+
+  updateReviewStatus: async (
+    id: string,
+    payload: { status: 'pending' | 'approved' | 'rejected'; isFeatured?: boolean }
+  ) => {
+    return adminRequest<{ review: AdminReviewItem; message: string }>(`/reviews/admin/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  deleteReview: async (id: string) => {
+    return adminRequest<{ message: string }>(`/reviews/admin/${id}`, {
+      method: 'DELETE',
     })
   },
 }

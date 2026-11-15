@@ -51,6 +51,7 @@ import ResellerSidebar, { type ResellerSectionId } from '@/components/admin/Rese
 import TransactionsTab from '@/components/admin/TransactionsTab'
 import ApplicationReviewModal from '@/components/admin/ApplicationReviewModal'
 import DocumentViewerModal, { type KycDocumentItem } from '@/components/admin/DocumentViewerModal'
+import ReviewsModerationTab from '@/components/admin/ReviewsModerationTab'
 
 export default function AdminPage() {
   const [token, setToken] = useState<string | null>(() => getStoredAdminToken())
@@ -75,6 +76,7 @@ export default function AdminPage() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const [copiedReferral, setCopiedReferral] = useState(false)
   const [copiedRefId, setCopiedRefId] = useState<string | null>(null)
+  const [pendingReviewsCount, setPendingReviewsCount] = useState(0)
 
   const getInitials = (name?: string, fallback = 'PG'): string => {
     if (!name || !name.trim()) return fallback
@@ -700,6 +702,7 @@ export default function AdminPage() {
             resellerId={resellerId}
             pendingCount={stats.pendingReview}
             totalMerchants={stats.totalMerchants}
+            pendingReviewsCount={pendingReviewsCount}
             referralLink={referralLink}
             copiedReferral={copiedReferral}
             onCopyReferral={handleCopyReferralLink}
@@ -1339,6 +1342,14 @@ export default function AdminPage() {
       {/* SECTION 4: REAL-TIME TRANSACTION LEDGER */}
       {adminSection === 'transactions' && (
         <TransactionsTab onShowToast={showToast} isSuperAdmin={false} />
+      )}
+
+      {/* SECTION 5: MERCHANT REVIEWS & TESTIMONIAL MODERATION */}
+      {adminSection === 'reviews' && (
+        <ReviewsModerationTab
+          onPendingCountChange={setPendingReviewsCount}
+          showToast={showToast}
+        />
       )}
 
       

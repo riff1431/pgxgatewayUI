@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   Users,
+  Star,
   Coins,
   Activity,
   Building2,
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react'
 import type { AdminUserInfo } from '@/lib/adminApi'
 
-export type ResellerSectionId = 'applications' | 'stripe' | 'transactions'
+export type ResellerSectionId = 'applications' | 'stripe' | 'transactions' | 'reviews'
 
 interface ResellerSidebarProps {
   activeSection: ResellerSectionId
@@ -24,6 +25,7 @@ interface ResellerSidebarProps {
   resellerId: string
   pendingCount?: number
   totalMerchants?: number
+  pendingReviewsCount?: number
   referralLink: string
   copiedReferral: boolean
   onCopyReferral: () => void
@@ -42,6 +44,7 @@ export default function ResellerSidebar({
   resellerId,
   pendingCount = 0,
   totalMerchants = 0,
+  pendingReviewsCount = 0,
   referralLink,
   copiedReferral,
   onCopyReferral,
@@ -87,6 +90,13 @@ export default function ResellerSidebar({
       id: 'transactions',
       label: 'Gateway Transactions',
       icon: Activity,
+    },
+    {
+      id: 'reviews',
+      label: 'Merchant Reviews',
+      icon: Star,
+      badge: pendingReviewsCount > 0 ? pendingReviewsCount : undefined,
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
     },
   ]
 
