@@ -1006,16 +1006,52 @@ export default function ApplicationReviewModal({
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-                {/* Compact Approval Mode Switcher (24h Trial vs Full Live) */}
-                <div className="flex items-center justify-center w-full sm:w-auto">
-                  <div className="inline-flex items-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-[10px] shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+                  {/* Decline Button */}
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => onDecision('rejected')}
+                    className="px-3.5 py-2 rounded-xl sm:rounded-full border border-red-500/70 bg-red-500/10 text-red-300 hover:text-white font-bold text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[36px] sm:min-h-[40px]"
+                  >
+                    <span>Decline</span>
+                  </button>
+
+                  {/* Send / Update Offer Button */}
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={onSubmitOffer}
+                    className="px-4 py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[36px] sm:min-h-[40px] truncate"
+                  >
+                    {reviewLoading ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Tag className="h-3.5 w-3.5 shrink-0" />
+                        <span className="sm:hidden">Send Offer</span>
+                        <span className="hidden sm:inline">{app.offer?.isAvailable ? 'Update Processing Offer' : 'Send Offer'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Subtle visual divider on desktop */}
+                <div className="h-6 w-px bg-slate-800 hidden sm:block mx-1" />
+
+                {/* Grouped Approval Controls: Mode Switcher + Approve Button */}
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                  <div className="inline-flex items-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-xs shrink-0">
                     <button
                       type="button"
                       onClick={() => setApprovalMode('trial')}
-                      className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold transition-all ${
+                      className={`px-3 py-1 rounded-full font-bold transition-all ${
                         approvalMode === 'trial'
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_6px_rgba(0,240,255,0.4)]'
+                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_8px_rgba(0,240,255,0.4)]'
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
@@ -1024,68 +1060,35 @@ export default function ApplicationReviewModal({
                     <button
                       type="button"
                       onClick={() => setApprovalMode('live')}
-                      className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-bold transition-all ${
+                      className={`px-3 py-1 rounded-full font-bold transition-all ${
                         approvalMode === 'live'
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_6px_rgba(16,185,129,0.4)]'
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
                           : 'text-slate-400 hover:text-white'
                       }`}
                     >
                       🟢 Full Live
                     </button>
                   </div>
-                </div>
-
-                {/* 3 Compact Action Buttons (Grid of 3 on mobile, horizontal row on desktop) */}
-                <div className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    disabled={reviewLoading}
-                    onClick={() => onDecision('rejected')}
-                    className="px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg sm:rounded-full border border-red-500/70 bg-red-500/10 text-red-300 font-bold text-[11px] sm:text-xs hover:bg-red-500/20 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center min-h-[32px] sm:min-h-[38px]"
-                  >
-                    <span>Decline</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={reviewLoading}
-                    onClick={onSubmitOffer}
-                    className="px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-[11px] sm:text-xs shadow-[0_0_10px_rgba(217,70,239,0.4)] hover:shadow-[0_0_18px_rgba(217,70,239,0.7)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 min-h-[32px] sm:min-h-[38px] truncate"
-                  >
-                    {reviewLoading ? (
-                      <>
-                        <Loader2 className="h-3 w-3 animate-spin text-white" />
-                        <span>Saving...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Tag className="h-3 w-3 shrink-0" />
-                        <span className="sm:hidden">Offer</span>
-                        <span className="hidden sm:inline">{app.offer?.isAvailable ? 'Update Offer' : 'Send Offer'}</span>
-                      </>
-                    )}
-                  </button>
 
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onDecision('approved', approvalMode)}
-                    className={`px-2 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full font-black text-[11px] sm:text-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 min-h-[32px] sm:min-h-[38px] truncate ${
+                    className={`flex-1 sm:flex-initial px-5 py-2 rounded-xl sm:rounded-full font-black text-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[36px] sm:min-h-[40px] truncate ${
                       approvalMode === 'trial'
-                        ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-slate-950 shadow-[0_0_12px_rgba(0,240,255,0.5)]'
-                        : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
+                        ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-slate-950 shadow-[0_0_14px_rgba(0,240,255,0.6)] hover:shadow-[0_0_22px_rgba(0,240,255,0.85)]'
+                        : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 shadow-[0_0_14px_rgba(16,185,129,0.6)] hover:shadow-[0_0_22px_rgba(16,185,129,0.85)]'
                     }`}
                   >
                     {reviewLoading ? (
                       <>
-                        <Loader2 className="h-3 w-3 animate-spin text-slate-950" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-950" />
                         <span>Approving...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="h-3 w-3 stroke-[2.5] shrink-0" />
-                        <span className="sm:hidden">{approvalMode === 'trial' ? 'Approve (24h)' : 'Approve (Live)'}</span>
-                        <span className="hidden sm:inline">{approvalMode === 'trial' ? 'Approve (24h Trial)' : 'Approve (Direct Live)'}</span>
+                        <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
+                        <span>{approvalMode === 'trial' ? 'Approve (24h Trial)' : 'Approve (Direct Live)'}</span>
                       </>
                     )}
                   </button>
