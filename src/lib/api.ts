@@ -28,6 +28,15 @@ export interface ApiMerchant {
   switchReason?: string
   currentStep: number
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected' | 'additional_info_required'
+  accountMode?: 'trial' | 'live' | 'suspended'
+  trial?: {
+    isActive: boolean
+    startedAt?: string
+    expiresAt?: string
+    trialDurationHours?: number
+    status: 'none' | 'active' | 'expired' | 'converted'
+    maxTestAmount?: number
+  }
   agreedToTerms?: boolean
   businessRegDoc?: { name: string; url: string; size: string; path?: string; uploadedAt?: string }
   directorIdDoc?: { name: string; url: string; size: string; path?: string; uploadedAt?: string }

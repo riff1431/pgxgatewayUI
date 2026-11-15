@@ -408,8 +408,12 @@ if data.get("success") and data.get("checkoutUrl"):
             <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-300">Your Merchant Ref ID</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
-                  Required
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                  merchant?.accountMode === 'trial'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.2)]'
+                    : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                }`}>
+                  {merchant?.accountMode === 'trial' ? '24h Sandbox Active' : 'Live Active'}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#030614] border border-cyan-500/30">

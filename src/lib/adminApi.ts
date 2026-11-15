@@ -138,6 +138,15 @@ export interface ApplicationItem {
   directorIdDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
   processingStatementDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
+  accountMode?: 'trial' | 'live' | 'suspended'
+  trial?: {
+    isActive: boolean
+    startedAt?: string
+    expiresAt?: string
+    trialDurationHours?: number
+    status: 'none' | 'active' | 'expired' | 'converted'
+    maxTestAmount?: number
+  }
   setupStatus?: string
   websiteDomain?: string
   gitRepoUrl?: string
@@ -368,6 +377,8 @@ export const adminApi = {
     id: string,
     payload: {
       status: 'approved' | 'rejected' | 'under_review'
+      approveMode?: 'trial' | 'live'
+      trialHours?: number
       offer?: {
         rate?: string
         volume?: string
@@ -384,6 +395,19 @@ export const adminApi = {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/review`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
+    })
+  },
+
+  extendMerchantTrial: async (id: string, hours = 24) => {
+    return adminRequest<ApplicationItem>(`/admin/applications/${id}/extend-trial`, {
+      method: 'POST',
+      body: JSON.stringify({ hours }),
+    })
+  },
+
+  convertMerchantToLive: async (id: string) => {
+    return adminRequest<ApplicationItem>(`/admin/applications/${id}/convert-live`, {
+      method: 'POST',
     })
   },
 

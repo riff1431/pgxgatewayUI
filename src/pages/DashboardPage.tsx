@@ -1,10 +1,12 @@
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Code2 } from 'lucide-react'
+import { Code2, Sparkles, AlertTriangle } from 'lucide-react'
 import ApplicationStatusCard from '@/components/dashboard/ApplicationStatusCard'
 import ProcessingOfferCard from '@/components/dashboard/ProcessingOfferCard'
 import QuickActions from '@/components/dashboard/QuickActions'
 import Sidebar from '@/components/dashboard/Sidebar'
 import HologramCard from '@/components/brand/HologramCard'
+import SetupPaymentModal from '@/components/dashboard/SetupPaymentModal'
 import { useAuth } from '@/context/AuthContext'
 
 // Dedicated Tab Views
@@ -32,12 +34,103 @@ export default function DashboardPage() {
     setSearchParams({ tab: newTab })
   }
 
+  // Setup Payment Modal State
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false)
+
+  // 24-Hour Trial Status & Dynamic Countdown
+  const isTrial = merchant?.accountMode === 'trial' || Boolean(merchant?.trial?.isActive)
+  const trialExpiresAt = merchant?.trial?.expiresAt ? new Date(merchant.trial.expiresAt) : null
+  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number; isExpired: boolean }>({
+    hours: 24,
+    minutes: 0,
+    seconds: 0,
+    isExpired: false,
+  })
+
+  useEffect(() => {
+    if (!isTrial || !trialExpiresAt) return
+
+    const calculateTime = () => {
+      const now = Date.now()
+      const diff = trialExpiresAt.getTime() - now
+      if (diff <= 0) {
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0, isExpired: true })
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+        setTimeLeft({ hours, minutes, seconds, isExpired: false })
+      }
+    }
+
+    calculateTime()
+    const timer = setInterval(calculateTime, 1000)
+    return () => clearInterval(timer)
+  }, [isTrial, trialExpiresAt])
+
   return (
     <div className="w-full max-w-[1440px] min-w-0 min-h-[calc(100vh-4.5rem)] mx-auto p-3.5 sm:p-6 lg:p-8 relative overflow-x-hidden">
       
       {/* Background Radial Glows */}
       <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-cyan-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-fuchsia-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
+
+      {/* 24-Hour Integration Sandbox Active Banner */}
+      {isTrial && !timeLeft.isExpired && (
+        <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-cyan-950/90 via-[#071330]/95 to-purple-950/90 border-[1.5px] border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.3)] p-3 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in backdrop-blur-xl">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="relative flex h-3.5 w-3.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500"></span>
+            </span>
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-black text-white tracking-wide">
+                  24-Hour Integration Sandbox Active
+                </span>
+                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                  ⏳ {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m {String(timeLeft.seconds).padStart(2, '0')}s remaining
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 hidden md:block">
+                Test your hosted card checkout with your Merchant Ref ID (<code className="text-cyan-300 font-bold">{merchant?.refId || 'PGX_REF_...'}</code>) in the API & Integration tab.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsSetupModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-purple-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(217,70,239,0.5)] hover:shadow-[0_0_24px_rgba(217,70,239,0.8)] hover:brightness-110 transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+            <span>Pay Setup Fee & Go Live 🚀</span>
+          </button>
+        </div>
+      )}
+
+      {/* 24-Hour Integration Trial Expired Warning Banner */}
+      {isTrial && timeLeft.isExpired && (
+        <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-amber-950/90 via-[#261506]/95 to-red-950/90 border-[1.5px] border-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.35)] p-3 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in backdrop-blur-xl">
+          <div className="flex items-center gap-3 min-w-0">
+            <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
+            <div className="space-y-0.5 min-w-0">
+              <span className="text-xs sm:text-sm font-black text-amber-200 tracking-wide">
+                Integration Trial Expired — Checkout Sessions Paused
+              </span>
+              <p className="text-[11px] text-amber-300/80">
+                Your 24-hour test period has ended. Settle your setup fee to instantly activate permanent live processing.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsSetupModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(245,158,11,0.5)] hover:brightness-110 transition-all cursor-pointer shrink-0"
+          >
+            Activate Live Processing ($450)
+          </button>
+        </div>
+      )}
 
       {/* Main Grid: Sidebar on Left, Content on Right */}
       <div className="w-full max-w-full min-w-0 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
@@ -159,6 +252,18 @@ export default function DashboardPage() {
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[120%] h-32 rounded-[100%] border-t-2 border-cyan-400 shadow-[0_-4px_25px_rgba(0,240,255,0.7),0_-10px_50px_rgba(217,70,239,0.5)]" />
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-48 h-2 bg-cyan-300 blur-sm rounded-full" />
       </div>
+
+      {/* Setup Payment Modal for Instant Live Conversion */}
+      <SetupPaymentModal
+        isOpen={isSetupModalOpen}
+        onClose={() => setIsSetupModalOpen(false)}
+        amount={450}
+        merchantRefId={merchant?.refId || ''}
+        merchantLegalName={merchant?.legalName || merchant?.fullName || ''}
+        merchantEmail={merchant?.businessEmail || ''}
+        websiteDomain={merchant?.websiteDomain || merchant?.website || ''}
+        gitRepoUrl={merchant?.gitRepoUrl || ''}
+      />
 
     </div>
   )

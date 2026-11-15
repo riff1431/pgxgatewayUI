@@ -330,13 +330,15 @@ export default function AdminPage() {
     setReviewNotes('')
   }
 
-  // Execute Review Decision (Approve or Reject)
-  const handleDecision = async (status: 'approved' | 'rejected') => {
+  // Execute Review Decision (Approve or Reject with 24h Trial vs Direct Live)
+  const handleDecision = async (status: 'approved' | 'rejected', approveMode: 'trial' | 'live' = 'trial') => {
     if (!selectedApp) return
     setReviewLoading(true)
     try {
       await adminApi.reviewApplication(selectedApp._id, {
         status,
+        approveMode,
+        trialHours: 24,
         offer: {
           rate: offerRate,
           volume: offerVolume,
@@ -350,7 +352,9 @@ export default function AdminPage() {
       })
 
       showToast(
-        status === 'approved' ? 'Application Approved! 🎉' : 'Application Declined',
+        status === 'approved'
+          ? (approveMode === 'trial' ? '24h Integration Trial Activated! ⏳' : 'Application Approved (Live Active)! 🎉')
+          : 'Application Declined',
         `Merchant ${selectedApp.legalName || selectedApp.fullName} has been updated in real time via WebSockets.`,
         'success'
       )
@@ -359,6 +363,38 @@ export default function AdminPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to submit underwriting review'
       showToast('Action Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Extend Merchant Trial (+24h)
+  const handleExtendTrial = async (id: string, hours = 24) => {
+    setReviewLoading(true)
+    try {
+      await adminApi.extendMerchantTrial(id, hours)
+      showToast('Trial Extended! ⏳', `Extended by ${hours} hours successfully.`, 'success')
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to extend trial'
+      showToast('Extension Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Convert Merchant Directly to Live Processing
+  const handleConvertToLive = async (id: string) => {
+    setReviewLoading(true)
+    try {
+      await adminApi.convertMerchantToLive(id)
+      showToast('Converted to Live! 🚀', 'Merchant is now permanently active for live processing.', 'success')
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to convert to live'
+      showToast('Conversion Failed', msg, 'error')
     } finally {
       setReviewLoading(false)
     }
@@ -999,10 +1035,22 @@ export default function AdminPage() {
                             <span>Under Review</span>
                           </span>
                         )}
-                        {isApproved && (
+                        {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/70 shadow-[0_0_8px_rgba(0,240,255,0.25)]">
+                            <Clock className="h-2.5 w-2.5 text-cyan-400 animate-pulse" />
+                            <span>24h Trial</span>
+                          </span>
+                        )}
+                        {isApproved && app.accountMode === 'trial' && app.trial?.status === 'expired' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                            <Clock className="h-2.5 w-2.5 text-amber-400" />
+                            <span>Trial Expired</span>
+                          </span>
+                        )}
+                        {isApproved && (app.accountMode === 'live' || !app.accountMode || app.trial?.status === 'converted') && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/70 shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                             <Check className="h-2.5 w-2.5 stroke-[3]" />
-                            <span>Approved</span>
+                            <span>Live Active</span>
                           </span>
                         )}
                         {app.applicationStatus === 'rejected' && (
@@ -1148,10 +1196,22 @@ export default function AdminPage() {
                         <span>Under Review</span>
                       </span>
                     )}
-                    {isApproved && (
+                    {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/70 shadow-[0_0_8px_rgba(0,240,255,0.25)]">
+                        <Clock className="h-3 w-3 text-cyan-400 animate-pulse" />
+                        <span>24h Trial</span>
+                      </span>
+                    )}
+                    {isApproved && app.accountMode === 'trial' && app.trial?.status === 'expired' && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_8px_rgba(245,158,11,0.25)]">
+                        <Clock className="h-3 w-3 text-amber-400" />
+                        <span>Trial Expired</span>
+                      </span>
+                    )}
+                    {isApproved && (app.accountMode === 'live' || !app.accountMode || app.trial?.status === 'converted') && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-400/70 shadow-[0_0_8px_rgba(16,185,129,0.25)]">
                         <Check className="h-3 w-3 stroke-[3]" />
-                        <span>Approved</span>
+                        <span>Live Active</span>
                       </span>
                     )}
                     {app.applicationStatus === 'rejected' && (
@@ -1294,6 +1354,8 @@ export default function AdminPage() {
         onOpenDocViewer={(doc) => setPreviewKycDoc(doc)}
         onOpenMessageModal={(app, defaultMsg) => openMessageModal(app, defaultMsg)}
         onDecision={handleDecision}
+        onExtendTrial={handleExtendTrial}
+        onConvertToLive={handleConvertToLive}
         onSubmitOffer={handleSubmitOffer}
         onRevokeOffer={handleRevokeOffer}
         reviewLoading={reviewLoading}
