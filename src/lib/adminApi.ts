@@ -626,8 +626,9 @@ export const adminApi = {
     )
   },
 
-  getSuperAdminAnalytics: async () => {
-    return adminRequest<SuperAdminAnalytics>('/admin/super-analytics', { method: 'GET' })
+  getSuperAdminAnalytics: async (params?: { period?: string }) => {
+    const qs = params?.period && params.period !== 'all' ? `?period=${params.period}` : ''
+    return adminRequest<SuperAdminAnalytics>(`/admin/super-analytics${qs}`, { method: 'GET' })
   },
 
   recordMerchantPayout: async (

@@ -6,7 +6,10 @@ interface SuperAdminAnalyticsBarProps {
   onRefresh?: () => void
 }
 
+type PeriodType = 'today' | 'yesterday' | 'week' | 'month' | 'ytd' | 'all'
+
 export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalyticsBarProps) {
+  const [period, setPeriod] = useState<PeriodType>('all')
   const [data, setData] = useState<SuperAdminAnalytics>({
     totalGrossVolume: 0,
     totalPlatformFees: 0,
@@ -22,10 +25,10 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
   })
   const [loading, setLoading] = useState(false)
 
-  const loadAnalytics = async () => {
+  const loadAnalytics = async (selectedPeriod: PeriodType = period) => {
     setLoading(true)
     try {
-      const res = await adminApi.getSuperAdminAnalytics()
+      const res = await adminApi.getSuperAdminAnalytics({ period: selectedPeriod })
       if (res.data) {
         setData(res.data)
       }
@@ -37,7 +40,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
   }
 
   useEffect(() => {
-    loadAnalytics()
+    loadAnalytics(period)
   }, [])
 
   const setupFees = (data.totalSetupFees !== undefined && data.totalSetupFees > 0)
@@ -50,7 +53,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
 
   const combinedRevenue = (data.totalPlatformRevenue !== undefined && data.totalPlatformRevenue > 0)
     ? data.totalPlatformRevenue
-    : (data.totalPlatformFees + setupFees)
+    : (data.totalPlatformFees + setupFees + monthlyRecurring)
 
   return (
     <div className="w-full max-w-full min-w-0 rounded-3xl bg-gradient-to-r from-[#060c28] via-[#09153d] to-[#060c28] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.3)] p-4 sm:p-6 backdrop-blur-xl relative overflow-hidden">
@@ -59,7 +62,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
       <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Strip */}
-      <div className="w-full min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-cyan-500/20">
+      <div className="w-full min-w-0 flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-cyan-500/20">
         <div className="flex items-start sm:items-center gap-2.5 min-w-0 flex-1">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-400 to-yellow-600 flex items-center justify-center text-black font-black text-xs shadow-[0_0_12px_rgba(251,191,36,0.6)] shrink-0 mt-0.5 sm:mt-0">
             9%
@@ -79,18 +82,48 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            loadAnalytics()
-            if (onRefresh) onRefresh()
-          }}
-          disabled={loading}
-          className="self-start sm:self-auto px-3 py-1.5 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-        >
-          <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-          <span>Sync Analytics</span>
-        </button>
+        {/* Timeframe Selector Pills & Sync Button */}
+        <div className="flex items-center gap-2 flex-wrap self-start lg:self-auto">
+          <div className="flex items-center gap-1 bg-[#04081c]/90 p-1 rounded-2xl border border-cyan-500/30 flex-wrap">
+            {[
+              { id: 'today', label: 'Today' },
+              { id: 'yesterday', label: 'Yesterday' },
+              { id: 'week', label: 'This Week' },
+              { id: 'month', label: 'This Month' },
+              { id: 'ytd', label: 'YTD' },
+              { id: 'all', label: 'All Time' },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  setPeriod(t.id as PeriodType)
+                  loadAnalytics(t.id as PeriodType)
+                }}
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                  period === t.id
+                    ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black shadow-[0_0_10px_rgba(251,191,36,0.5)]'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              loadAnalytics(period)
+              if (onRefresh) onRefresh()
+            }}
+            disabled={loading}
+            className="px-3 py-1.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+          >
+            <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
+            <span>Sync</span>
+          </button>
+        </div>
       </div>
 
       {/* 6 Super Admin Revenue & Billing Chambers */}
@@ -161,7 +194,7 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
             ${combinedRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-emerald-300/80 mt-0.5 truncate">
-            9% Cut + Setup Fees
+            9% Cut + Setup + Mthly
           </div>
         </div>
 
