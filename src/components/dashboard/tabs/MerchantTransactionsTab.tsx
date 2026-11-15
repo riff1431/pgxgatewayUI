@@ -202,7 +202,7 @@ export default function MerchantTransactionsTab() {
           <div className="text-2xl font-black text-cyan-300 tracking-tight">
             ${metrics.rollingReserveBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-cyan-200/80">{reserveDays}-day refundable security reserve (separate from processing fee)</p>
+          <p className="text-[11px] text-cyan-200/80">{reserveDays}-day rolling reserve (separate from processing fee)</p>
         </div>
       </div>
 
