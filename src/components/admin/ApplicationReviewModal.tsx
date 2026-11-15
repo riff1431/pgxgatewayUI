@@ -30,6 +30,27 @@ import {
 import type { ApplicationItem } from '@/lib/adminApi'
 import type { KycDocumentItem } from './DocumentViewerModal'
 
+// Helper function to format timestamp in Eastern Time (ET / EST / EDT)
+function formatEasternTime(dateInput?: string | Date | null): string {
+  if (!dateInput) return ''
+  try {
+    const d = new Date(dateInput)
+    if (isNaN(d.getTime())) return ''
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+      timeZoneName: 'short',
+    }).format(d)
+  } catch {
+    return ''
+  }
+}
+
 interface ApplicationReviewModalProps {
   isOpen: boolean
   app: ApplicationItem | null
@@ -940,10 +961,10 @@ export default function ApplicationReviewModal({
 
               {/* Live Status Notification */}
               {app.offer?.isAvailable ? (
-                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
+                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                    <div>
+                    <div className="min-w-0">
                       <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
                       <div className="text-[11px] text-emerald-200/90 mt-0.5">
                         Current terms: <strong>{app.offer.rate}</strong> • <strong>{app.offer.volume}</strong> • <strong>{app.offer.settlement}</strong> • Reserve: <strong>{app.offer.reserve}</strong> • Setup: <strong>{app.offer.setupFee || (app.tier === 2 ? '$2,500' : '$1,499')}</strong> • Monthly: <strong>{app.offer.monthlyFee || '$499 / month'}</strong>
@@ -951,9 +972,19 @@ export default function ApplicationReviewModal({
                     </div>
                   </div>
                   {app.offer.accepted && (
-                    <span className="px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold shrink-0">
-                      Accepted by Merchant ✓
-                    </span>
+                    <div className="flex flex-col sm:items-end gap-1 shrink-0 self-start sm:self-auto">
+                      <span className="px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs font-bold whitespace-nowrap shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                        Accepted by Merchant ✓
+                      </span>
+                      {Boolean(app.offer.acceptedAt || (app as any).updatedAt) && (
+                        <span className="text-[10px] text-cyan-200/80 font-mono font-medium flex items-center gap-1">
+                          <Clock className="h-3 w-3 text-cyan-400 shrink-0" />
+                          <span>
+                            {formatEasternTime(app.offer.acceptedAt || (app as any).updatedAt)}
+                          </span>
+                        </span>
+                      )}
+                    </div>
                   )}
                 </div>
               ) : (
