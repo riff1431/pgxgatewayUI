@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Code2, Sparkles, AlertTriangle } from 'lucide-react'
+import { Code2, Sparkles, AlertTriangle, CheckCircle2, X } from 'lucide-react'
 import ApplicationStatusCard from '@/components/dashboard/ApplicationStatusCard'
 import ProcessingOfferCard from '@/components/dashboard/ProcessingOfferCard'
 import QuickActions from '@/components/dashboard/QuickActions'
@@ -79,6 +79,35 @@ export default function DashboardPage() {
       {/* Background Radial Glows */}
       <div className="absolute top-1/3 left-1/3 w-[500px] h-[500px] bg-cyan-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-fuchsia-600/10 blur-[150px] rounded-full pointer-events-none -z-10" />
+
+      {/* Setup Payment Success Banner */}
+      {searchParams.get('setup_payment') === 'success' && (
+        <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-emerald-950/90 via-teal-950/90 to-cyan-950/90 border border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.35)] p-4 sm:px-6 flex items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/60 flex items-center justify-center text-emerald-300 shrink-0">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-white text-sm">Setup Fee Payment Received & Verified!</h4>
+              <p className="text-xs text-slate-300">
+                Your payment has been confirmed via PGX Digital. Your gateway integration and dedicated desk are now unlocked!
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const next = new URLSearchParams(searchParams)
+              next.delete('setup_payment')
+              next.delete('session_id')
+              setSearchParams(next)
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* 24-Hour Integration Sandbox Active Banner */}
       {isTrial && !timeLeft.isExpired && (
