@@ -423,10 +423,12 @@ export default function ApplicationReviewModal({
                       </span>
                     )}
                     {(() => {
-                      const offerFeeParsed = app.offer?.setupFee ? parseFloat(String(app.offer.setupFee).replace(/[^0-9.]/g, '')) : null
+                      const offerFeeParsed = (app.offer?.setupFee || offerSetupFee)
+                        ? parseFloat(String(app.offer?.setupFee || offerSetupFee).replace(/[^0-9.]/g, ''))
+                        : null
                       const displayFee = (offerFeeParsed && !isNaN(offerFeeParsed) && offerFeeParsed > 0)
                         ? offerFeeParsed
-                        : (app.cryptoPayment.amount || 450)
+                        : (app.cryptoPayment.amount && app.cryptoPayment.amount !== 450 ? app.cryptoPayment.amount : 999)
                       return (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
                           ${displayFee} USD

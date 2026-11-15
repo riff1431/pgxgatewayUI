@@ -13,9 +13,9 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
   const isAccepted = Boolean(offer?.accepted)
   const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (offer?.rate?.includes('15') || offer?.setupFee?.includes('2500') ? 2 : 1)
-  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$999'
   const defaultMonthlyFee = isArxo ? '$499 / month' : '$99 / month'
-  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 999
 
   // Split rate string (e.g. "2.1% + $0.20")
   const rateParts = offer?.rate ? offer.rate.split('+') : []

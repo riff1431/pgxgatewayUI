@@ -22,10 +22,10 @@ export default function OfferTab() {
   const isApproved = applicationStatus === 'approved'
   const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (offer?.rate?.includes('15') || offer?.setupFee?.includes('2500') ? 2 : 1)
-  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$999'
   const defaultMonthlyFee = isArxo ? '$499 / mo' : '$99 / mo'
   const defaultMonthlyFeeFull = isArxo ? '$499 / month' : '$99 / month'
-  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 999
 
   const rateParts = offer?.rate ? offer.rate.split('+') : []
   const baseRate = rateParts[0]?.trim() || ''

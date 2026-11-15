@@ -41,8 +41,8 @@ export default function DashboardPage() {
   const isTrial = merchant?.accountMode === 'trial' || Boolean(merchant?.trial?.isActive)
   const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (merchant?.offer?.rate?.includes('15') || merchant?.offer?.setupFee?.includes('2500') ? 2 : 1)
-  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
-  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$999'
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 999
   const setupFeeFormatted = merchant?.offer?.setupFee || defaultSetupFee
   const trialExpiresAt = merchant?.trial?.expiresAt ? new Date(merchant.trial.expiresAt) : null
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number; isExpired: boolean }>({

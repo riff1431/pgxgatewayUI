@@ -39,7 +39,7 @@ type PaymentMethod = 'stripe' | 'usdc' | 'btc'
 export default function SetupPaymentModal({
   isOpen,
   onClose,
-  amount = 450,
+  amount = 999,
   merchantRefId = '',
   merchantLegalName = '',
   merchantEmail = '',
