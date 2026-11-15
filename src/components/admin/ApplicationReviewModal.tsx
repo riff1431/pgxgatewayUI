@@ -257,6 +257,16 @@ export default function ApplicationReviewModal({
 
               <button
                 type="button"
+                onClick={() => onOpenMessageModal(app)}
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-cyan-950/70 border border-cyan-400/40 text-cyan-300 hover:text-white hover:bg-cyan-900/60 shadow-[0_0_10px_rgba(0,240,255,0.2)] text-[11px] sm:text-xs font-bold transition-all cursor-pointer shrink-0"
+                title="Send Real-Time Message to Merchant"
+              >
+                <MessageSquare className="h-3.5 w-3.5 text-cyan-400" />
+                <span>Message</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={onClose}
                 className="text-slate-400 hover:text-white p-1 sm:p-2 rounded-xl hover:bg-slate-800/60 transition-colors cursor-pointer"
                 title="Close Underwriting Window (Esc)"
@@ -1009,6 +1019,63 @@ export default function ApplicationReviewModal({
                 />
               </div>
 
+              {/* Dedicated Offer Action Controls inside Tab 3 */}
+              <div className="p-3.5 rounded-2xl bg-[#081232] border border-fuchsia-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-[0_0_20px_rgba(217,70,239,0.15)]">
+                <div className="text-xs text-slate-300 min-w-0">
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <Tag className="h-4 w-4 text-fuchsia-400 shrink-0" />
+                    <span>Commercial Offer Submission</span>
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5 truncate">
+                    {app.offer?.isAvailable
+                      ? 'Offer is live on merchant dashboard. Updating terms will refresh their acceptance prompt.'
+                      : 'Broadcast this customized interchange offer directly to the merchant dashboard.'}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => onOpenMessageModal(app, reviewNotes ? `Regarding your offer terms: ${reviewNotes}` : undefined)}
+                    className="px-3 py-2 rounded-xl border border-cyan-500/40 bg-cyan-950/50 hover:bg-cyan-900/50 text-cyan-300 font-bold text-xs transition-all cursor-pointer flex items-center gap-1.5"
+                    title="Send a direct message regarding this offer"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    <span>Message Merchant</span>
+                  </button>
+
+                  {app.offer?.isAvailable && onRevokeOffer && (
+                    <button
+                      type="button"
+                      disabled={reviewLoading}
+                      onClick={onRevokeOffer}
+                      className="px-3 py-2 rounded-xl border border-rose-500/40 bg-rose-950/30 hover:bg-rose-900/50 text-rose-300 font-bold text-xs transition-all cursor-pointer"
+                    >
+                      Revoke Offer
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={onSubmitOffer}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:brightness-110 text-white font-bold text-xs shadow-[0_0_16px_rgba(217,70,239,0.5)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 whitespace-nowrap"
+                  >
+                    {reviewLoading ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                        <span>Saving Offer...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Tag className="h-3.5 w-3.5" />
+                        <span>{app.offer?.isAvailable ? 'Update Processing Offer' : 'Send Processing Offer 🚀'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -1048,6 +1115,26 @@ export default function ApplicationReviewModal({
                   <span>+24h Extend</span>
                 </button>
 
+                <button
+                  type="button"
+                  disabled={reviewLoading}
+                  onClick={onSubmitOffer}
+                  className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_12px_rgba(217,70,239,0.45)] hover:shadow-[0_0_20px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  title="Send or update commercial processing offer"
+                >
+                  {reviewLoading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Tag className="h-3.5 w-3.5 shrink-0" />
+                      <span>{app.offer?.isAvailable ? 'Update Offer' : 'Send Offer'}</span>
+                    </>
+                  )}
+                </button>
+
                 {isSuperAdmin ? (
                   <button
                     type="button"
@@ -1074,6 +1161,27 @@ export default function ApplicationReviewModal({
                     <span>Request for Live ⚡</span>
                   </button>
                 )}
+              </div>
+            ) : app.applicationStatus === 'approved' && app.accountMode === 'live' ? (
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end">
+                <button
+                  type="button"
+                  disabled={reviewLoading}
+                  onClick={onSubmitOffer}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_22px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                >
+                  {reviewLoading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Tag className="h-3.5 w-3.5 shrink-0" />
+                      <span>{app.offer?.isAvailable ? 'Update Processing Offer' : 'Send Offer'}</span>
+                    </>
+                  )}
+                </button>
               </div>
             ) : (
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-between sm:justify-end">
