@@ -3,10 +3,13 @@ import {
   X,
   CreditCard,
   MessageSquare,
+  Mail,
+  Camera,
   ShieldCheck,
   CheckCircle2,
   Lock,
   Loader2,
+  ExternalLink,
   Globe,
   GitBranch,
   Coins,
@@ -26,6 +29,7 @@ interface SetupPaymentModalProps {
   merchantLegalName?: string
   merchantEmail?: string
   supportWhatsapp?: string
+  supportEmail?: string
   websiteDomain?: string
   gitRepoUrl?: string
   btcAddress?: string
@@ -41,14 +45,18 @@ export default function SetupPaymentModal({
   merchantLegalName = '',
   merchantEmail = '',
   supportWhatsapp = '+1 (437) 577-8785',
+  supportEmail = 'info@pgxgateway.com',
   websiteDomain: initialDomain = '',
   gitRepoUrl: initialGitRepo = '',
   btcAddress = '3DyMA7VZavn4iA4m4scrjMHJyaEn1XRmaz',
   usdcEthAddress = '0x4520FBE6d418c1bAcE97A1E517e5Be2d78eb9598',
   onPaymentSubmitted,
 }: SetupPaymentModalProps) {
-  const [selectedMethod, setSelectedMethod] = useState<'stripe' | 'crypto'>('stripe')
+  // Client prefers crypto as primary payment method
+  const [selectedMethod, setSelectedMethod] = useState<'crypto' | 'stripe'>('crypto')
   const [cryptoAsset, setCryptoAsset] = useState<'USDC' | 'BTC'>('USDC')
+  const [contactName, setContactName] = useState(merchantLegalName || '')
+  const [companyName, setCompanyName] = useState(merchantLegalName || '')
   const [domain, setDomain] = useState(initialDomain)
   const [gitRepo, setGitRepo] = useState(initialGitRepo)
   const [txHash, setTxHash] = useState('')
@@ -59,6 +67,7 @@ export default function SetupPaymentModal({
   const [error, setError] = useState<string | null>(null)
   const [copiedWallet, setCopiedWallet] = useState(false)
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false)
+  const [copiedEmail, setCopiedEmail] = useState(false)
 
   // 3% Stripe Card Processing Surcharge calculation
   const stripeFee = Math.round(amount * 0.03 * 100) / 100
@@ -73,18 +82,37 @@ export default function SetupPaymentModal({
   const cleanPhone = supportWhatsapp.replace(/[^0-9]/g, '') || '14375778785'
 
   // Pre-filled WhatsApp message
-  const whatsappMessage = `Hi, I am paying the PGX Setup & Integration Fee ($${amount.toFixed(
+  const whatsappMessage = `Hi, I completed the PGX Setup & Integration Fee payment ($${amount.toFixed(
     2
   )}) via ${cryptoAsset} (${activeNetworkName}).
 
+Contact Name: ${contactName || merchantLegalName || 'N/A'}
+Company Name: ${companyName || merchantLegalName || 'N/A'}
 Merchant Ref: ${merchantRefId || 'N/A'}
-Business: ${merchantLegalName || 'N/A'}
 Email: ${merchantEmail || 'N/A'}
-TxID: ${txHash.trim() || 'Pending Transfer'}
+TxID: ${txHash.trim() || 'Attached in screenshot'}
 
-Please confirm receipt and activate my live gateway.`
+Attached is my payment confirmation screenshot. Please verify on blockchain and activate my live gateway.`
 
   const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMessage)}`
+
+  // Pre-filled Email mailto link
+  const emailSubject = `Crypto Setup Payment Proof - ${companyName || merchantLegalName || 'Merchant'} (${merchantRefId || 'N/A'})`
+  const emailBody = `Hi PGX Gateway Finance Desk,
+
+I have completed the Setup & Integration Fee payment ($${amount.toFixed(2)}) via ${cryptoAsset} (${activeNetworkName}).
+
+Contact Name: ${contactName || merchantLegalName || 'N/A'}
+Company Name: ${companyName || merchantLegalName || 'N/A'}
+Merchant Ref ID: ${merchantRefId || 'N/A'}
+Account Email: ${merchantEmail || 'N/A'}
+Blockchain TxID: ${txHash.trim() || 'Attached in screenshot'}
+
+I have attached the payment confirmation screenshot to this email. Please verify on the blockchain and activate my live gateway integration.
+
+Thank you!`
+
+  const emailUrl = `mailto:${supportEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
 
   const handleCopyWallet = () => {
     navigator.clipboard.writeText(activeWalletAddress)
@@ -96,6 +124,12 @@ Please confirm receipt and activate my live gateway.`
     navigator.clipboard.writeText(supportWhatsapp)
     setCopiedWhatsapp(true)
     setTimeout(() => setCopiedWhatsapp(false), 2000)
+  }
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(supportEmail)
+    setCopiedEmail(true)
+    setTimeout(() => setCopiedEmail(false), 2000)
   }
 
   const handleStripePay = async () => {
@@ -181,30 +215,30 @@ Please confirm receipt and activate my live gateway.`
         <div className="px-6 py-3.5 bg-[#08102d] border-b border-cyan-500/15 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-300">
-              {selectedMethod === 'stripe' ? 'Total Payable via Card:' : `Total Payable via ${cryptoAsset}:`}
+              {selectedMethod === 'crypto' ? `Total Payable via ${cryptoAsset}:` : 'Total Payable via Card:'}
             </span>
             {merchantRefId && (
               <span className="font-mono text-[11px] text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded font-bold">
                 {merchantRefId}
               </span>
             )}
-            {selectedMethod === 'stripe' ? (
-              <span className="text-[10px] text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
-                Includes 3% Card Surcharge (+${stripeFee.toFixed(2)})
-              </span>
-            ) : (
+            {selectedMethod === 'crypto' ? (
               <span className="text-[10px] text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
                 <Sparkles className="h-3 w-3" />
-                0% Surcharge • Direct Transfer
+                Preferred Method • 0% Surcharge
+              </span>
+            ) : (
+              <span className="text-[10px] text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
+                Includes 3% Card Surcharge (+${stripeFee.toFixed(2)})
               </span>
             )}
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-black text-white font-mono">
-              ${selectedMethod === 'stripe' ? totalCardAmount : amount.toFixed(2)}
+              ${selectedMethod === 'crypto' ? amount.toFixed(2) : totalCardAmount}
             </span>
             <span className="text-xs text-cyan-300 font-bold uppercase">
-              {selectedMethod === 'stripe' ? 'USD' : cryptoAsset}
+              {selectedMethod === 'crypto' ? cryptoAsset : 'USD'}
             </span>
           </div>
         </div>
@@ -212,7 +246,37 @@ Please confirm receipt and activate my live gateway.`
         {/* Method Switcher Tabs */}
         <div className="p-5 sm:p-6 space-y-5">
           <div className="grid grid-cols-2 gap-3">
-            {/* Option 1: Card / Stripe */}
+            {/* Option 1: Crypto (USDC & BTC) - Preferred by Client */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedMethod('crypto')
+                setError(null)
+              }}
+              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                selectedMethod === 'crypto'
+                  ? 'bg-gradient-to-br from-fuchsia-950/50 via-purple-900/40 to-cyan-950/40 border-fuchsia-400 shadow-[0_0_24px_rgba(217,70,239,0.35)]'
+                  : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-xl bg-[#040817] border border-fuchsia-500/30 text-fuchsia-400">
+                  <Coins className="h-5 w-5" />
+                </div>
+                {selectedMethod === 'crypto' && <CheckCircle2 className="h-5 w-5 text-fuchsia-400" />}
+              </div>
+              <div className="mt-3">
+                <div className="font-bold text-white text-sm flex items-center gap-1.5 flex-wrap">
+                  <span>Crypto Transfer</span>
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold">Preferred</span>
+                </div>
+                <div className="text-[11px] text-fuchsia-300/80 mt-0.5">
+                  USDC (Ethereum ERC-20) & Bitcoin (BTC) • 0% Fee
+                </div>
+              </div>
+            </button>
+
+            {/* Option 2: Card / Stripe */}
             <button
               type="button"
               onClick={() => {
@@ -234,37 +298,7 @@ Please confirm receipt and activate my live gateway.`
               <div className="mt-3">
                 <div className="font-bold text-white text-sm">Pay with Card</div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Stripe Checkout • Visa, MC, Amex, Apple Pay
-                </div>
-              </div>
-            </button>
-
-            {/* Option 2: Crypto (USDC & BTC) */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedMethod('crypto')
-                setError(null)
-              }}
-              className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                selectedMethod === 'crypto'
-                  ? 'bg-gradient-to-br from-fuchsia-950/40 via-purple-900/30 to-amber-950/40 border-fuchsia-400/80 shadow-[0_0_24px_rgba(217,70,239,0.35)]'
-                  : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-xl bg-[#040817] border border-fuchsia-500/30 text-fuchsia-400">
-                  <Coins className="h-5 w-5" />
-                </div>
-                {selectedMethod === 'crypto' && <CheckCircle2 className="h-5 w-5 text-fuchsia-400" />}
-              </div>
-              <div className="mt-3">
-                <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                  <span>Crypto Transfer</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 font-mono">0% Fee</span>
-                </div>
-                <div className="text-[11px] text-fuchsia-300/80 mt-0.5">
-                  USDC (Ethereum ERC-20) & Bitcoin (BTC)
+                  Stripe Checkout • Visa, MC, Amex (+3% Fee)
                 </div>
               </div>
             </button>
@@ -278,91 +312,7 @@ Please confirm receipt and activate my live gateway.`
             </div>
           )}
 
-          {/* VIEW A: STRIPE CARD CHECKOUT */}
-          {selectedMethod === 'stripe' && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-[#08102b] border border-cyan-500/20 space-y-3">
-                <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider block">
-                  Store Details for Gateway Integration
-                </span>
-
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-300 block mb-1 flex items-center gap-1.5">
-                      <Globe className="h-3.5 w-3.5 text-cyan-400" />
-                      Store Website Domain
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. https://mystore.com"
-                      value={domain}
-                      onChange={(e) => setDomain(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-300 block mb-1 flex items-center gap-1.5">
-                      <GitBranch className="h-3.5 w-3.5 text-cyan-400" />
-                      Git Repository Link (Optional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. https://github.com/my-org/my-app"
-                      value={gitRepo}
-                      onChange={(e) => setGitRepo(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Transparent Card Processing Surcharge Breakdown */}
-              <div className="p-3.5 rounded-2xl bg-[#08102b] border border-cyan-500/25 space-y-2 text-xs">
-                <div className="flex justify-between items-center text-slate-300">
-                  <span>Base Setup & Integration Fee:</span>
-                  <span className="font-bold text-white">${amount.toFixed(2)} USD</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-300">
-                  <span className="flex items-center gap-1.5 text-cyan-300">
-                    <span>Card Processing Surcharge (3%):</span>
-                  </span>
-                  <span className="font-bold text-cyan-300">+${stripeFee.toFixed(2)} USD</span>
-                </div>
-                <div className="border-t border-cyan-500/20 pt-2 flex justify-between items-center font-bold">
-                  <span className="text-white text-xs">Total Charged via Stripe:</span>
-                  <span className="text-cyan-400 font-mono text-base">${totalCardAmount} USD</span>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleStripePay}
-                disabled={paying}
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm tracking-wide shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {paying ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                    <span>Opening Stripe Checkout...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="h-4 w-4" />
-                    <span>Pay ${totalCardAmount} USD via Stripe Checkout</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-
-              <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
-                <Lock className="h-3 w-3 text-cyan-400" />
-                <span>256-Bit SSL Encrypted Card Processing via Stripe</span>
-              </div>
-            </div>
-          )}
-
-          {/* VIEW B: CRYPTOCURRENCY TRANSFER (USDC on Ethereum & BTC) */}
+          {/* VIEW A: CRYPTOCURRENCY TRANSFER (USDC on Ethereum & BTC) */}
           {selectedMethod === 'crypto' && (
             <div className="space-y-4 animate-fade-in">
               {/* Crypto Asset Selector */}
@@ -409,7 +359,7 @@ Please confirm receipt and activate my live gateway.`
                   <div>
                     <h4 className="font-bold text-white text-base">Payment Proof Submitted Successfully!</h4>
                     <p className="text-xs text-slate-300 mt-1 max-w-md mx-auto leading-relaxed">
-                      Your <strong>{cryptoAsset}</strong> transaction hash has been registered. Super Admin has been notified to verify your transfer on the blockchain and activate your account.
+                      Your <strong>{cryptoAsset}</strong> transaction hash has been registered. Please send your payment screenshot with your Name and Company Name to WhatsApp or Email below for instant confirmation.
                     </p>
                   </div>
                   <div className="p-3 rounded-xl bg-[#040817] border border-emerald-500/20 text-xs font-mono text-cyan-300 break-all">
@@ -420,10 +370,18 @@ Please confirm receipt and activate my live gateway.`
                       href={whatsappUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.4)]"
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
-                      <span>Notify Super Admin on WhatsApp</span>
+                      <span>Send Screenshot on WhatsApp</span>
+                      <ExternalLink className="h-3 w-3 opacity-80" />
+                    </a>
+                    <a
+                      href={emailUrl}
+                      className="px-4 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Mail className="h-3.5 w-3.5" />
+                      <span>Send via Email</span>
                     </a>
                     <button
                       type="button"
@@ -525,11 +483,94 @@ Please confirm receipt and activate my live gateway.`
                     </div>
                   </div>
 
+                  {/* Screenshot & Contact Dispatch Instructions Box */}
+                  <div className="p-3.5 rounded-2xl bg-[#06122c] border border-cyan-400/40 shadow-[0_0_20px_rgba(0,240,255,0.12)] space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs uppercase tracking-wide">
+                        <Camera className="h-4 w-4 text-cyan-400" />
+                        <span>Screenshot Verification Requirement</span>
+                      </div>
+                      <span className="text-[10px] text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
+                        Fast Activation
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-200 leading-relaxed">
+                      Please take a <strong>screenshot of your payment confirmation</strong> and send it along with your <strong>Full Name and Company Name</strong> to our finance team for instant blockchain verification:
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                      {/* WhatsApp Option */}
+                      <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 hover:bg-emerald-900/60 text-emerald-200 font-bold flex items-center justify-between transition-all group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300">
+                            <MessageSquare className="h-4 w-4" />
+                          </div>
+                          <div className="truncate">
+                            <span className="text-[10px] text-emerald-400 block font-normal uppercase">Send on WhatsApp</span>
+                            <span className="font-mono text-xs text-white">{supportWhatsapp}</span>
+                          </div>
+                        </div>
+                        <ExternalLink className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100 shrink-0 ml-1" />
+                      </a>
+
+                      {/* Email Option */}
+                      <a
+                        href={emailUrl}
+                        className="p-3 rounded-xl bg-blue-950/60 border border-blue-500/40 hover:bg-blue-900/60 text-cyan-200 font-bold flex items-center justify-between transition-all group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded-lg bg-blue-500/20 text-cyan-300">
+                            <Mail className="h-4 w-4" />
+                          </div>
+                          <div className="truncate">
+                            <span className="text-[10px] text-cyan-400 block font-normal uppercase">Send via Email</span>
+                            <span className="font-mono text-xs text-white">{supportEmail}</span>
+                          </div>
+                        </div>
+                        <ExternalLink className="h-3.5 w-3.5 opacity-70 group-hover:opacity-100 shrink-0 ml-1" />
+                      </a>
+                    </div>
+                  </div>
+
                   {/* Submission Form */}
                   <form onSubmit={handleSubmitCryptoProof} className="p-4 rounded-2xl bg-[#08102b] border border-cyan-500/20 space-y-3 text-xs">
                     <span className="font-bold text-white block text-xs">
-                      Submit Your Transaction Hash (TxID) for Instant Verification
+                      Submit Your Transaction Hash (TxID) to the Portal
                     </span>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Your Name"
+                          value={contactName}
+                          onChange={(e) => setContactName(e.target.value)}
+                          className="w-full px-3.5 py-2 rounded-xl bg-[#040817] border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-300 block mb-1">
+                          Company / Business Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Your Company Name"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          className="w-full px-3.5 py-2 rounded-xl bg-[#040817] border border-slate-700 text-white text-xs focus:outline-none focus:border-cyan-400"
+                        />
+                      </div>
+                    </div>
 
                     <div>
                       <label className="text-[11px] font-semibold text-slate-300 block mb-1">
@@ -548,11 +589,11 @@ Please confirm receipt and activate my live gateway.`
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                          Your Sender Wallet (Optional)
+                          Sender Wallet Address (Optional)
                         </label>
                         <input
                           type="text"
-                          placeholder="Your wallet address"
+                          placeholder="Your sending address"
                           value={senderAddress}
                           onChange={(e) => setSenderAddress(e.target.value)}
                           className="w-full px-3.5 py-2 rounded-xl bg-[#040817] border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
@@ -561,7 +602,7 @@ Please confirm receipt and activate my live gateway.`
 
                       <div>
                         <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                          Store Domain (Optional)
+                          Store Website Domain (Optional)
                         </label>
                         <input
                           type="text"
@@ -597,10 +638,10 @@ Please confirm receipt and activate my live gateway.`
                         target="_blank"
                         rel="noreferrer"
                         className="py-3 px-4 rounded-xl border border-emerald-500/40 bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shrink-0"
-                        title="Notify Finance Desk on WhatsApp"
+                        title="Send Screenshot via WhatsApp"
                       >
                         <MessageSquare className="h-4 w-4" />
-                        <span>Confirm via WhatsApp</span>
+                        <span>Send on WhatsApp</span>
                       </a>
                     </div>
                   </form>
@@ -609,22 +650,122 @@ Please confirm receipt and activate my live gateway.`
             </div>
           )}
 
+          {/* VIEW B: STRIPE CARD CHECKOUT */}
+          {selectedMethod === 'stripe' && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="p-4 rounded-2xl bg-[#08102b] border border-cyan-500/20 space-y-3">
+                <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider block">
+                  Store Details for Gateway Integration
+                </span>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-300 block mb-1 flex items-center gap-1.5">
+                      <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                      Store Website Domain
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://mystore.com"
+                      value={domain}
+                      onChange={(e) => setDomain(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-300 block mb-1 flex items-center gap-1.5">
+                      <GitBranch className="h-3.5 w-3.5 text-cyan-400" />
+                      Git Repository Link (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://github.com/my-org/my-app"
+                      value={gitRepo}
+                      onChange={(e) => setGitRepo(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#040817] border border-cyan-500/40 text-white font-medium text-base sm:text-xs min-h-[44px] focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Transparent Card Processing Surcharge Breakdown */}
+              <div className="p-3.5 rounded-2xl bg-[#08102b] border border-cyan-500/25 space-y-2 text-xs">
+                <div className="flex justify-between items-center text-slate-300">
+                  <span>Base Setup & Integration Fee:</span>
+                  <span className="font-bold text-white">${amount.toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="flex items-center gap-1.5 text-cyan-300">
+                    <span>Card Processing Surcharge (3%):</span>
+                  </span>
+                  <span className="font-bold text-cyan-300">+${stripeFee.toFixed(2)} USD</span>
+                </div>
+                <div className="border-t border-cyan-500/20 pt-2 flex justify-between items-center font-bold">
+                  <span className="text-white text-xs">Total Charged via Stripe:</span>
+                  <span className="text-cyan-400 font-mono text-base">${totalCardAmount} USD</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleStripePay}
+                disabled={paying}
+                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-sm tracking-wide shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {paying ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
+                    <span>Opening Stripe Checkout...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4" />
+                    <span>Pay ${totalCardAmount} USD via Stripe Checkout</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </button>
+
+              <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
+                <Lock className="h-3 w-3 text-cyan-400" />
+                <span>256-Bit SSL Encrypted Card Processing via Stripe</span>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-cyan-500/15 bg-[#040817] flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span>Finance Desk:</span>
-            <span className="font-mono text-white font-bold">{supportWhatsapp}</span>
-            <button
-              type="button"
-              onClick={handleCopyWhatsapp}
-              className="p-1 rounded-md bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
-              title="Copy WhatsApp"
-            >
-              {copiedWhatsapp ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-            </button>
+        <div className="p-4 border-t border-cyan-500/15 bg-[#040817] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <span>WhatsApp:</span>
+              <span className="font-mono text-white font-bold">{supportWhatsapp}</span>
+              <button
+                type="button"
+                onClick={handleCopyWhatsapp}
+                className="p-1 rounded-md bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
+                title="Copy WhatsApp"
+              >
+                {copiedWhatsapp ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span>Email:</span>
+              <span className="font-mono text-white font-bold">{supportEmail}</span>
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className="p-1 rounded-md bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
+                title="Copy Email"
+              >
+                {copiedEmail ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+              </button>
+            </div>
           </div>
+
           <button
             type="button"
             onClick={onClose}
