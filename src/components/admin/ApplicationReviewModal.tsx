@@ -385,60 +385,66 @@ export default function ApplicationReviewModal({
 
           {/* Crypto Payment Proof Submitted Alert Banner */}
           {app.cryptoPayment && app.cryptoPayment.status === 'pending' && (
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-fuchsia-950/70 via-purple-950/40 to-fuchsia-950/70 border border-fuchsia-400/60 shadow-[0_0_20px_rgba(217,70,239,0.3)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+            <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-fuchsia-950/70 via-purple-950/50 to-fuchsia-950/70 border border-fuchsia-400/60 shadow-[0_0_20px_rgba(217,70,239,0.3)] flex flex-col md:flex-row md:items-center justify-between gap-3 animate-fade-in">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-fuchsia-500/20 border border-fuchsia-400/50 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.35)] shrink-0">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-fuchsia-500/20 border border-fuchsia-400/50 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.35)] shrink-0">
                   <Coins className="h-5 w-5 animate-pulse" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-black text-white text-xs sm:text-sm tracking-wide">
-                      🪙 Crypto Setup Payment Submitted ({app.cryptoPayment.currency})
+                      🪙 Crypto Setup Payment Submitted{app.cryptoPayment.currency ? ` (${app.cryptoPayment.currency})` : ''}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40">
-                      {app.cryptoPayment.network}
-                    </span>
+                    {app.cryptoPayment.network && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40">
+                        {app.cryptoPayment.network}
+                      </span>
+                    )}
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                       ${app.cryptoPayment.amount || 450} USD
                     </span>
                   </div>
-                  <div className="text-xs text-slate-300 font-mono mt-1 break-all">
-                    <span className="text-slate-400 font-sans">TxID: </span>
-                    <a
-                      href={
-                        app.cryptoPayment.currency === 'USDC'
-                          ? `https://etherscan.io/tx/${app.cryptoPayment.txHash}`
-                          : `https://www.blockchain.com/explorer/transactions/btc/${app.cryptoPayment.txHash}`
-                      }
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-cyan-400 hover:underline inline-flex items-center gap-1"
-                    >
-                      <span>{app.cryptoPayment.txHash}</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
+                  <div className="text-xs text-slate-300 font-mono mt-1 break-all flex items-center gap-1.5 flex-wrap">
+                    <span className="text-slate-400 font-sans">TxID:</span>
+                    {app.cryptoPayment.txHash ? (
+                      <a
+                        href={
+                          app.cryptoPayment.currency === 'USDC'
+                            ? `https://etherscan.io/tx/${app.cryptoPayment.txHash}`
+                            : `https://www.blockchain.com/explorer/transactions/btc/${app.cryptoPayment.txHash}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-cyan-400 hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>{app.cryptoPayment.txHash}</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="text-amber-300 font-sans text-[11px]">Submitted via WhatsApp / Email</span>
+                    )}
                   </div>
                 </div>
               </div>
 
               {isSuperAdmin && onVerifyCryptoPayment && (
-                <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto flex-wrap">
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onVerifyCryptoPayment(app._id, 'reject')}
                     className="px-3 py-1.5 rounded-xl border border-red-500/60 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-bold text-xs transition-all cursor-pointer whitespace-nowrap"
                   >
-                    Reject Proof
+                    Reject
                   </button>
                   <button
                     type="button"
                     disabled={reviewLoading}
                     onClick={() => onVerifyCryptoPayment(app._id, 'approve')}
-                    className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-[0_0_14px_rgba(16,185,129,0.5)] transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                    className="px-3.5 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-[0_0_14px_rgba(16,185,129,0.5)] transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
-                    <span>Confirm Payment & Activate Live 🚀</span>
+                    <span>Confirm Live 🚀</span>
                   </button>
                 </div>
               )}
@@ -1333,7 +1339,7 @@ export default function ApplicationReviewModal({
                     ) : (
                       <>
                         <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
-                        <span>{(!isSuperAdmin || approvalMode === 'trial') ? 'Approve (24h Trial)' : 'Approve (Direct Live)'}</span>
+                        <span>{(!isSuperAdmin || approvalMode === 'trial') ? 'Approve Trial' : 'Approve Live'}</span>
                       </>
                     )}
                   </button>
