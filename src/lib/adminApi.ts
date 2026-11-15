@@ -340,6 +340,9 @@ export interface SuperAdminAnalytics {
   totalMerchants: number
   approvedMerchants: number
   platformFeeRate: number
+  totalSetupFees?: number
+  totalMonthlyRecurring?: number
+  totalPlatformRevenue?: number
   resellers?: Array<{
     _id: string
     resellerId: string

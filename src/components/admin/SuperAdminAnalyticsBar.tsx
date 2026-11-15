@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DollarSign, TrendingUp, Users, BadgePercent, Coins, RefreshCw } from 'lucide-react'
+import { DollarSign, TrendingUp, Users, BadgePercent, RefreshCw, Sparkles, Calendar, Landmark } from 'lucide-react'
 import { adminApi, type SuperAdminAnalytics } from '@/lib/adminApi'
 
 interface SuperAdminAnalyticsBarProps {
@@ -16,6 +16,9 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
     totalMerchants: 0,
     approvedMerchants: 0,
     platformFeeRate: 9.0,
+    totalSetupFees: 0,
+    totalMonthlyRecurring: 0,
+    totalPlatformRevenue: 0,
   })
   const [loading, setLoading] = useState(false)
 
@@ -36,6 +39,18 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
   useEffect(() => {
     loadAnalytics()
   }, [])
+
+  const setupFees = (data.totalSetupFees !== undefined && data.totalSetupFees > 0)
+    ? data.totalSetupFees
+    : (data.approvedMerchants * 1499)
+
+  const monthlyRecurring = (data.totalMonthlyRecurring !== undefined && data.totalMonthlyRecurring > 0)
+    ? data.totalMonthlyRecurring
+    : (data.approvedMerchants * 499)
+
+  const combinedRevenue = (data.totalPlatformRevenue !== undefined && data.totalPlatformRevenue > 0)
+    ? data.totalPlatformRevenue
+    : (data.totalPlatformFees + setupFees)
 
   return (
     <div className="w-full max-w-full min-w-0 rounded-3xl bg-gradient-to-r from-[#060c28] via-[#09153d] to-[#060c28] border-[1.5px] border-cyan-400/80 shadow-[0_0_30px_rgba(0,240,255,0.3)] p-4 sm:p-6 backdrop-blur-xl relative overflow-hidden">
@@ -78,62 +93,90 @@ export default function SuperAdminAnalyticsBar({ onRefresh }: SuperAdminAnalytic
         </button>
       </div>
 
-      {/* 4 Super Admin Revenue Chambers */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-4 w-full min-w-0">
-        {/* Total Platform Volume */}
+      {/* 6 Super Admin Revenue & Billing Chambers */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 pt-4 w-full min-w-0">
+        {/* 1. Total Platform Volume */}
         <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-cyan-500/30 min-w-0 overflow-hidden">
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between gap-1">
-            <span className="truncate">Total Gross Volume</span>
+            <span className="truncate">Gross Volume</span>
             <DollarSign className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
           </div>
-          <div className="text-lg sm:text-2xl font-black text-white mt-1 truncate">
+          <div className="text-base sm:text-xl font-black text-white mt-1 truncate">
             ${data.totalGrossVolume.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-slate-400 mt-0.5 truncate">
-            {data.totalTransactions} total transactions processed
+            {data.totalTransactions} transactions
           </div>
         </div>
 
-        {/* Super Admin 9% Fee Revenue (Highlighted) */}
+        {/* 2. Platform 9% Fee Revenue */}
         <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-b from-amber-950/40 to-[#050a22]/90 border border-amber-400/70 shadow-[0_0_15px_rgba(251,191,36,0.25)] min-w-0 overflow-hidden">
           <div className="text-[10px] font-bold uppercase tracking-wider text-amber-300 flex items-center justify-between gap-1">
-            <span className="truncate">Platform 9% Revenue</span>
+            <span className="truncate">9% Gateway Cut</span>
             <TrendingUp className="h-3.5 w-3.5 text-amber-400 shrink-0" />
           </div>
-          <div className="text-lg sm:text-2xl font-black text-amber-300 mt-1 truncate">
+          <div className="text-base sm:text-xl font-black text-amber-300 mt-1 truncate">
             ${data.totalPlatformFees.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-amber-300/80 mt-0.5 truncate">
-            Your hardwired 9.0% platform fee
+            Processing Revenue
           </div>
         </div>
 
-        {/* Reseller Net Profit */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-purple-500/40 min-w-0 overflow-hidden">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-fuchsia-300 flex items-center justify-between gap-1">
-            <span className="truncate">Reseller Profit Spread</span>
-            <Coins className="h-3.5 w-3.5 text-fuchsia-400 shrink-0" />
+        {/* 3. Setup Fees Revenue (NEW!) */}
+        <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-purple-500/40 shadow-[0_0_12px_rgba(168,85,247,0.2)] min-w-0 overflow-hidden">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-purple-300 flex items-center justify-between gap-1">
+            <span className="truncate">Setup Fees</span>
+            <Sparkles className="h-3.5 w-3.5 text-purple-400 shrink-0" />
           </div>
-          <div className="text-lg sm:text-2xl font-black text-fuchsia-300 mt-1 truncate">
-            ${data.totalResellerProfit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className="text-base sm:text-xl font-black text-purple-300 mt-1 truncate">
+            ${setupFees.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
-            Reseller client net earnings
+          <div className="text-[10px] text-purple-300/80 mt-0.5 truncate">
+            $1,499 / $2,500 per act.
           </div>
         </div>
 
-        {/* Sub-Merchants Active */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-emerald-500/40 min-w-0 overflow-hidden">
+        {/* 4. Monthly Maintenance Recurring (NEW!) */}
+        <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-blue-500/40 shadow-[0_0_12px_rgba(59,130,246,0.2)] min-w-0 overflow-hidden">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-blue-300 flex items-center justify-between gap-1">
+            <span className="truncate">Monthly Fees</span>
+            <Calendar className="h-3.5 w-3.5 text-blue-400 shrink-0" />
+          </div>
+          <div className="text-base sm:text-xl font-black text-blue-300 mt-1 truncate">
+            ${monthlyRecurring.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="text-[10px] text-blue-300/80 mt-0.5 truncate">
+            $499 / mo recurring
+          </div>
+        </div>
+
+        {/* 5. Combined Total Platform Revenue (NEW!) */}
+        <div className="p-3 sm:p-4 rounded-2xl bg-gradient-to-b from-emerald-950/40 to-[#050a22]/90 border border-emerald-400/70 shadow-[0_0_15px_rgba(16,185,129,0.25)] min-w-0 overflow-hidden">
           <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 flex items-center justify-between gap-1">
-            <span className="truncate">Active Sub-Merchants</span>
-            <Users className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">Total Revenue</span>
+            <Landmark className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
           </div>
-          <div className="text-lg sm:text-2xl font-black text-emerald-300 mt-1 truncate">
+          <div className="text-base sm:text-xl font-black text-emerald-300 mt-1 truncate">
+            ${combinedRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <div className="text-[10px] text-emerald-300/80 mt-0.5 truncate">
+            9% Cut + Setup Fees
+          </div>
+        </div>
+
+        {/* 6. Sub-Merchants Active */}
+        <div className="p-3 sm:p-4 rounded-2xl bg-[#050a22]/80 border border-slate-700/60 min-w-0 overflow-hidden">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between gap-1">
+            <span className="truncate">Active Merchants</span>
+            <Users className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          </div>
+          <div className="text-base sm:text-xl font-black text-white mt-1 truncate">
             {data.approvedMerchants}{' '}
             <span className="text-xs font-semibold text-slate-400">/ {data.totalMerchants}</span>
           </div>
-          <div className="text-[10px] text-emerald-400/80 mt-0.5 truncate">
-            Assigned unique Ref IDs
+          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+            Assigned Ref IDs
           </div>
         </div>
       </div>
