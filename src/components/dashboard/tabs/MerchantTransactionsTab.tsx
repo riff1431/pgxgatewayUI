@@ -13,6 +13,7 @@ import {
   Lock,
 } from 'lucide-react'
 import { getStoredToken } from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 
 interface TransactionItem {
   _id: string
@@ -49,6 +50,12 @@ const API_BASE =
   (import.meta.env.PROD ? 'https://api.pgxgateway.com/api/v1' : 'http://localhost:5000/api/v1')
 
 export default function MerchantTransactionsTab() {
+  const { merchant } = useAuth()
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const tier = merchant?.tier || (merchant?.offer?.rate?.includes('15') || merchant?.offer?.setupFee?.includes('2500') ? 2 : 1)
+  const holdDays = isArxo ? (tier === 2 ? 45 : 14) : 14
+  const reserveRate = isArxo ? (tier === 2 ? 20 : 10) : 10
+  const reserveDays = isArxo ? (tier === 2 ? 90 : 60) : 60
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -177,25 +184,25 @@ export default function MerchantTransactionsTab() {
         {/* Metric 3: 14-Day Hold Balance */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>14-Day Hold Pool</span>
+            <span>{holdDays}-Day Settlement Hold</span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-2xl font-black text-amber-300 tracking-tight">
             ${metrics.onHoldBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-amber-200/80">Auto-matures into available balance</p>
+          <p className="text-[11px] text-amber-200/80">Auto-matures into available balance ({holdDays} days)</p>
         </div>
 
         {/* Metric 4: 10% Rolling Reserve */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Rolling Reserve (10%)</span>
+            <span>Rolling Reserve ({reserveRate}%)</span>
             <ShieldCheck className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-2xl font-black text-cyan-300 tracking-tight">
             ${metrics.rollingReserveBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-cyan-200/80">60-day security reserve pool</p>
+          <p className="text-[11px] text-cyan-200/80">{reserveDays}-day refundable security reserve (separate from processing fee)</p>
         </div>
       </div>
 
@@ -354,7 +361,7 @@ export default function MerchantTransactionsTab() {
                           {t.rollingReserveAmount !== undefined && t.rollingReserveAmount > 0 && (
                             <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
                               <Lock className="w-2.5 h-2.5 text-cyan-400" />
-                              <span>Reserve (10%): ${t.rollingReserveAmount.toFixed(2)}</span>
+                              <span>Rolling Reserve ({reserveRate}%): ${t.rollingReserveAmount.toFixed(2)}</span>
                               {reserveDate && <span className="text-slate-500">({reserveDate})</span>}
                             </div>
                           )}

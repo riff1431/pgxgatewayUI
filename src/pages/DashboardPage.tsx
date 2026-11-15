@@ -39,6 +39,11 @@ export default function DashboardPage() {
 
   // 24-Hour Trial Status & Dynamic Countdown
   const isTrial = merchant?.accountMode === 'trial' || Boolean(merchant?.trial?.isActive)
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const tier = merchant?.tier || (merchant?.offer?.rate?.includes('15') || merchant?.offer?.setupFee?.includes('2500') ? 2 : 1)
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
+  const setupFeeFormatted = merchant?.offer?.setupFee || defaultSetupFee
   const trialExpiresAt = merchant?.trial?.expiresAt ? new Date(merchant.trial.expiresAt) : null
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number; isExpired: boolean }>({
     hours: 24,
@@ -127,7 +132,7 @@ export default function DashboardPage() {
             onClick={() => setIsSetupModalOpen(true)}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(245,158,11,0.5)] hover:brightness-110 transition-all cursor-pointer shrink-0"
           >
-            Activate Live Processing ($450)
+            Activate Live Processing ({setupFeeFormatted})
           </button>
         </div>
       )}
@@ -257,7 +262,7 @@ export default function DashboardPage() {
       <SetupPaymentModal
         isOpen={isSetupModalOpen}
         onClose={() => setIsSetupModalOpen(false)}
-        amount={450}
+        amount={merchant?.offer?.setupFee ? (parseFloat(String(merchant.offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum) : setupFeeNum}
         merchantRefId={merchant?.refId || ''}
         merchantLegalName={merchant?.legalName || merchant?.fullName || ''}
         merchantEmail={merchant?.businessEmail || ''}

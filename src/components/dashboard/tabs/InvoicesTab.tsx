@@ -284,7 +284,7 @@ export default function InvoicesTab() {
                   <div className="p-2 rounded-xl bg-[#091332]/60 border border-cyan-500/10">
                     <span className="text-[10px] text-slate-400 block uppercase">Fee Rate</span>
                     <span className="font-semibold text-cyan-300 text-xs">
-                      {inv.invoiceType === 'monthly_maintenance' ? '$99 / mo' : `${inv.feeRate}%`}
+                      {inv.invoiceType === 'monthly_maintenance' ? `${inv.payableAmount.toFixed(0)} / mo` : `${inv.feeRate}%`}
                     </span>
                   </div>
                 </div>
@@ -400,7 +400,7 @@ export default function InvoicesTab() {
                       </td>
                       <td className="px-5 py-4 font-semibold">
                         {inv.invoiceType === 'monthly_maintenance' ? (
-                          <span className="text-purple-300 text-xs">$99 / month</span>
+                          <span className="text-purple-300 text-xs">${inv.payableAmount ? `${inv.payableAmount.toFixed(0)} / mo` : '$99 / month'}</span>
                         ) : (
                           <span className="text-cyan-300">${inv.feeRate}%</span>
                         )}

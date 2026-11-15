@@ -20,6 +20,12 @@ export default function OfferTab() {
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
   const isAccepted = Boolean(offer?.accepted)
   const isApproved = applicationStatus === 'approved'
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const tier = merchant?.tier || (offer?.rate?.includes('15') || offer?.setupFee?.includes('2500') ? 2 : 1)
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
+  const defaultMonthlyFee = isArxo ? '$499 / mo' : '$99 / mo'
+  const defaultMonthlyFeeFull = isArxo ? '$499 / month' : '$99 / month'
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
 
   const rateParts = offer?.rate ? offer.rate.split('+') : []
   const baseRate = rateParts[0]?.trim() || ''
@@ -67,7 +73,7 @@ export default function OfferTab() {
         <div className="sm:self-center">
           {isAvailable ? (
             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-              <ShieldCheck className="h-3.5 w-3.5" /> Tier 1 Direct Gateway Rates
+              <ShieldCheck className="h-3.5 w-3.5" /> {isArxo ? (tier === 2 ? 'Tier 2 Documentation Exception Rates' : 'Tier 1 Verified KYB Rates') : 'Tier 1 Direct Gateway Rates'}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.3)]">
@@ -176,7 +182,7 @@ export default function OfferTab() {
           </div>
           <div className="my-2.5">
             <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-amber-300' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.setupFee || '$450') : '—'}
+              {isAvailable ? (offer.setupFee || defaultSetupFee) : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-amber-200/90' : 'text-slate-600'}`}>
               Account Activation
@@ -194,7 +200,7 @@ export default function OfferTab() {
           </div>
           <div className="my-2.5">
             <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-purple-300' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.monthlyFee || '$99 / mo') : '—'}
+              {isAvailable ? (offer.monthlyFee || defaultMonthlyFee) : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-purple-200/90' : 'text-slate-600'}`}>
               Maintenance Fee
@@ -240,7 +246,7 @@ export default function OfferTab() {
             <div className="text-right sm:self-center">
               <div className="text-xs text-slate-400">Recurring Rate</div>
               <div className="text-lg font-black text-white">
-                {offer.monthlyFee || '$99 / month'}
+                {offer.monthlyFee || defaultMonthlyFeeFull}
               </div>
             </div>
           </div>
@@ -272,8 +278,8 @@ export default function OfferTab() {
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
                 {merchant?.subscription?.stripeCustomerId
-                  ? '$99.00 + 3% card fee = $101.97 USD'
-                  : '$99.00 in BTC (0% card surcharge)'}
+                  ? `${isArxo ? '$499.00' : '$99.00'} + 3% card fee = ${isArxo ? '$513.97' : '$101.97'} USD`
+                  : `${isArxo ? '$499.00' : '$99.00'} in BTC (0% card surcharge)`}
               </div>
             </div>
 
@@ -337,7 +343,7 @@ export default function OfferTab() {
                   className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 cursor-pointer transition-all"
                 >
                   <CreditCard className="h-4 w-4" />
-                  <span>Pay Setup Fee ({offer.setupFee || '$450'}) & Unlock Gateway</span>
+                  <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Gateway</span>
                 </button>
               </div>
             ) : (
@@ -370,8 +376,8 @@ export default function OfferTab() {
         onClose={() => setShowPaymentModal(false)}
         amount={
           offer?.setupFee
-            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || 450
-            : 450
+            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
+            : setupFeeNum
         }
         merchantRefId={merchant?.refId}
         merchantLegalName={merchant?.legalName || merchant?.fullName}

@@ -323,12 +323,33 @@ export default function AdminPage() {
   const openReviewModal = (app: ApplicationItem, tab: 'dossier' | 'documents' | 'offer' = 'dossier') => {
     setSelectedApp(app)
     setReviewInitialTab(tab)
-    setOfferRate(app.offer?.rate || '2.9% + $0.30')
-    setOfferVolume(app.offer?.volume || 'Up to $250,000')
-    setOfferSettlement(app.offer?.settlement || 'Daily (Next Day)')
-    setOfferReserve(app.offer?.reserve || '5% (90 Days)')
-    setOfferSetupFee(app.offer?.setupFee || '$450')
-    setOfferMonthlyFee(app.offer?.monthlyFee || '$99 / month')
+    const isArxo = app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-')
+    const tier = app.tier || (app.offer?.rate?.includes('15') || app.offer?.setupFee?.includes('2500') ? 2 : 1)
+
+    if (isArxo) {
+      if (tier === 2) {
+        setOfferRate(app.offer?.rate || '15.0% + $0.30')
+        setOfferVolume(app.offer?.volume || 'Up to $250,000')
+        setOfferSettlement(app.offer?.settlement || 'Bi-Weekly (45 Days Hold)')
+        setOfferReserve(app.offer?.reserve || '20% (90 Days)')
+        setOfferSetupFee(app.offer?.setupFee || '$2,500')
+        setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
+      } else {
+        setOfferRate(app.offer?.rate || '9.0% + $0.30')
+        setOfferVolume(app.offer?.volume || 'Up to $250,000')
+        setOfferSettlement(app.offer?.settlement || 'Weekly (14 Days Hold)')
+        setOfferReserve(app.offer?.reserve || '10% (60 Days)')
+        setOfferSetupFee(app.offer?.setupFee || '$1,499')
+        setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
+      }
+    } else {
+      setOfferRate(app.offer?.rate || '2.9% + $0.30')
+      setOfferVolume(app.offer?.volume || 'Up to $250,000')
+      setOfferSettlement(app.offer?.settlement || 'Daily (Next Day)')
+      setOfferReserve(app.offer?.reserve || '5% (90 Days)')
+      setOfferSetupFee(app.offer?.setupFee || '$450')
+      setOfferMonthlyFee(app.offer?.monthlyFee || '$99 / month')
+    }
     setReviewNotes('')
   }
 

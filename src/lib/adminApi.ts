@@ -120,6 +120,7 @@ export interface ApplicationItem {
   _id: string
   refId?: string
   resellerId?: string
+  tier?: number
   fullName: string
   businessEmail: string
   phone: string

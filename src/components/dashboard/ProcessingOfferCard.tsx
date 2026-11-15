@@ -11,6 +11,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
 
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
   const isAccepted = Boolean(offer?.accepted)
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const tier = merchant?.tier || (offer?.rate?.includes('15') || offer?.setupFee?.includes('2500') ? 2 : 1)
+  const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$450'
+  const defaultMonthlyFee = isArxo ? '$499 / month' : '$99 / month'
+  const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 450
 
   // Split rate string (e.g. "2.1% + $0.20")
   const rateParts = offer?.rate ? offer.rate.split('+') : []
@@ -238,11 +243,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               </div>
               <div className="p-3 rounded-xl bg-[#091332] border border-amber-500/30 flex justify-between items-center">
                 <span className="text-amber-300 font-semibold">One-Time Setup Fee:</span>
-                <span className="font-bold text-amber-300">{offer.setupFee || '$450'}</span>
+                <span className="font-bold text-amber-300">{offer.setupFee || defaultSetupFee}</span>
               </div>
               <div className="p-3 rounded-xl bg-[#091332] border border-purple-500/30 flex justify-between items-center">
                 <span className="text-purple-300 font-semibold">Monthly Maintenance Fee:</span>
-                <span className="font-bold text-purple-300">{offer.monthlyFee || '$99 / month'}</span>
+                <span className="font-bold text-purple-300">{offer.monthlyFee || defaultMonthlyFee}</span>
               </div>
             </div>
 
@@ -262,7 +267,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                     className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <CreditCard className="h-4 w-4" />
-                    <span>Pay Setup Fee ({offer.setupFee || '$450'}) & Unlock Desk</span>
+                    <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Desk</span>
                   </button>
                 </>
               ) : (
@@ -287,8 +292,8 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
         onClose={() => setShowPaymentModal(false)}
         amount={
           offer?.setupFee
-            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || 450
-            : 450
+            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
+            : setupFeeNum
         }
         merchantRefId={merchant?.refId}
         merchantLegalName={merchant?.legalName || merchant?.fullName}
