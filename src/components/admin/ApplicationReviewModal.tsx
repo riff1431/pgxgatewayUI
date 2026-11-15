@@ -400,9 +400,17 @@ export default function ApplicationReviewModal({
                         {app.cryptoPayment.network}
                       </span>
                     )}
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                      ${app.cryptoPayment.amount || 450} USD
-                    </span>
+                    {(() => {
+                      const offerFeeParsed = app.offer?.setupFee ? parseFloat(String(app.offer.setupFee).replace(/[^0-9.]/g, '')) : null
+                      const displayFee = (offerFeeParsed && !isNaN(offerFeeParsed) && offerFeeParsed > 0)
+                        ? offerFeeParsed
+                        : (app.cryptoPayment.amount || 450)
+                      return (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                          ${displayFee} USD
+                        </span>
+                      )
+                    })()}
                   </div>
                   <div className="text-xs text-slate-300 font-mono mt-1 break-all flex items-center gap-1.5 flex-wrap">
                     <span className="text-slate-400 font-sans">TxID:</span>
