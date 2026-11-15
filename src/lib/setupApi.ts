@@ -19,6 +19,7 @@ export interface SetupStatusResponse {
     | 'completed'
     | 'delivered'
     | 'pending_payment'
+    | 'crypto_pending'
     | 'paid_setup'
     | 'collab_submitted'
     | 'in_progress'
@@ -32,6 +33,22 @@ export interface SetupStatusResponse {
   resellerId: string
   isStripeReady: boolean
   supportWhatsapp?: string
+  cryptoWallets?: {
+    btcAddress: string
+    usdcEthAddress: string
+  }
+  cryptoPayment?: {
+    currency: 'BTC' | 'USDC'
+    network: string
+    txHash: string
+    senderAddress?: string
+    amount: number
+    submittedAt: string
+    status: 'pending' | 'verified' | 'rejected'
+    verifiedAt?: string
+    verifiedBy?: string
+    notes?: string
+  } | null
   hostingProvider?: string
   techStack?: string
   companyDescription?: string
@@ -176,6 +193,45 @@ export async function createSetupCheckout(data: {
   })
   const json = await res.json()
   if (!res.ok) throw new Error(json.message || 'Failed to create setup checkout session')
+  return json
+}
+
+export async function submitCryptoPayment(data: {
+  currency: 'BTC' | 'USDC'
+  txHash: string
+  senderAddress?: string
+  websiteDomain?: string
+  gitRepoUrl?: string
+}): Promise<{ success: boolean; message: string; cryptoPayment: any }> {
+  const token = localStorage.getItem('pgx_auth_token')
+  const res = await fetch(`${API_BASE}/setup/crypto-payment`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.message || 'Failed to submit crypto payment proof')
+  return json
+}
+
+export async function verifyCryptoPayment(
+  merchantId: string,
+  data: { action: 'approve' | 'reject'; notes?: string; activateLive?: boolean }
+): Promise<{ success: boolean; message: string; merchant: any }> {
+  const token = localStorage.getItem('pgx_admin_token')
+  const res = await fetch(`${API_BASE}/setup/admin/verify-crypto/${merchantId}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.message || 'Failed to verify crypto payment')
   return json
 }
 

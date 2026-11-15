@@ -210,6 +210,18 @@ export interface ApplicationItem {
     failureCount?: number
     gracePeriodEnd?: string
   }
+  cryptoPayment?: {
+    currency: 'BTC' | 'USDC'
+    network: string
+    txHash: string
+    senderAddress?: string
+    amount: number
+    submittedAt: string
+    status: 'pending' | 'verified' | 'rejected'
+    verifiedAt?: string
+    verifiedBy?: string
+    notes?: string
+  }
   createdAt: string
   updatedAt: string
 }

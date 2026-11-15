@@ -33,6 +33,7 @@ import {
 } from '@/lib/adminApi'
 import ApplicationReviewModal from './ApplicationReviewModal'
 import DocumentViewerModal, { type KycDocumentItem } from './DocumentViewerModal'
+import { verifyCryptoPayment } from '@/lib/setupApi'
 
 interface UnderwritingDeskProps {
   isSuperAdmin?: boolean
@@ -298,6 +299,26 @@ export default function UnderwritingDesk({
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to decline request'
       showToast('Action Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Super Admin verifies/declines Crypto Payment Submission
+  const handleVerifyCryptoPayment = async (id: string, action: 'approve' | 'reject') => {
+    setReviewLoading(true)
+    try {
+      await verifyCryptoPayment(id, { action, activateLive: action === 'approve' })
+      showToast(
+        action === 'approve' ? 'Crypto Payment Confirmed! 🪙' : 'Crypto Declined',
+        action === 'approve' ? 'Merchant setup fee marked as paid and gateway unlocked.' : 'Payment proof rejected.',
+        action === 'approve' ? 'success' : 'error'
+      )
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to process crypto verification'
+      showToast('Verification Failed', msg, 'error')
     } finally {
       setReviewLoading(false)
     }
@@ -732,6 +753,11 @@ export default function UnderwritingDesk({
                             <span>Live Requested ⚡</span>
                           </span>
                         )}
+                        {app.cryptoPayment?.status === 'pending' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-fuchsia-300 bg-fuchsia-500/20 border border-fuchsia-400/80 shadow-[0_0_10px_rgba(217,70,239,0.35)] animate-pulse">
+                            <span>Crypto Pending 🪙</span>
+                          </span>
+                        )}
                         {isUnderReview && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_8px_rgba(251,191,36,0.2)]">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -893,6 +919,11 @@ export default function UnderwritingDesk({
                         <span>Live Requested ⚡</span>
                       </span>
                     )}
+                    {app.cryptoPayment?.status === 'pending' && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-fuchsia-300 bg-fuchsia-500/20 border border-fuchsia-400/80 shadow-[0_0_10px_rgba(217,70,239,0.35)] animate-pulse">
+                        <span>Crypto Pending 🪙</span>
+                      </span>
+                    )}
                     {isUnderReview && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -1033,6 +1064,7 @@ export default function UnderwritingDesk({
         onConvertToLive={handleConvertToLive}
         onRequestLiveActivation={handleRequestLiveActivation}
         onRejectLiveActivation={handleRejectLiveActivation}
+        onVerifyCryptoPayment={handleVerifyCryptoPayment}
         isSuperAdmin={isSuperAdmin}
         onSubmitOffer={handleSubmitOffer}
         onRevokeOffer={handleRevokeOffer}
