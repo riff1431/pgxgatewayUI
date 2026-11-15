@@ -406,7 +406,6 @@ export const adminApi = {
     if (params?.page) query.set('page', params.page.toString())
     if (params?.limit) query.set('limit', params.limit.toString())
     if (params?.resellerId && params.resellerId !== 'all') query.set('resellerId', params.resellerId)
-    if (params?.resellerId && params.resellerId !== 'all') query.set('resellerId', params.resellerId)
 
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<ApplicationItem[]>(`/admin/applications${qs}`, { method: 'GET' })
@@ -563,6 +562,7 @@ export const adminApi = {
     if (params?.refId) query.set('refId', params.refId)
     if (params?.page) query.set('page', params.page.toString())
     if (params?.limit) query.set('limit', params.limit.toString())
+    if (params?.resellerId && params.resellerId !== 'all') query.set('resellerId', params.resellerId)
 
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<TransactionItem[]>(`/admin/transactions${qs}`, { method: 'GET' })

@@ -55,8 +55,34 @@ export default function UnderwritingDesk({
   })
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'approved' | 'rejected'>('all')
-  const [tenantFilter, setTenantFilter] = useState<'all' | 'admin_root' | 'ARXO'>('all')
+  const [tenantFilter, setTenantFilter] = useState<string>('all')
+  const [resellerOptions, setResellerOptions] = useState<{ id: string; label: string }[]>([
+    { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+    { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+    { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
+  ])
   const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    if (!isSuperAdmin) return
+    adminApi.getSuperAdminResellersList().then((res) => {
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        const options = [
+          { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+          { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+        ]
+        res.data.forEach((r) => {
+          if (r.resellerId && r.resellerId !== 'admin_root') {
+            options.push({
+              id: r.resellerId,
+              label: `${r.name || r.resellerId} (${r.resellerId})`,
+            })
+          }
+        })
+        setResellerOptions(options)
+      }
+    }).catch(() => {})
+  }, [isSuperAdmin])
 
   // Selected Application for Review Drawer
   const [selectedApp, setSelectedApp] = useState<ApplicationItem | null>(null)
@@ -440,15 +466,11 @@ export default function UnderwritingDesk({
           <span className="text-xs font-bold text-white uppercase tracking-wider">Partner Portfolio:</span>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          {[
-            { id: 'all', label: 'All Portfolios (Direct + Partners)' },
-            { id: 'admin_root', label: 'Direct PGX (admin_root)' },
-            { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
-          ].map((t) => (
+          {resellerOptions.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setTenantFilter(t.id as 'all' | 'admin_root' | 'ARXO')}
+              onClick={() => setTenantFilter(t.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 tenantFilter === t.id
                   ? isSuperAdmin

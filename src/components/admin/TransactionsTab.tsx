@@ -26,8 +26,34 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed'>('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [tenantFilter, setTenantFilter] = useState<'all' | 'admin_root' | 'ARXO'>('all')
+  const [tenantFilter, setTenantFilter] = useState<string>('all')
+  const [resellerOptions, setResellerOptions] = useState<{ id: string; label: string }[]>([
+    { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+    { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+    { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
+  ])
   const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!isSuperAdmin) return
+    adminApi.getSuperAdminResellersList().then((res) => {
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        const options = [
+          { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+          { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+        ]
+        res.data.forEach((r) => {
+          if (r.resellerId && r.resellerId !== 'admin_root') {
+            options.push({
+              id: r.resellerId,
+              label: `${r.name || r.resellerId} (${r.resellerId})`,
+            })
+          }
+        })
+        setResellerOptions(options)
+      }
+    }).catch(() => {})
+  }, [isSuperAdmin])
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true)
@@ -155,15 +181,11 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
             <span className="text-xs font-bold text-white uppercase tracking-wider">Partner Portfolio:</span>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
-            {[
-              { id: 'all', label: 'All Portfolios (Direct + Partners)' },
-              { id: 'admin_root', label: 'Direct PGX (admin_root)' },
-              { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
-            ].map((t) => (
+            {resellerOptions.map((t) => (
               <button
                 key={t.id}
                 type="button"
-                onClick={() => setTenantFilter(t.id as any)}
+                onClick={() => setTenantFilter(t.id)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   tenantFilter === t.id
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_12px_rgba(0,240,255,0.4)]'
