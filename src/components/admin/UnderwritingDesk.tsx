@@ -271,6 +271,38 @@ export default function UnderwritingDesk({
     }
   }
 
+  // Request Live Activation (Reseller requests Super Admin sign-off)
+  const handleRequestLiveActivation = async (id: string, notes?: string) => {
+    setReviewLoading(true)
+    try {
+      await adminApi.requestLiveActivation(id, notes)
+      showToast('Live Request Submitted! ⚡', 'Platform Super Administrator has been notified to review and activate within 24 hours.', 'success')
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to submit live request'
+      showToast('Submission Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
+  // Super Admin declines Live Activation Request
+  const handleRejectLiveActivation = async (id: string, reason?: string) => {
+    setReviewLoading(true)
+    try {
+      await adminApi.rejectLiveActivation(id, reason)
+      showToast('Live Request Declined', 'The live activation request was declined.', 'success')
+      setSelectedApp(null)
+      fetchData()
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to decline request'
+      showToast('Action Failed', msg, 'error')
+    } finally {
+      setReviewLoading(false)
+    }
+  }
+
   // Submit Processing Offer to Merchant
   const handleSubmitOffer = async () => {
     if (!selectedApp) return
@@ -694,13 +726,19 @@ export default function UnderwritingDesk({
 
                       {/* Status */}
                       <td className="px-2.5 py-3 whitespace-nowrap">
+                        {app.liveActivationRequest?.status === 'pending' && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.35)] animate-pulse">
+                            <Zap className="h-2.5 w-2.5 text-amber-400 fill-current" />
+                            <span>Live Requested ⚡</span>
+                          </span>
+                        )}
                         {isUnderReview && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70 shadow-[0_0_8px_rgba(251,191,36,0.2)]">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                             <span>Under Review</span>
                           </span>
                         )}
-                        {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && (
+                        {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && app.liveActivationRequest?.status !== 'pending' && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/70 shadow-[0_0_8px_rgba(0,240,255,0.25)]">
                             <Clock className="h-2.5 w-2.5 text-cyan-400 animate-pulse" />
                             <span>24h Trial</span>
@@ -849,13 +887,19 @@ export default function UnderwritingDesk({
 
                   {/* Status */}
                   <div className="shrink-0">
+                    {app.liveActivationRequest?.status === 'pending' && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/20 border border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.35)] animate-pulse">
+                        <Zap className="h-3 w-3 text-amber-400 fill-current" />
+                        <span>Live Requested ⚡</span>
+                      </span>
+                    )}
                     {isUnderReview && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/70">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         <span>Under Review</span>
                       </span>
                     )}
-                    {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && (
+                    {isApproved && app.accountMode === 'trial' && app.trial?.status === 'active' && app.liveActivationRequest?.status !== 'pending' && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-cyan-300 bg-cyan-500/15 border border-cyan-400/70">
                         <Clock className="h-3 w-3 text-cyan-400 animate-pulse" />
                         <span>24h Trial</span>
@@ -987,6 +1031,9 @@ export default function UnderwritingDesk({
         onDecision={handleDecision}
         onExtendTrial={handleExtendTrial}
         onConvertToLive={handleConvertToLive}
+        onRequestLiveActivation={handleRequestLiveActivation}
+        onRejectLiveActivation={handleRejectLiveActivation}
+        isSuperAdmin={isSuperAdmin}
         onSubmitOffer={handleSubmitOffer}
         onRevokeOffer={handleRevokeOffer}
         reviewLoading={reviewLoading}

@@ -159,6 +159,16 @@ export interface ApplicationItem {
     status: 'none' | 'active' | 'expired' | 'converted'
     maxTestAmount?: number
   }
+  liveActivationRequest?: {
+    isRequested: boolean
+    requestedAt?: string
+    requestedByResellerId?: string
+    notes?: string
+    status: 'none' | 'pending' | 'approved' | 'rejected'
+    reviewedAt?: string
+    reviewedBy?: string
+    rejectionReason?: string
+  }
   setupStatus?: string
   websiteDomain?: string
   gitRepoUrl?: string
@@ -450,6 +460,20 @@ export const adminApi = {
   convertMerchantToLive: async (id: string) => {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/convert-live`, {
       method: 'POST',
+    })
+  },
+
+  requestLiveActivation: async (id: string, notes?: string) => {
+    return adminRequest<ApplicationItem>(`/admin/applications/${id}/request-live`, {
+      method: 'POST',
+      body: JSON.stringify({ notes }),
+    })
+  },
+
+  rejectLiveActivation: async (id: string, reason?: string) => {
+    return adminRequest<ApplicationItem>(`/admin/applications/${id}/reject-live`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
     })
   },
 

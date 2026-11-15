@@ -24,6 +24,7 @@ import {
   MessageSquare,
   HardDrive,
   FileCheck,
+  Zap,
 } from 'lucide-react'
 import type { ApplicationItem } from '@/lib/adminApi'
 import type { KycDocumentItem } from './DocumentViewerModal'
@@ -38,6 +39,9 @@ interface ApplicationReviewModalProps {
   onDecision: (status: 'approved' | 'rejected', approveMode?: 'trial' | 'live') => Promise<void>
   onExtendTrial?: (id: string, hours?: number) => Promise<void>
   onConvertToLive?: (id: string) => Promise<void>
+  onRequestLiveActivation?: (id: string, notes?: string) => Promise<void>
+  onRejectLiveActivation?: (id: string, reason?: string) => Promise<void>
+  isSuperAdmin?: boolean
   onSubmitOffer: () => Promise<void>
   onRevokeOffer: () => Promise<void>
   reviewLoading: boolean
@@ -67,6 +71,9 @@ export default function ApplicationReviewModal({
   onDecision,
   onExtendTrial,
   onConvertToLive,
+  onRequestLiveActivation,
+  onRejectLiveActivation,
+  isSuperAdmin = false,
   onSubmitOffer,
   onRevokeOffer,
   reviewLoading,
@@ -317,6 +324,52 @@ export default function ApplicationReviewModal({
         {/* Modal Body / Tab Content */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
           
+          {/* Live Activation Request Alert Banner */}
+          {app.liveActivationRequest?.status === 'pending' && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-950/70 via-yellow-950/40 to-amber-950/70 border border-amber-400/60 shadow-[0_0_15px_rgba(251,191,36,0.25)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/60 flex items-center justify-center text-amber-300 shrink-0">
+                  <Zap className="h-4 w-4 fill-current animate-pulse" />
+                </div>
+                <div className="min-w-0 text-xs">
+                  <div className="font-bold text-amber-200 text-sm">
+                    {isSuperAdmin
+                      ? `⚡ Live Activation Requested by Reseller (${app.resellerId || 'Partner'})`
+                      : `⏳ Live Activation Request Pending Review by Super Admin`}
+                  </div>
+                  <div className="text-[11px] text-amber-300/80 truncate mt-0.5">
+                    {isSuperAdmin
+                      ? `Requested on ${app.liveActivationRequest.requestedAt ? new Date(app.liveActivationRequest.requestedAt).toLocaleString() : 'recently'}. Please review KYC documents and merchant website before approving.`
+                      : `Submitted on ${app.liveActivationRequest.requestedAt ? new Date(app.liveActivationRequest.requestedAt).toLocaleString() : 'recently'}. Platform Super Admin will verify and activate within 24 hours.`}
+                  </div>
+                </div>
+              </div>
+              {isSuperAdmin && onConvertToLive && (
+                <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                  {onRejectLiveActivation && (
+                    <button
+                      type="button"
+                      disabled={reviewLoading}
+                      onClick={() => onRejectLiveActivation(app._id, 'Declined by Super Administrator')}
+                      className="px-3 py-1.5 rounded-xl border border-red-500/60 bg-red-500/10 hover:bg-red-500/20 text-red-300 font-bold text-xs transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      Decline Request
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => onConvertToLive(app._id)}
+                    className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-[0_0_14px_rgba(16,185,129,0.5)] transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
+                    <span>Approve & Go Live 🚀</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* TAB 1: BUSINESS PROFILE & DOSSIER */}
           {activeTab === 'dossier' && (
             <div className="space-y-6 animate-fade-in">
@@ -984,7 +1037,7 @@ export default function ApplicationReviewModal({
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end shrink-0">
             {/* If merchant is currently in Trial mode, provide 1-click Extend and Convert to Live */}
             {app.applicationStatus === 'approved' && app.accountMode === 'trial' ? (
-              <div className="grid grid-cols-2 gap-1.5 sm:flex sm:items-center sm:gap-2.5 w-full sm:w-auto">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2.5 w-full sm:w-auto">
                 <button
                   type="button"
                   disabled={reviewLoading}
@@ -995,15 +1048,32 @@ export default function ApplicationReviewModal({
                   <span>+24h Extend</span>
                 </button>
 
-                <button
-                  type="button"
-                  disabled={reviewLoading}
-                  onClick={() => onConvertToLive?.(app._id)}
-                  className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_16px_rgba(16,185,129,0.6)] hover:shadow-[0_0_25px_rgba(16,185,129,0.85)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap"
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
-                  <span>Convert to Live 🚀</span>
-                </button>
+                {isSuperAdmin ? (
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => onConvertToLive?.(app._id)}
+                    className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_16px_rgba(16,185,129,0.6)] hover:shadow-[0_0_25px_rgba(16,185,129,0.85)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
+                    <span>Convert to Live 🚀</span>
+                  </button>
+                ) : app.liveActivationRequest?.status === 'pending' ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-400/50 shadow-[0_0_10px_rgba(251,191,36,0.2)] whitespace-nowrap">
+                    <Clock className="h-3 w-3 text-amber-400 animate-pulse" />
+                    <span>Live Request Pending (&lt;24h)</span>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => onRequestLiveActivation?.(app._id)}
+                    className="px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-lg sm:rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-[11px] sm:text-xs shadow-[0_0_14px_rgba(251,191,36,0.5)] hover:shadow-[0_0_22px_rgba(251,191,36,0.8)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  >
+                    <Zap className="h-3.5 w-3.5 fill-current" />
+                    <span>Request for Live ⚡</span>
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-between sm:justify-end">
@@ -1045,37 +1115,39 @@ export default function ApplicationReviewModal({
 
                 {/* Grouped Approval Controls: Mode Switcher + Approve Button */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <div className="inline-flex items-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-xs shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setApprovalMode('trial')}
-                      className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
-                        approvalMode === 'trial'
-                          ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_8px_rgba(0,240,255,0.4)]'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      ⏳ 24h Trial
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setApprovalMode('live')}
-                      className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
-                        approvalMode === 'live'
-                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      🟢 Full Live
-                    </button>
-                  </div>
+                  {isSuperAdmin && (
+                    <div className="inline-flex items-center p-0.5 rounded-full bg-slate-950 border border-cyan-500/30 text-xs shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setApprovalMode('trial')}
+                        className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
+                          approvalMode === 'trial'
+                            ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-slate-950 shadow-[0_0_8px_rgba(0,240,255,0.4)]'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        ⏳ 24h Trial
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setApprovalMode('live')}
+                        className={`px-2.5 sm:px-3 py-1 rounded-full font-bold transition-all whitespace-nowrap ${
+                          approvalMode === 'live'
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        🟢 Full Live
+                      </button>
+                    </div>
+                  )}
 
                   <button
                     type="button"
                     disabled={reviewLoading}
-                    onClick={() => onDecision('approved', approvalMode)}
+                    onClick={() => onDecision('approved', isSuperAdmin ? approvalMode : 'trial')}
                     className={`px-4 sm:px-5 py-2 rounded-xl sm:rounded-full font-black text-xs transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[36px] sm:min-h-[40px] whitespace-nowrap shrink-0 ${
-                      approvalMode === 'trial'
+                      (!isSuperAdmin || approvalMode === 'trial')
                         ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-slate-950 shadow-[0_0_14px_rgba(0,240,255,0.6)] hover:shadow-[0_0_22px_rgba(0,240,255,0.85)]'
                         : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 text-slate-950 shadow-[0_0_14px_rgba(16,185,129,0.6)] hover:shadow-[0_0_22px_rgba(16,185,129,0.85)]'
                     }`}
@@ -1088,7 +1160,7 @@ export default function ApplicationReviewModal({
                     ) : (
                       <>
                         <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5] shrink-0" />
-                        <span>{approvalMode === 'trial' ? 'Approve (24h Trial)' : 'Approve (Direct Live)'}</span>
+                        <span>{(!isSuperAdmin || approvalMode === 'trial') ? 'Approve (24h Trial)' : 'Approve (Direct Live)'}</span>
                       </>
                     )}
                   </button>
