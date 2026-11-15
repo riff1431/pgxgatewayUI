@@ -804,7 +804,7 @@ export default function ApplicationReviewModal({
                     <div>
                       <div className="font-bold text-white">Offer is currently Live on Merchant Dashboard</div>
                       <div className="text-[11px] text-emerald-200/90 mt-0.5">
-                        Current terms: <strong>{app.offer.rate}</strong> • <strong>{app.offer.volume}</strong> • <strong>{app.offer.settlement}</strong> • Reserve: <strong>{app.offer.reserve}</strong> • Setup: <strong>{app.offer.setupFee || (app.resellerId === 'ARXO' ? (app.tier === 2 ? '$2,500' : '$1,499') : '$450')}</strong> • Monthly: <strong>{app.offer.monthlyFee || (app.resellerId === 'ARXO' ? '$499 / mo' : '$99 / mo')}</strong>
+                        Current terms: <strong>{app.offer.rate}</strong> • <strong>{app.offer.volume}</strong> • <strong>{app.offer.settlement}</strong> • Reserve: <strong>{app.offer.reserve}</strong> • Setup: <strong>{app.offer.setupFee || (app.tier === 2 ? '$2,500' : '$1,499')}</strong> • Monthly: <strong>{app.offer.monthlyFee || '$499 / month'}</strong>
                       </div>
                     </div>
                   </div>
@@ -829,22 +829,8 @@ export default function ApplicationReviewModal({
               {/* Underwriter Quick Tier Presets */}
               <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-[#08102b] border border-cyan-500/25">
                 <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mr-1">
-                  Quick Presets:
+                  Default Tier Presets:
                 </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOfferRate('2.9% + $0.30')
-                    setOfferVolume('Up to $250,000')
-                    setOfferSettlement('Daily (Next Day)')
-                    setOfferReserve('5% (90 Days)')
-                    setOfferSetupFee('$450')
-                    setOfferMonthlyFee('$99 / month')
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-semibold cursor-pointer transition-all"
-                >
-                  Standard PGX (2.9% · $450 Setup · $99/mo)
-                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -855,9 +841,9 @@ export default function ApplicationReviewModal({
                     setOfferSetupFee('$1,499')
                     setOfferMonthlyFee('$499 / month')
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-semibold cursor-pointer transition-all"
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/60 text-emerald-300 text-xs font-bold cursor-pointer transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)]"
                 >
-                  ARXO Tier 1 (9.0% · 14d · 10% Res · $1,499 Setup · $499/mo)
+                  ★ Tier 1 (Default): 9.0% · 14d Hold · 10% Res · $1,499 Setup · $499/mo
                 </button>
                 <button
                   type="button"
@@ -869,9 +855,9 @@ export default function ApplicationReviewModal({
                     setOfferSetupFee('$2,500')
                     setOfferMonthlyFee('$499 / month')
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-400/40 text-purple-300 text-xs font-semibold cursor-pointer transition-all"
+                  className="px-3 py-1.5 rounded-lg bg-purple-500/15 hover:bg-purple-500/25 border border-purple-400/60 text-purple-300 text-xs font-bold cursor-pointer transition-all shadow-[0_0_10px_rgba(217,70,239,0.2)]"
                 >
-                  ARXO Tier 2 (15.0% · 45d · 20% Res · $2,500 Setup · $499/mo)
+                  Tier 2 (Doc Exception): 15.0% · 45d Hold · 20% Res · $2,500 Setup · $499/mo
                 </button>
               </div>
 
@@ -884,7 +870,7 @@ export default function ApplicationReviewModal({
                     type="text"
                     value={offerRate}
                     onChange={(e) => setOfferRate(e.target.value)}
-                    placeholder="e.g. 2.9% + $0.30"
+                    placeholder="e.g. 9.0% + $0.30"
                     className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-white font-bold text-sm focus:outline-none focus:border-cyan-400"
                   />
                   <span className="text-[10px] text-slate-500 block">Custom blended gateway rate</span>
@@ -936,7 +922,7 @@ export default function ApplicationReviewModal({
                     type="text"
                     value={offerSetupFee}
                     onChange={(e) => setOfferSetupFee(e.target.value)}
-                    placeholder="e.g. $450"
+                    placeholder="e.g. $1,499"
                     className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-amber-300 font-bold text-sm focus:outline-none focus:border-cyan-400"
                   />
                   <span className="text-[10px] text-slate-500 block">White-glove onboarding activation</span>
@@ -949,7 +935,7 @@ export default function ApplicationReviewModal({
                     type="text"
                     value={offerMonthlyFee}
                     onChange={(e) => setOfferMonthlyFee(e.target.value)}
-                    placeholder="e.g. $99 / month"
+                    placeholder="e.g. $499 / month"
                     className="w-full bg-[#040817] border border-cyan-500/40 rounded-lg px-3 py-2 text-purple-300 font-bold text-sm focus:outline-none focus:border-cyan-400"
                   />
                   <span className="text-[10px] text-slate-500 block">Recurring portal maintenance</span>

@@ -64,6 +64,7 @@ export default function AdminPage() {
   })
   const [applications, setApplications] = useState<ApplicationItem[]>([])
   const [statusFilter, setStatusFilter] = useState<'all' | 'under_review' | 'approved' | 'rejected'>('all')
+  const [tenantFilter, setTenantFilter] = useState<'all' | 'admin_root' | 'ARXO'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   const [adminUser, setAdminUser] = useState<AdminUserInfo | null>(() => getStoredAdminUser())
@@ -122,12 +123,12 @@ export default function AdminPage() {
   const [selectedApp, setSelectedApp] = useState<ApplicationItem | null>(null)
   const [reviewInitialTab, setReviewInitialTab] = useState<'dossier' | 'documents' | 'offer'>('dossier')
   const [previewKycDoc, setPreviewKycDoc] = useState<KycDocumentItem | null>(null)
-  const [offerRate, setOfferRate] = useState('2.9% + $0.30')
+  const [offerRate, setOfferRate] = useState('9.0% + $0.30')
   const [offerVolume, setOfferVolume] = useState('Up to $250,000')
-  const [offerSettlement, setOfferSettlement] = useState('Daily (Next Day)')
-  const [offerReserve, setOfferReserve] = useState('5% (90 Days)')
-  const [offerSetupFee, setOfferSetupFee] = useState('$450')
-  const [offerMonthlyFee, setOfferMonthlyFee] = useState('$99 / month')
+  const [offerSettlement, setOfferSettlement] = useState('Weekly (14 Days Hold)')
+  const [offerReserve, setOfferReserve] = useState('10% (60 Days)')
+  const [offerSetupFee, setOfferSetupFee] = useState('$1,499')
+  const [offerMonthlyFee, setOfferMonthlyFee] = useState('$499 / month')
   const [reviewNotes, setReviewNotes] = useState('')
   const [reviewLoading, setReviewLoading] = useState(false)
 
@@ -200,8 +201,8 @@ export default function AdminPage() {
     setLoading(true)
     try {
       const [statsRes, appsRes] = await Promise.all([
-        adminApi.getStats(),
-        adminApi.getApplications({ status: statusFilter, search: searchQuery }),
+        adminApi.getStats({ resellerId: tenantFilter }),
+        adminApi.getApplications({ status: statusFilter, search: searchQuery, resellerId: tenantFilter }),
       ])
       if (statsRes.data) setStats(statsRes.data)
       if (appsRes.data) setApplications(appsRes.data)
@@ -211,7 +212,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false)
     }
-  }, [token, statusFilter, searchQuery])
+  }, [token, statusFilter, searchQuery, tenantFilter])
 
   useEffect(() => {
     let isSubscribed = true
@@ -220,8 +221,8 @@ export default function AdminPage() {
       setLoading(true)
       try {
         const [statsRes, appsRes] = await Promise.all([
-          adminApi.getStats(),
-          adminApi.getApplications({ status: statusFilter, search: searchQuery }),
+          adminApi.getStats({ resellerId: tenantFilter }),
+          adminApi.getApplications({ status: statusFilter, search: searchQuery, resellerId: tenantFilter }),
         ])
         if (isSubscribed) {
           if (statsRes.data) setStats(statsRes.data)
@@ -323,32 +324,22 @@ export default function AdminPage() {
   const openReviewModal = (app: ApplicationItem, tab: 'dossier' | 'documents' | 'offer' = 'dossier') => {
     setSelectedApp(app)
     setReviewInitialTab(tab)
-    const isArxo = app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-')
     const tier = app.tier || (app.offer?.rate?.includes('15') || app.offer?.setupFee?.includes('2500') ? 2 : 1)
 
-    if (isArxo) {
-      if (tier === 2) {
-        setOfferRate(app.offer?.rate || '15.0% + $0.30')
-        setOfferVolume(app.offer?.volume || 'Up to $250,000')
-        setOfferSettlement(app.offer?.settlement || 'Bi-Weekly (45 Days Hold)')
-        setOfferReserve(app.offer?.reserve || '20% (90 Days)')
-        setOfferSetupFee(app.offer?.setupFee || '$2,500')
-        setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
-      } else {
-        setOfferRate(app.offer?.rate || '9.0% + $0.30')
-        setOfferVolume(app.offer?.volume || 'Up to $250,000')
-        setOfferSettlement(app.offer?.settlement || 'Weekly (14 Days Hold)')
-        setOfferReserve(app.offer?.reserve || '10% (60 Days)')
-        setOfferSetupFee(app.offer?.setupFee || '$1,499')
-        setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
-      }
-    } else {
-      setOfferRate(app.offer?.rate || '2.9% + $0.30')
+    if (tier === 2) {
+      setOfferRate(app.offer?.rate || '15.0% + $0.30')
       setOfferVolume(app.offer?.volume || 'Up to $250,000')
-      setOfferSettlement(app.offer?.settlement || 'Daily (Next Day)')
-      setOfferReserve(app.offer?.reserve || '5% (90 Days)')
-      setOfferSetupFee(app.offer?.setupFee || '$450')
-      setOfferMonthlyFee(app.offer?.monthlyFee || '$99 / month')
+      setOfferSettlement(app.offer?.settlement || 'Bi-Weekly (45 Days Hold)')
+      setOfferReserve(app.offer?.reserve || '20% (90 Days)')
+      setOfferSetupFee(app.offer?.setupFee || '$2,500')
+      setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
+    } else {
+      setOfferRate(app.offer?.rate || '9.0% + $0.30')
+      setOfferVolume(app.offer?.volume || 'Up to $250,000')
+      setOfferSettlement(app.offer?.settlement || 'Weekly (14 Days Hold)')
+      setOfferReserve(app.offer?.reserve || '10% (60 Days)')
+      setOfferSetupFee(app.offer?.setupFee || '$1,499')
+      setOfferMonthlyFee(app.offer?.monthlyFee || '$499 / month')
     }
     setReviewNotes('')
   }
@@ -841,6 +832,34 @@ export default function AdminPage() {
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-500/10 border border-red-400/60 flex items-center justify-center text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.25)] shrink-0">
             <ShieldAlert className="h-4 w-4 sm:h-5 sm:w-5 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
           </div>
+        </div>
+      </div>
+
+      {/* Partner & Reseller Tenant Selector Filter Bar */}
+      <div className="p-3.5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-cyan-400" />
+          <span className="text-xs font-bold text-white uppercase tracking-wider">Partner Portfolio:</span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+            { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+            { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTenantFilter(t.id as any)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                tenantFilter === t.id
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_12px_rgba(0,240,255,0.4)]'
+                  : 'bg-[#091332] text-slate-400 hover:text-white border border-cyan-500/20'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       </div>
 

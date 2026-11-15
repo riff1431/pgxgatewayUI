@@ -373,16 +373,19 @@ export const adminApi = {
     return res
   },
 
-  getStats: async () => {
-    return adminRequest<AdminStats>('/admin/stats', { method: 'GET' })
+  getStats: async (params?: { resellerId?: string }) => {
+    const qs = params?.resellerId && params.resellerId !== 'all' ? `?resellerId=${params.resellerId}` : ''
+    return adminRequest<AdminStats>(`/admin/stats${qs}`, { method: 'GET' })
   },
 
-  getApplications: async (params?: { status?: string; search?: string; page?: number; limit?: number }) => {
+  getApplications: async (params?: { status?: string; search?: string; page?: number; limit?: number; resellerId?: string }) => {
     const query = new URLSearchParams()
     if (params?.status && params.status !== 'all') query.set('status', params.status)
     if (params?.search) query.set('search', params.search)
     if (params?.page) query.set('page', params.page.toString())
     if (params?.limit) query.set('limit', params.limit.toString())
+    if (params?.resellerId && params.resellerId !== 'all') query.set('resellerId', params.resellerId)
+    if (params?.resellerId && params.resellerId !== 'all') query.set('resellerId', params.resellerId)
 
     const qs = query.toString() ? `?${query.toString()}` : ''
     return adminRequest<ApplicationItem[]>(`/admin/applications${qs}`, { method: 'GET' })
@@ -531,6 +534,7 @@ export const adminApi = {
     refId?: string
     page?: number
     limit?: number
+    resellerId?: string
   }) => {
     const query = new URLSearchParams()
     if (params?.status && params.status !== 'all') query.set('status', params.status)

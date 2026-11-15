@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Coins,
   Loader2,
+  Building2,
 } from 'lucide-react'
 import { adminApi, type TransactionItem } from '@/lib/adminApi'
 
@@ -25,6 +26,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
   const [loading, setLoading] = useState(false)
   const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [tenantFilter, setTenantFilter] = useState<'all' | 'admin_root' | 'ARXO'>('all')
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const fetchTransactions = useCallback(async () => {
@@ -33,6 +35,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
       const res = await adminApi.getTransactions({
         status: statusFilter,
         search: searchQuery,
+        resellerId: tenantFilter,
       })
       if (res.data) {
         setTransactions(res.data)
@@ -43,7 +46,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, searchQuery, onShowToast])
+  }, [statusFilter, searchQuery, tenantFilter, onShowToast])
 
   useEffect(() => {
     fetchTransactions()
@@ -145,6 +148,34 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
 
       {/* Main Ledger Table Card */}
       <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] backdrop-blur-xl overflow-hidden w-full max-w-full min-w-0">
+        {/* Partner Portfolio Selector Filter Bar */}
+        <div className="px-4 py-3 bg-[#050c26] border-b border-cyan-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-cyan-400" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">Partner Portfolio:</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { id: 'all', label: 'All Portfolios (Direct + Partners)' },
+              { id: 'admin_root', label: 'Direct PGX (admin_root)' },
+              { id: 'ARXO', label: 'Arxopay Partner (ARXO)' },
+            ].map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTenantFilter(t.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  tenantFilter === t.id
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-[0_0_12px_rgba(0,240,255,0.4)]'
+                    : 'bg-[#091332] text-slate-400 hover:text-white border border-cyan-500/20'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Header Strip with Search & Filters */}
         <div className="p-4 sm:p-5 border-b border-cyan-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 w-full min-w-0">
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
