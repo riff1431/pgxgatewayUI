@@ -1195,7 +1195,7 @@ export default function UnderwritingDesk({
           showToast(
             'Crypto Payment Submitted! 🚀',
             arxoCryptoModal.mode === 'golive'
-              ? 'Wholesale $499 setup fee submitted with TxID. Live activation request pending review.'
+              ? 'Wholesale $1,499 setup fee submitted with TxID. Live activation request pending review.'
               : 'Wholesale $499 monthly maintenance submitted with TxID.',
             'success'
           )

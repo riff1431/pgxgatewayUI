@@ -158,7 +158,7 @@ export default function ArxopayCryptoPaymentModal({
               Wholesale Amount Due
             </div>
             <div className="text-2xl sm:text-3xl font-black text-white mt-0.5 tracking-tight">
-              $499.00 <span className="text-xs font-semibold text-cyan-300 uppercase">USD</span>
+              ${isGoLive ? '1,499.00' : '499.00'} <span className="text-xs font-semibold text-cyan-300 uppercase">USD</span>
             </div>
           </div>
           <div className="text-right">
@@ -222,7 +222,7 @@ export default function ArxopayCryptoPaymentModal({
           </div>
           <p className="text-[11px] text-amber-300/90 flex items-center gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-            <span>Send exactly $499 equivalent via {activeWallet.network}. Funds are credited upon 1 network confirmation.</span>
+            <span>Send exactly ${isGoLive ? '1,499' : '499'} equivalent via {activeWallet.network}. Funds are credited upon 1 network confirmation.</span>
           </p>
         </div>
 
@@ -288,7 +288,7 @@ export default function ArxopayCryptoPaymentModal({
               ) : (
                 <>
                   <ShieldCheck className="w-4 h-4 text-slate-950" />
-                  <span>{isGoLive ? 'Confirm $499 & Request Go Live' : 'Confirm $499 Monthly Payment'}</span>
+                  <span>{isGoLive ? 'Confirm $1,499 & Request Go Live' : 'Confirm $499 Monthly Payment'}</span>
                 </>
               )}
             </button>
