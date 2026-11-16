@@ -138,7 +138,7 @@ export default function IntegrationTab() {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const merchantRef = merchant?.refId || setupData?.merchantId || 'YOUR_REF_ID'
+  const merchantRef = merchant?.refId || (setupData as any)?.refId || 'YOUR_REF_ID'
 
   const handleCopy = (text: string, setFn: (v: boolean) => void) => {
     navigator.clipboard.writeText(text)
