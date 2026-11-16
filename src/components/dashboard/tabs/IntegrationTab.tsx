@@ -461,6 +461,25 @@ if data.get("success") and data.get("checkoutUrl"):
           )
         ) : (
         <div className="space-y-6 sm:space-y-8 animate-fade-in w-full min-w-0">
+          {/* 24-Hour Integration Sandbox Policy Instructions Banner */}
+          <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 shadow-[0_0_15px_rgba(0,240,255,0.15)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start gap-3">
+              <Clock className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <span className="font-bold text-white text-sm">24-Hour Integration Sandbox Policy</span>
+                <p className="text-slate-300 leading-relaxed">
+                  Setup credentials and API endpoints are unlocked for a 24-hour sandbox testing window once approved by underwriting.
+                  If the account does not convert to permanent live mode within 24 hours, setup access and test sessions will be automatically disabled.
+                </p>
+              </div>
+            </div>
+            {merchant?.accountMode === 'trial' && trialExpiresAt && (
+              <span className="font-mono text-cyan-300 font-bold px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/50 shrink-0 whitespace-nowrap self-start sm:self-auto">
+                Expires: {trialExpiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
+
           {/* Credentials Bar: 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full min-w-0">
             {/* Card 1: Merchant Ref ID */}
