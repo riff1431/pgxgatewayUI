@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Code2, Sparkles, AlertTriangle, CheckCircle2, X } from 'lucide-react'
+import { Code2, Sparkles, AlertTriangle, CheckCircle2, X, ShieldCheck, Clock } from 'lucide-react'
 import ApplicationStatusCard from '@/components/dashboard/ApplicationStatusCard'
 import ProcessingOfferCard from '@/components/dashboard/ProcessingOfferCard'
 import QuickActions from '@/components/dashboard/QuickActions'
@@ -38,22 +38,27 @@ export default function DashboardPage() {
   const [isSetupModalOpen, setIsSetupModalOpen] = useState(false)
 
   // 24-Hour Trial Status & Dynamic Countdown
-  const isTrial = merchant?.accountMode === 'trial' || Boolean(merchant?.trial?.isActive)
-  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.resellerId === 'arxopay' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (merchant?.offer?.rate?.includes('15') || merchant?.offer?.setupFee?.includes('2500') ? 2 : 1)
   const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$999'
   const setupFeeNum = isArxo ? (tier === 2 ? 2500 : 1499) : 999
   const setupFeeFormatted = merchant?.offer?.setupFee || defaultSetupFee
   const trialExpiresAt = merchant?.trial?.expiresAt ? new Date(merchant.trial.expiresAt) : null
+  const isTrialTurnedOn = Boolean(
+    merchant?.accountMode === 'trial' &&
+    merchant?.trial?.isActive &&
+    merchant?.trial?.status === 'active' &&
+    trialExpiresAt
+  )
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number; isExpired: boolean }>({
     hours: 24,
     minutes: 0,
     seconds: 0,
-    isExpired: false,
+    isExpired: Boolean(merchant?.trial?.status === 'expired' || (trialExpiresAt && Date.now() > trialExpiresAt.getTime())),
   })
 
   useEffect(() => {
-    if (!isTrial || !trialExpiresAt) return
+    if (!isTrialTurnedOn || !trialExpiresAt) return
 
     const calculateTime = () => {
       const now = Date.now()
@@ -71,7 +76,7 @@ export default function DashboardPage() {
     calculateTime()
     const timer = setInterval(calculateTime, 1000)
     return () => clearInterval(timer)
-  }, [isTrial, trialExpiresAt])
+  }, [isTrialTurnedOn, trialExpiresAt])
 
   return (
     <div className="w-full max-w-[1440px] min-w-0 min-h-[calc(100vh-4.5rem)] mx-auto p-3.5 sm:p-6 lg:p-8 relative overflow-x-hidden">
@@ -109,8 +114,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* 24-Hour Integration Sandbox Active Banner */}
-      {isTrial && !timeLeft.isExpired && (
+      {/* 24-Hour Integration Sandbox Active Banner (Only if underwriting activated trial) */}
+      {isTrialTurnedOn && !timeLeft.isExpired && (
         <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-cyan-950/90 via-[#071330]/95 to-purple-950/90 border-[1.5px] border-cyan-400 shadow-[0_0_25px_rgba(0,240,255,0.3)] p-3 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in backdrop-blur-xl">
           <div className="flex items-center gap-3 min-w-0">
             <span className="relative flex h-3.5 w-3.5 shrink-0">
@@ -131,19 +136,26 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsSetupModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-purple-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(217,70,239,0.5)] hover:shadow-[0_0_24px_rgba(217,70,239,0.8)] hover:brightness-110 transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-            <span>Pay Setup Fee & Go Live 🚀</span>
-          </button>
+          {!isArxo ? (
+            <button
+              type="button"
+              onClick={() => setIsSetupModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-purple-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(217,70,239,0.5)] hover:shadow-[0_0_24px_rgba(217,70,239,0.8)] hover:brightness-110 transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+              <span>Pay Setup Fee & Go Live 🚀</span>
+            </button>
+          ) : (
+            <div className="px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 font-bold text-xs shrink-0 flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
+              <ShieldCheck className="w-4 h-4 text-cyan-400" />
+              <span>Partner Plan (Arxopay)</span>
+            </div>
+          )}
         </div>
       )}
 
       {/* 24-Hour Integration Trial Expired Warning Banner */}
-      {isTrial && timeLeft.isExpired && (
+      {merchant?.accountMode === 'trial' && timeLeft.isExpired && (
         <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-amber-950/90 via-[#261506]/95 to-red-950/90 border-[1.5px] border-amber-500/80 shadow-[0_0_25px_rgba(245,158,11,0.35)] p-3 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in backdrop-blur-xl">
           <div className="flex items-center gap-3 min-w-0">
             <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
@@ -152,17 +164,26 @@ export default function DashboardPage() {
                 Integration Trial Expired — Checkout Sessions Paused
               </span>
               <p className="text-[11px] text-amber-300/80">
-                Your 24-hour test period has ended. Settle your setup fee to instantly activate permanent live processing.
+                {isArxo
+                  ? 'Your 24-hour sandbox testing period has ended. Your partner manager at Arxopay will submit your live activation request.'
+                  : 'Your 24-hour test period has ended. Settle your setup fee to instantly activate permanent live processing.'}
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsSetupModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(245,158,11,0.5)] hover:brightness-110 transition-all cursor-pointer shrink-0"
-          >
-            Activate Live Processing ({setupFeeFormatted})
-          </button>
+          {!isArxo ? (
+            <button
+              type="button"
+              onClick={() => setIsSetupModalOpen(true)}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(245,158,11,0.5)] hover:brightness-110 transition-all cursor-pointer shrink-0"
+            >
+              Activate Live Processing ({setupFeeFormatted})
+            </button>
+          ) : (
+            <div className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 font-bold text-xs shrink-0 flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-amber-400" />
+              <span>Awaiting Partner Live Request</span>
+            </div>
+          )}
         </div>
       )}
 

@@ -222,6 +222,25 @@ export interface ApplicationItem {
     verifiedBy?: string
     notes?: string
   }
+  arxopayWholesale?: {
+    setupFee?: {
+      amount: number
+      currency: string
+      network?: string
+      txHash?: string
+      paidAt?: string
+      status: 'none' | 'pending' | 'verified'
+    }
+    monthlyMaintenance?: {
+      amount: number
+      currency?: string
+      network?: string
+      txHash?: string
+      lastPaidAt?: string
+      nextDueAt?: string
+      status: 'none' | 'current' | 'due' | 'pending_verification'
+    }
+  }
   createdAt: string
   updatedAt: string
 }
@@ -475,10 +494,29 @@ export const adminApi = {
     })
   },
 
-  requestLiveActivation: async (id: string, notes?: string) => {
+  requestLiveActivation: async (
+    id: string,
+    notes?: string,
+    cryptoPayment?: { txHash: string; currency?: string; network?: string }
+  ) => {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/request-live`, {
       method: 'POST',
-      body: JSON.stringify({ notes }),
+      body: JSON.stringify({
+        notes,
+        txHash: cryptoPayment?.txHash,
+        currency: cryptoPayment?.currency,
+        network: cryptoPayment?.network,
+      }),
+    })
+  },
+
+  submitMonthlyCryptoPayment: async (
+    id: string,
+    payload: { txHash: string; currency?: string; network?: string }
+  ) => {
+    return adminRequest<{ success: boolean; message: string }>(`/admin/applications/${id}/pay-monthly`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
     })
   },
 

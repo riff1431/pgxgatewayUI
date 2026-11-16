@@ -33,6 +33,7 @@ import {
 } from '@/lib/adminApi'
 import ApplicationReviewModal from './ApplicationReviewModal'
 import DocumentViewerModal, { type KycDocumentItem } from './DocumentViewerModal'
+import ArxopayCryptoPaymentModal from './ArxopayCryptoPaymentModal'
 import { verifyCryptoPayment } from '@/lib/setupApi'
 
 interface UnderwritingDeskProps {
@@ -115,6 +116,28 @@ export default function UnderwritingDesk({
 
   // UI Helpers
   const [copiedRefId, setCopiedRefId] = useState<string | null>(null)
+
+  // Arxopay Wholesale Crypto Payment Modal State ($499 Go Live or $499 Monthly)
+  const [arxoCryptoModal, setArxoCryptoModal] = useState<{
+    isOpen: boolean
+    merchantId: string
+    merchantRefId?: string
+    merchantLegalName?: string
+    mode: 'golive' | 'monthly'
+  }>({
+    isOpen: false,
+    merchantId: '',
+    mode: 'golive',
+  })
+
+  // Check for live Arxopay sub-merchants due for 30-day recurring maintenance
+  const dueMonthlyMerchants = applications.filter((app) => {
+    const isArxo = app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-')
+    if (!isArxo || app.accountMode !== 'live') return false
+    const nextDue = app.arxopayWholesale?.monthlyMaintenance?.nextDueAt
+    if (!nextDue) return true
+    return new Date() >= new Date(nextDue)
+  })
 
   const showToast = useCallback(
     (title: string, message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -537,6 +560,63 @@ export default function UnderwritingDesk({
           ))}
         </div>
       </div>
+
+      {/* Arxopay 30-Day Monthly Maintenance Due Alert Banner */}
+      {dueMonthlyMerchants.length > 0 && (
+        <div className="w-full rounded-3xl bg-gradient-to-r from-[#1c082b] via-[#2a0e3f] to-[#120524] border-[1.5px] border-purple-400/80 shadow-[0_0_25px_rgba(217,70,239,0.35)] p-4 sm:p-5 backdrop-blur-xl space-y-3 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-purple-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-400/50 flex items-center justify-center text-purple-300 shrink-0 shadow-[0_0_12px_rgba(217,70,239,0.4)]">
+                <Clock className="w-5 h-5 text-purple-300 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
+                  <span>Monthly Maintenance Fees Due</span>
+                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-400/50">
+                    {dueMonthlyMerchants.length} Merchant{dueMonthlyMerchants.length > 1 ? 's' : ''}
+                  </span>
+                </h4>
+                <p className="text-xs text-purple-200/85 mt-0.5">
+                  Arxopay wholesale 30-day recurring maintenance fee of $499.00 USD (Crypto only) is due for active live processing.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
+            {dueMonthlyMerchants.map((m) => (
+              <div
+                key={m._id}
+                className="p-3 rounded-2xl bg-[#070214]/90 border border-purple-500/30 flex items-center justify-between gap-3 shadow-[inset_0_0_10px_rgba(217,70,239,0.05)] hover:border-purple-400/60 transition-all"
+              >
+                <div className="min-w-0">
+                  <div className="font-bold text-white text-xs truncate">
+                    {m.legalName || m.fullName}
+                  </div>
+                  <div className="text-[10px] font-mono text-cyan-300 truncate mt-0.5">
+                    {m.refId || 'PGX_REF_...'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setArxoCryptoModal({
+                      isOpen: true,
+                      merchantId: m._id,
+                      merchantRefId: m.refId,
+                      merchantLegalName: m.legalName || m.fullName,
+                      mode: 'monthly',
+                    })
+                  }
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black text-xs shadow-[0_0_12px_rgba(217,70,239,0.5)] shrink-0 cursor-pointer active:scale-95 transition-all"
+                >
+                  Pay $499 ⚡
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* SECTION 3: FILTER TABS & SEARCH BAR */}
       <div className="w-full max-w-full min-w-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
@@ -1065,6 +1145,16 @@ export default function UnderwritingDesk({
         onRequestLiveActivation={handleRequestLiveActivation}
         onRejectLiveActivation={handleRejectLiveActivation}
         onVerifyCryptoPayment={handleVerifyCryptoPayment}
+        onOpenArxoCryptoModal={(mode) =>
+          selectedApp &&
+          setArxoCryptoModal({
+            isOpen: true,
+            merchantId: selectedApp._id,
+            merchantRefId: selectedApp.refId,
+            merchantLegalName: selectedApp.legalName || selectedApp.fullName,
+            mode,
+          })
+        }
         isSuperAdmin={isSuperAdmin}
         onSubmitOffer={handleSubmitOffer}
         onRevokeOffer={handleRevokeOffer}
@@ -1091,6 +1181,27 @@ export default function UnderwritingDesk({
         activeDoc={previewKycDoc}
         allDocs={previewKycDoc ? [previewKycDoc] : []}
         onClose={() => setPreviewKycDoc(null)}
+      />
+
+      {/* Arxopay Wholesale Crypto Payment Modal ($499 Go Live or $499 Monthly) */}
+      <ArxopayCryptoPaymentModal
+        isOpen={arxoCryptoModal.isOpen}
+        onClose={() => setArxoCryptoModal((prev) => ({ ...prev, isOpen: false }))}
+        merchantId={arxoCryptoModal.merchantId}
+        merchantRefId={arxoCryptoModal.merchantRefId}
+        merchantLegalName={arxoCryptoModal.merchantLegalName}
+        mode={arxoCryptoModal.mode}
+        onSuccess={() => {
+          showToast(
+            'Crypto Payment Submitted! 🚀',
+            arxoCryptoModal.mode === 'golive'
+              ? 'Wholesale $499 setup fee submitted with TxID. Live activation request pending review.'
+              : 'Wholesale $499 monthly maintenance submitted with TxID.',
+            'success'
+          )
+          setSelectedApp(null)
+          fetchData()
+        }}
       />
 
       {/* Real-Time Message Modal */}

@@ -20,7 +20,7 @@ export default function OfferTab() {
   const isAvailable = Boolean(offer?.isAvailable && offer.rate)
   const isAccepted = Boolean(offer?.accepted)
   const isApproved = applicationStatus === 'approved'
-  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
+  const isArxo = merchant?.resellerId === 'ARXO' || merchant?.resellerId === 'arxopay' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (offer?.rate?.includes('15') || offer?.setupFee?.includes('2500') ? 2 : 1)
   const defaultSetupFee = isArxo ? (tier === 2 ? '$2,500' : '$1,499') : '$999'
   const defaultMonthlyFee = isArxo ? '$499 / mo' : '$99 / mo'
@@ -35,7 +35,9 @@ export default function OfferTab() {
     setSubmitting(true)
     try {
       await acceptOffer()
-      setShowPaymentModal(true)
+      if (!isArxo) {
+        setShowPaymentModal(true)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -117,7 +119,7 @@ export default function OfferTab() {
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
-            Card / Amex / Crypto
+            {isAvailable ? 'Card / Amex / Crypto' : 'Underwriting review'}
           </div>
         </div>
 
@@ -131,11 +133,11 @@ export default function OfferTab() {
               {isAvailable ? (offer.volume || 'Up to $250k') : '—'}
             </div>
             <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-cyan-300' : 'text-slate-600'}`}>
-              Approved Ceiling
+              {isAvailable ? 'Approved Ceiling' : 'Pending review'}
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
-            Scalable at 90 days
+            {isAvailable ? 'Scalable at 90 days' : 'Underwriting review'}
           </div>
         </div>
 
@@ -153,7 +155,7 @@ export default function OfferTab() {
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
-            Direct Wire / USDT
+            {isAvailable ? 'Direct Wire / USDT' : 'Underwriting review'}
           </div>
         </div>
 
@@ -171,7 +173,7 @@ export default function OfferTab() {
             </div>
           </div>
           <div className="text-[10px] text-slate-500 border-t border-cyan-500/20 pt-1.5">
-            Chargeback buffer
+            {isAvailable ? 'Chargeback buffer' : 'Underwriting review'}
           </div>
         </div>
 
@@ -182,14 +184,14 @@ export default function OfferTab() {
           </div>
           <div className="my-2.5">
             <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-amber-300' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.setupFee || defaultSetupFee) : '—'}
+              {isAvailable ? (isArxo ? 'Included' : (offer.setupFee || defaultSetupFee)) : '—'}
             </div>
-            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-amber-200/90' : 'text-slate-600'}`}>
-              Account Activation
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? (isArxo ? 'text-emerald-400' : 'text-amber-200/90') : 'text-slate-600'}`}>
+              {isAvailable ? (isArxo ? 'Covered by Arxopay' : 'Account Activation') : 'Pending review'}
             </div>
           </div>
           <div className="text-[10px] text-amber-300/70 border-t border-amber-500/20 pt-1.5">
-            Payable upon accept
+            {isAvailable ? (isArxo ? 'Partner Managed' : 'Payable upon accept') : 'Underwriting review'}
           </div>
         </div>
 
@@ -200,20 +202,20 @@ export default function OfferTab() {
           </div>
           <div className="my-2.5">
             <div className={`text-lg sm:text-2xl font-black ${isAvailable ? 'text-purple-300' : 'text-slate-600'}`}>
-              {isAvailable ? (offer.monthlyFee || defaultMonthlyFee) : '—'}
+              {isAvailable ? (isArxo ? 'Included' : (offer.monthlyFee || defaultMonthlyFee)) : '—'}
             </div>
-            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? 'text-purple-200/90' : 'text-slate-600'}`}>
-              Maintenance Fee
+            <div className={`text-[11px] font-semibold mt-0.5 truncate ${isAvailable ? (isArxo ? 'text-emerald-400' : 'text-purple-200/90') : 'text-slate-600'}`}>
+              {isAvailable ? (isArxo ? 'Covered by Arxopay' : 'Maintenance Fee') : 'Pending review'}
             </div>
           </div>
           <div className="text-[10px] text-purple-300/70 border-t border-purple-500/20 pt-1.5">
-            Recurring platform
+            {isAvailable ? (isArxo ? 'Partner Managed' : 'Recurring platform') : 'Underwriting review'}
           </div>
         </div>
       </div>
 
-      {/* Recurring Monthly Maintenance Subscription Card */}
-      {isAccepted && (
+      {/* Recurring Monthly Maintenance Subscription Card (Non-Arxopay Direct Merchants) */}
+      {isAccepted && !isArxo && (
         <div className="p-5 rounded-3xl bg-[#060b20]/90 border-[1.5px] border-purple-400/80 shadow-[0_0_20px_rgba(217,70,239,0.3)] backdrop-blur-xl space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-purple-500/20">
             <div className="flex items-center gap-3">
@@ -337,14 +339,21 @@ export default function OfferTab() {
                   <Check className="h-4 w-4 stroke-[3]" />
                   <span>Terms Confirmed & Active</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPaymentModal(true)}
-                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 cursor-pointer transition-all"
-                >
-                  <CreditCard className="h-4 w-4" />
-                  <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Gateway</span>
-                </button>
+                {!isArxo ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowPaymentModal(true)}
+                    className="px-6 py-2.5 rounded-full text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center gap-2 cursor-pointer transition-all"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Gateway</span>
+                  </button>
+                ) : (
+                  <div className="px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.15)]">
+                    <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                    <span>Arxopay Partner Plan • Setup & Live Activation Handled by Partner Desk</span>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -370,20 +379,22 @@ export default function OfferTab() {
         </div>
       </div>
 
-      {/* Setup Payment & Payment Method Selector Modal */}
-      <SetupPaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        amount={
-          offer?.setupFee
-            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
-            : setupFeeNum
-        }
-        merchantRefId={merchant?.refId}
-        merchantLegalName={merchant?.legalName || merchant?.fullName}
-        merchantEmail={merchant?.businessEmail}
-        websiteDomain={merchant?.websiteDomain || merchant?.website}
-      />
+      {/* Setup Payment & Payment Method Selector Modal (Only for direct clients, never Arxopay) */}
+      {!isArxo && (
+        <SetupPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={
+            offer?.setupFee
+              ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
+              : setupFeeNum
+          }
+          merchantRefId={merchant?.refId}
+          merchantLegalName={merchant?.legalName || merchant?.fullName}
+          merchantEmail={merchant?.businessEmail}
+          websiteDomain={merchant?.websiteDomain || merchant?.website}
+        />
+      )}
     </div>
   )
 }

@@ -67,7 +67,9 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
     try {
       await acceptOffer()
       setShowModal(false)
-      setShowPaymentModal(true)
+      if (!isArxo) {
+        setShowPaymentModal(true)
+      }
     } finally {
       setAccepting(false)
     }
@@ -241,14 +243,23 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                 <span className="text-slate-400">Rolling Reserve Requirement:</span>
                 <span className="font-bold text-white">{offer.reserve}</span>
               </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-amber-500/30 flex justify-between items-center">
-                <span className="text-amber-300 font-semibold">One-Time Setup Fee:</span>
-                <span className="font-bold text-amber-300">{offer.setupFee || defaultSetupFee}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#091332] border border-purple-500/30 flex justify-between items-center">
-                <span className="text-purple-300 font-semibold">Monthly Maintenance Fee:</span>
-                <span className="font-bold text-purple-300">{offer.monthlyFee || defaultMonthlyFee}</span>
-              </div>
+              {!isArxo ? (
+                <>
+                  <div className="p-3 rounded-xl bg-[#091332] border border-amber-500/30 flex justify-between items-center">
+                    <span className="text-amber-300 font-semibold">One-Time Setup Fee:</span>
+                    <span className="font-bold text-amber-300">{offer.setupFee || defaultSetupFee}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#091332] border border-purple-500/30 flex justify-between items-center">
+                    <span className="text-purple-300 font-semibold">Monthly Maintenance Fee:</span>
+                    <span className="font-bold text-purple-300">{offer.monthlyFee || defaultMonthlyFee}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="p-3 rounded-xl bg-[#091332] border border-emerald-500/30 flex justify-between items-center">
+                  <span className="text-emerald-300 font-semibold">Partner Fee Coverage:</span>
+                  <span className="font-bold text-emerald-400">Setup & Platform Maintenance Covered by Arxopay</span>
+                </div>
+              )}
             </div>
 
             <div className="pt-2 space-y-2">
@@ -258,17 +269,24 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                     <Check className="h-4 w-4 stroke-[3]" />
                     <span>Terms Accepted & Active</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowModal(false)
-                      setShowPaymentModal(true)
-                    }}
-                    className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Desk</span>
-                  </button>
+                  {!isArxo ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowModal(false)
+                        setShowPaymentModal(true)
+                      }}
+                      className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Desk</span>
+                    </button>
+                  ) : (
+                    <div className="w-full py-2.5 rounded-full bg-cyan-500/10 border border-cyan-400/50 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-cyan-400" />
+                      <span>Arxopay Partner Plan: Account Ready for Partner Go-Live</span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <button
@@ -286,20 +304,22 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
         </div>
       )}
 
-      {/* Setup Fee Payment & Method Selector Modal */}
-      <SetupPaymentModal
-        isOpen={showPaymentModal}
-        onClose={() => setShowPaymentModal(false)}
-        amount={
-          offer?.setupFee
-            ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
-            : setupFeeNum
-        }
-        merchantRefId={merchant?.refId}
-        merchantLegalName={merchant?.legalName || merchant?.fullName}
-        merchantEmail={merchant?.businessEmail}
-        websiteDomain={merchant?.websiteDomain || merchant?.website}
-      />
+      {/* Setup Fee Payment & Method Selector Modal (Direct merchants only, never Arxopay) */}
+      {!isArxo && (
+        <SetupPaymentModal
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          amount={
+            offer?.setupFee
+              ? parseFloat(String(offer.setupFee).replace(/[^0-9.]/g, '')) || setupFeeNum
+              : setupFeeNum
+          }
+          merchantRefId={merchant?.refId}
+          merchantLegalName={merchant?.legalName || merchant?.fullName}
+          merchantEmail={merchant?.businessEmail}
+          websiteDomain={merchant?.websiteDomain || merchant?.website}
+        />
+      )}
     </>
   )
 }

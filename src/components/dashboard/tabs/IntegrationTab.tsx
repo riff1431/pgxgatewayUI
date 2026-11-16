@@ -340,6 +340,24 @@ if data.get("success") and data.get("checkoutUrl"):
 
   const currentMilestoneIdx = getMilestoneIndex(normalizedStatus)
 
+  // 24-Hour Trial & Live Status Gate
+  const isLive = merchant?.accountMode === 'live'
+  const trialExpiresAt = merchant?.trial?.expiresAt ? new Date(merchant.trial.expiresAt) : null
+  const isTrialActive = Boolean(
+    merchant?.accountMode === 'trial' &&
+    merchant?.trial?.isActive &&
+    merchant?.trial?.status === 'active' &&
+    trialExpiresAt &&
+    new Date() <= trialExpiresAt
+  )
+  const isTrialExpired = Boolean(
+    merchant?.accountMode === 'trial' && (
+      merchant?.trial?.status === 'expired' ||
+      (trialExpiresAt && new Date() > trialExpiresAt)
+    )
+  )
+  const isTrialLocked = !isLive && !isTrialActive
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in w-full min-w-0">
       {/* Top Segmented Mode Switcher */}
@@ -401,6 +419,47 @@ if data.get("success") and data.get("checkoutUrl"):
       {/* MODE 1: DEVELOPER API QUICKSTART (INSTANT SELF-INTEGRATION FOR DEVS)       */}
       {/* ========================================================================= */}
       {integrationMode === 'api' && (
+        isTrialLocked ? (
+          isTrialExpired ? (
+            <div className="p-8 sm:p-12 rounded-3xl bg-[#060b20]/95 border-[1.5px] border-amber-500/80 shadow-[0_0_35px_rgba(245,158,11,0.25)] text-center space-y-4 max-w-2xl mx-auto my-6 backdrop-blur-xl animate-fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/50 text-amber-400 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                <Lock className="w-8 h-8" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-black text-white">24-Hour Integration Sandbox Expired</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Your 24-hour test period has ended. Integration credentials and checkout session initiation are paused.
+                </p>
+                {trialExpiresAt && (
+                  <p className="text-xs font-mono text-amber-300 bg-amber-500/10 py-1 px-3 rounded-full inline-block border border-amber-500/30">
+                    Expired on: {trialExpiresAt.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                Please contact underwriting support or complete your setup fee to unlock permanent live processing and production API credentials.
+              </p>
+            </div>
+          ) : (
+            <div className="p-8 sm:p-12 rounded-3xl bg-[#060b20]/95 border-[1.5px] border-cyan-400/80 shadow-[0_0_35px_rgba(0,240,255,0.25)] text-center space-y-4 max-w-2xl mx-auto my-6 backdrop-blur-xl animate-fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-cyan-500/15 border border-cyan-400/50 text-cyan-400 flex items-center justify-center mx-auto shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                <Clock className="w-8 h-8 animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-black text-white">Integration Workspace Locked</h3>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Your 24-hour sandbox trial has not been activated yet by underwriting.
+                </p>
+                <p className="text-xs text-cyan-300 bg-cyan-500/10 py-1.5 px-4 rounded-full inline-block border border-cyan-500/30 font-semibold">
+                  Awaiting Underwriter Review • 24h Sandbox Activation Pending
+                </p>
+              </div>
+              <p className="text-xs text-slate-400 max-w-md mx-auto">
+                No integration details or setup information can be accessed until underwriting turns on your 24-hour trial period. Your Merchant Ref ID, API keys, and SDK endpoints will automatically unlock here once activated.
+              </p>
+            </div>
+          )
+        ) : (
         <div className="space-y-6 sm:space-y-8 animate-fade-in w-full min-w-0">
           {/* Credentials Bar: 3 Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full min-w-0">
@@ -775,6 +834,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
             </button>
           </div>
         </div>
+        )
       )}
 
       {/* ========================================================================= */}

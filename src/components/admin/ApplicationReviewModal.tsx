@@ -64,6 +64,7 @@ interface ApplicationReviewModalProps {
   onRequestLiveActivation?: (id: string, notes?: string) => Promise<void>
   onRejectLiveActivation?: (id: string, reason?: string) => Promise<void>
   onVerifyCryptoPayment?: (id: string, action: 'approve' | 'reject') => Promise<void>
+  onOpenArxoCryptoModal?: (mode: 'golive' | 'monthly') => void
   isSuperAdmin?: boolean
   onSubmitOffer: () => Promise<void>
   onRevokeOffer: () => Promise<void>
@@ -97,6 +98,7 @@ export default function ApplicationReviewModal({
   onRequestLiveActivation,
   onRejectLiveActivation,
   onVerifyCryptoPayment,
+  onOpenArxoCryptoModal,
   isSuperAdmin = false,
   onSubmitOffer,
   onRevokeOffer,
@@ -1282,7 +1284,13 @@ export default function ApplicationReviewModal({
                   <button
                     type="button"
                     disabled={reviewLoading}
-                    onClick={() => onRequestLiveActivation?.(app._id)}
+                    onClick={() => {
+                      if (onOpenArxoCryptoModal && (app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-'))) {
+                        onOpenArxoCryptoModal('golive')
+                      } else {
+                        onRequestLiveActivation?.(app._id)
+                      }
+                    }}
                     className="px-2.5 py-1.5 sm:px-5 sm:py-2 rounded-xl sm:rounded-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black text-xs shadow-[0_0_14px_rgba(251,191,36,0.5)] hover:shadow-[0_0_22px_rgba(251,191,36,0.8)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 whitespace-nowrap min-h-[38px] sm:min-h-[40px]"
                   >
                     <Zap className="h-3.5 w-3.5 fill-current" />
@@ -1292,6 +1300,17 @@ export default function ApplicationReviewModal({
               </div>
             ) : app.applicationStatus === 'approved' && app.accountMode === 'live' ? (
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end">
+                {onOpenArxoCryptoModal && (app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-')) && (
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => onOpenArxoCryptoModal('monthly')}
+                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white font-bold text-xs shadow-[0_0_14px_rgba(217,70,239,0.5)] hover:shadow-[0_0_22px_rgba(217,70,239,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-[40px] whitespace-nowrap"
+                  >
+                    <Coins className="h-3.5 w-3.5 shrink-0" />
+                    <span>Pay Monthly Fee ($499 Crypto)</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   disabled={reviewLoading}
