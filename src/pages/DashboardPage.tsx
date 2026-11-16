@@ -7,6 +7,7 @@ import QuickActions from '@/components/dashboard/QuickActions'
 import Sidebar from '@/components/dashboard/Sidebar'
 import HologramCard from '@/components/brand/HologramCard'
 import SetupPaymentModal from '@/components/dashboard/SetupPaymentModal'
+import MonthlyMaintenanceModal from '@/components/dashboard/MonthlyMaintenanceModal'
 import { useAuth } from '@/context/AuthContext'
 
 // Dedicated Tab Views
@@ -36,6 +37,24 @@ export default function DashboardPage() {
 
   // Setup Payment Modal State
   const [isSetupModalOpen, setIsSetupModalOpen] = useState(false)
+
+  // 30-Day Monthly Maintenance Modal State & Auto Pop-up
+  const [isMonthlyModalOpen, setIsMonthlyModalOpen] = useState(false)
+  const isLive = merchant?.accountMode === 'live'
+  const monthlyDueAt = merchant?.arxopayWholesale?.monthlyMaintenance?.nextDueAt
+    ? new Date(merchant.arxopayWholesale.monthlyMaintenance.nextDueAt)
+    : null
+  const maintenanceStatus = merchant?.arxopayWholesale?.monthlyMaintenance?.status
+  const isMonthlyDue = Boolean(
+    isLive &&
+      (maintenanceStatus === 'due' || (monthlyDueAt && Date.now() >= monthlyDueAt.getTime()))
+  )
+
+  useEffect(() => {
+    if (isMonthlyDue && maintenanceStatus !== 'pending_verification') {
+      setIsMonthlyModalOpen(true)
+    }
+  }, [isMonthlyDue, maintenanceStatus])
 
   // 24-Hour Trial Status & Dynamic Countdown
   const isArxo = merchant?.resellerId === 'ARXO' || merchant?.resellerId === 'arxopay' || merchant?.refId?.startsWith('ARXO-')
@@ -110,6 +129,37 @@ export default function DashboardPage() {
             className="p-1.5 rounded-lg text-slate-400 hover:text-white cursor-pointer"
           >
             <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* 30-Day Monthly Maintenance Payment Due Alert Banner */}
+      {isMonthlyDue && (
+        <div className="w-full mb-5 rounded-2xl bg-gradient-to-r from-cyan-950/95 via-[#071330]/95 to-purple-950/95 border-[1.5px] border-cyan-400 shadow-[0_0_30px_rgba(0,240,255,0.4)] p-3.5 sm:p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in backdrop-blur-xl">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/60 flex items-center justify-center text-cyan-300 shrink-0">
+              <Clock className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-black text-white tracking-wide">
+                  Monthly Gateway Maintenance Due ($499.00 USD)
+                </span>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">
+                  30-Day Billing Cycle
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300">
+                Your 30-day live gateway maintenance is due. Please settle via USDT / USDC / BTC and attach payment proof.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsMonthlyModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(0,240,255,0.5)] hover:shadow-[0_0_24px_rgba(0,240,255,0.8)] transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5 self-start sm:self-auto"
+          >
+            <span>Pay Monthly $499 ⚡</span>
           </button>
         </div>
       )}
@@ -318,6 +368,15 @@ export default function DashboardPage() {
         merchantEmail={merchant?.businessEmail || ''}
         websiteDomain={merchant?.websiteDomain || merchant?.website || ''}
         gitRepoUrl={merchant?.gitRepoUrl || ''}
+      />
+
+      {/* 30-Day Monthly Maintenance Pop-up Modal */}
+      <MonthlyMaintenanceModal
+        isOpen={isMonthlyModalOpen}
+        onClose={() => setIsMonthlyModalOpen(false)}
+        merchantLegalName={merchant?.legalName || merchant?.fullName}
+        merchantRefId={merchant?.refId}
+        amount={merchant?.arxopayWholesale?.monthlyMaintenance?.amount || 499}
       />
 
     </div>

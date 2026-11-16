@@ -13,13 +13,18 @@ import {
   Camera,
   ExternalLink,
   Tag,
+  Wallet,
+  Landmark,
+  CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { api } from '@/lib/api'
 import AvatarUploader from '@/components/dashboard/AvatarUploader'
 import SubmitReviewCard from '@/components/dashboard/SubmitReviewCard'
 
 export default function SettingsTab() {
-  const { merchant, updateProfile, changePassword, addToast } = useAuth()
+  const { merchant, updateProfile, changePassword, addToast, refreshMerchant } = useAuth()
 
   // Profile Form State
   const [fullName, setFullName] = useState(merchant?.fullName || '')
@@ -43,6 +48,57 @@ export default function SettingsTab() {
   const [copiedRef, setCopiedRef] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
   const [webhookUrl, setWebhookUrl] = useState('')
+
+  // Payout Destination State (USDC & SWIFT)
+  const [preferredMethod, setPreferredMethod] = useState<'crypto_usdc' | 'bank_swift'>(
+    merchant?.payoutSettings?.preferredMethod || 'crypto_usdc'
+  )
+  const [usdcAddress, setUsdcAddress] = useState(merchant?.payoutSettings?.cryptoUsdc?.address || '')
+  const [usdcNetwork, setUsdcNetwork] = useState(merchant?.payoutSettings?.cryptoUsdc?.network || 'ERC-20')
+  const [bankBeneficiary, setBankBeneficiary] = useState(
+    merchant?.payoutSettings?.bankSwift?.beneficiaryName || merchant?.legalName || merchant?.fullName || ''
+  )
+  const [bankName, setBankName] = useState(merchant?.payoutSettings?.bankSwift?.bankName || '')
+  const [bankSwiftBic, setBankSwiftBic] = useState(merchant?.payoutSettings?.bankSwift?.swiftBic || '')
+  const [bankIban, setBankIban] = useState(merchant?.payoutSettings?.bankSwift?.ibanOrAccountNumber || '')
+  const [bankCountry, setBankCountry] = useState(merchant?.payoutSettings?.bankSwift?.bankCountry || '')
+  const [bankRouting, setBankRouting] = useState(merchant?.payoutSettings?.bankSwift?.routingNumber || '')
+  const [bankAddress, setBankAddress] = useState(merchant?.payoutSettings?.bankSwift?.bankAddress || '')
+  const [payoutLoading, setPayoutLoading] = useState(false)
+  const [payoutSuccess, setPayoutSuccess] = useState(false)
+
+  const handlePayoutSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPayoutLoading(true)
+    setPayoutSuccess(false)
+    try {
+      await api.payout.updateSettings({
+        preferredMethod,
+        cryptoUsdc: {
+          address: usdcAddress.trim(),
+          network: usdcNetwork,
+        },
+        bankSwift: {
+          beneficiaryName: bankBeneficiary.trim(),
+          bankName: bankName.trim(),
+          swiftBic: bankSwiftBic.trim().toUpperCase(),
+          ibanOrAccountNumber: bankIban.trim(),
+          bankCountry: bankCountry.trim(),
+          routingNumber: bankRouting.trim(),
+          bankAddress: bankAddress.trim(),
+        },
+      })
+      await refreshMerchant()
+      setPayoutSuccess(true)
+      addToast('Payout Destination Saved', 'Your settlement receiving destination has been securely recorded.', 'success')
+      setTimeout(() => setPayoutSuccess(false), 4000)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save payout settings'
+      addToast('Error', msg, 'error')
+    } finally {
+      setPayoutLoading(false)
+    }
+  }
 
   const merchantId = merchant?.id || merchant?._id || ''
   const refId =
@@ -279,6 +335,235 @@ export default function SettingsTab() {
             </button>
           </form>
         </div>
+      </div>
+
+      {/* SECTION: Settlement & Payout Receiving Destination (Crypto USDC & Bank SWIFT) */}
+      <div className="rounded-3xl bg-[#060b20]/90 border-[1.5px] border-cyan-400/80 shadow-[0_0_25px_rgba(0,240,255,0.3)] p-6 sm:p-8 backdrop-blur-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-cyan-500/20 gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shrink-0">
+              <Landmark className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                Settlement &amp; Payout Receiving Destination
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                  Required for Daily Payouts
+                </span>
+              </h3>
+              <p className="text-xs text-slate-300">
+                Configure your USDC cryptocurrency address and/or bank account SWIFT transfer details to receive matured settlements.
+              </p>
+            </div>
+          </div>
+
+          {/* Rail Switcher Buttons */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#030614] border border-cyan-500/30 shrink-0">
+            <button
+              type="button"
+              onClick={() => setPreferredMethod('crypto_usdc')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                preferredMethod === 'crypto_usdc'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Wallet className="h-3.5 w-3.5" />
+              <span>Crypto USDC</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreferredMethod('bank_swift')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                preferredMethod === 'bank_swift'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Landmark className="h-3.5 w-3.5" />
+              <span>Bank SWIFT Transfer</span>
+            </button>
+          </div>
+        </div>
+
+        {payoutSuccess && (
+          <div className="p-3.5 rounded-2xl bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2.5 animate-fade-in">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+            <span>Payout receiving destination saved securely! Admin will disburse daily payouts to these verified coordinates.</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePayoutSubmit} className="space-y-6">
+          {preferredMethod === 'crypto_usdc' ? (
+            /* Crypto USDC Receiving Section */
+            <div className="space-y-4 rounded-2xl bg-[#04081b] border border-cyan-500/30 p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Wallet className="h-4 w-4 text-cyan-400" />
+                  Circle USDC Wallet Coordinates
+                </span>
+                <span className="text-[11px] text-slate-400">Zero wire fees &bull; Instant daily clearing</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    USDC Wallet Address / Receiving ID
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'crypto_usdc'}
+                    value={usdcAddress}
+                    onChange={(e) => setUsdcAddress(e.target.value)}
+                    placeholder="e.g. 0x4520FBE6d418c1bAcE97A1E517e5Be2d78eb9598 or Solana address"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold">USDC Network / Protocol</label>
+                  <select
+                    value={usdcNetwork}
+                    onChange={(e) => setUsdcNetwork(e.target.value)}
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs cursor-pointer"
+                  >
+                    <option value="ERC-20">Ethereum (ERC-20)</option>
+                    <option value="TRC-20">Tron (TRC-20)</option>
+                    <option value="Solana">Solana (SPL)</option>
+                    <option value="Polygon">Polygon (PoS)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Bank SWIFT Wire Transfer Receiving Section */
+            <div className="space-y-4 rounded-2xl bg-[#04081b] border border-cyan-500/30 p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Landmark className="h-4 w-4 text-cyan-400" />
+                  International Bank Wire (SWIFT / BIC)
+                </span>
+                <span className="text-[11px] text-slate-400">Direct business bank deposit</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    Beneficiary / Account Holder Full Legal Name
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'bank_swift'}
+                    value={bankBeneficiary}
+                    onChange={(e) => setBankBeneficiary(e.target.value)}
+                    placeholder="Legal Entity or Account Holder Name"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    Bank Name
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'bank_swift'}
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="e.g. JPMorgan Chase, Barclays, DBS"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    SWIFT / BIC Code (8 or 11 Characters)
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'bank_swift'}
+                    value={bankSwiftBic}
+                    onChange={(e) => setBankSwiftBic(e.target.value.toUpperCase())}
+                    placeholder="e.g. CHASUS33XXX"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    IBAN or Bank Account Number
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'bank_swift'}
+                    value={bankIban}
+                    onChange={(e) => setBankIban(e.target.value)}
+                    placeholder="e.g. GB29NWBK60161331926819 or Account #"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold flex items-center gap-1">
+                    Bank Country
+                    <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required={preferredMethod === 'bank_swift'}
+                    value={bankCountry}
+                    onChange={(e) => setBankCountry(e.target.value)}
+                    placeholder="e.g. United States, United Kingdom, Singapore"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-slate-300 font-semibold">Routing Number / Branch Code (Optional)</label>
+                  <input
+                    type="text"
+                    value={bankRouting}
+                    onChange={(e) => setBankRouting(e.target.value)}
+                    placeholder="ABA / Sort Code / FedWire"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <label className="text-slate-300 font-semibold">Bank Branch Address (Optional)</label>
+                  <input
+                    type="text"
+                    value={bankAddress}
+                    onChange={(e) => setBankAddress(e.target.value)}
+                    placeholder="e.g. 270 Park Ave, New York, NY 10017"
+                    className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-cyan-400 shrink-0" />
+              <span>Receiving coordinates are encrypted and utilized exclusively for underwriting settlement disbursements.</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={payoutLoading}
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_22px_rgba(0,240,255,0.7)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+            >
+              {payoutLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+              <span>Save Payout Destination</span>
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Developer API & Webhook Credentials */}

@@ -26,8 +26,9 @@ import {
   FileCheck,
   Zap,
   Coins,
+  Landmark,
 } from 'lucide-react'
-import type { ApplicationItem } from '@/lib/adminApi'
+import { adminApi, type ApplicationItem } from '@/lib/adminApi'
 import type { KycDocumentItem } from './DocumentViewerModal'
 
 // Helper function to format timestamp in Eastern Time (ET / EST / EDT)
@@ -121,6 +122,56 @@ export default function ApplicationReviewModal({
   const [activeTab, setActiveTab] = useState<'dossier' | 'documents' | 'offer'>(initialTab)
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [approvalMode, setApprovalMode] = useState<'trial' | 'live'>('trial')
+
+  // Disburse Daily Payout / Settlement State
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false)
+  const [payoutAmount, setPayoutAmount] = useState('')
+  const [payoutMethod, setPayoutMethod] = useState<'crypto_usdc' | 'bank_swift'>('crypto_usdc')
+  const [payoutDestination, setPayoutDestination] = useState('')
+  const [payoutReference, setPayoutReference] = useState('')
+  const [payoutNotes, setPayoutNotes] = useState('')
+  const [payoutSubmitting, setPayoutSubmitting] = useState(false)
+  const [payoutSuccessMsg, setPayoutSuccessMsg] = useState<string | null>(null)
+  const [payoutErrorMsg, setPayoutErrorMsg] = useState<string | null>(null)
+
+  const handleDisbursePayout = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!app) return
+    const amt = parseFloat(payoutAmount)
+    if (isNaN(amt) || amt <= 0) {
+      setPayoutErrorMsg('Please enter a valid payout amount.')
+      return
+    }
+
+    setPayoutSubmitting(true)
+    setPayoutErrorMsg(null)
+    setPayoutSuccessMsg(null)
+
+    try {
+      await adminApi.recordMerchantPayout(app._id, {
+        amount: amt,
+        method: payoutMethod,
+        destination: payoutDestination.trim(),
+        reference: payoutReference.trim() || 'Daily Settlement Deposit',
+        notes: payoutNotes.trim(),
+      })
+
+      setPayoutSuccessMsg(
+        `Successfully recorded daily deposit of $${amt.toFixed(2)} for ${app.legalName || app.fullName}!`
+      )
+      if (app.balance) {
+        app.balance.netBalance = Math.max(0, (app.balance.netBalance || 0) - amt)
+      }
+      setTimeout(() => {
+        setIsPayoutModalOpen(false)
+        setPayoutSuccessMsg(null)
+      }, 2000)
+    } catch (err: unknown) {
+      setPayoutErrorMsg(err instanceof Error ? err.message : 'Failed to record payout.')
+    } finally {
+      setPayoutSubmitting(false)
+    }
+  }
 
   // Reset tab when modal opens or initialTab changes
   useEffect(() => {
@@ -1300,6 +1351,31 @@ export default function ApplicationReviewModal({
               </div>
             ) : app.applicationStatus === 'approved' && app.accountMode === 'live' ? (
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto justify-end">
+                {/* Disburse Daily Settlement Payout Button */}
+                <button
+                  type="button"
+                  disabled={reviewLoading}
+                  onClick={() => {
+                    const pref = app.payoutSettings?.preferredMethod || 'crypto_usdc'
+                    setPayoutMethod(pref)
+                    const defaultDest =
+                      pref === 'bank_swift'
+                        ? `${app.payoutSettings?.bankSwift?.bankName || ''} / IBAN: ${app.payoutSettings?.bankSwift?.ibanOrAccountNumber || ''} (SWIFT: ${app.payoutSettings?.bankSwift?.swiftBic || ''})`
+                        : app.payoutSettings?.cryptoUsdc?.address || ''
+                    setPayoutDestination(defaultDest)
+                    setPayoutAmount(app.balance?.netBalance ? String(app.balance.netBalance) : '')
+                    setPayoutReference('')
+                    setPayoutNotes('')
+                    setPayoutErrorMsg(null)
+                    setPayoutSuccessMsg(null)
+                    setIsPayoutModalOpen(true)
+                  }}
+                  className="w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white font-bold text-xs shadow-[0_0_14px_rgba(16,185,129,0.5)] hover:shadow-[0_0_22px_rgba(16,185,129,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 min-h-[38px] sm:min-h-[40px] whitespace-nowrap"
+                >
+                  <Landmark className="h-3.5 w-3.5 shrink-0" />
+                  <span>Disburse Daily Payout / Deposit</span>
+                </button>
+
                 {onOpenArxoCryptoModal && (app.resellerId === 'ARXO' || app.refId?.startsWith('ARXO-')) && (
                   <button
                     type="button"
@@ -1422,6 +1498,191 @@ export default function ApplicationReviewModal({
             )}
           </div>
         </div>
+
+        {/* Admin Daily Payout / Deposit Modal */}
+        {isPayoutModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className="relative w-full max-w-lg rounded-3xl bg-[#060b20] border-[1.5px] border-emerald-500/80 shadow-[0_0_40px_rgba(16,185,129,0.35)] p-6 sm:p-7 space-y-5 text-white">
+              <button
+                type="button"
+                onClick={() => setIsPayoutModalOpen(false)}
+                className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-3 pb-3 border-b border-emerald-500/20">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-emerald-300 shrink-0">
+                  <Landmark className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white tracking-tight">
+                    Record Daily Settlement Deposit
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    {app.legalName || app.fullName} ({app.refId || 'PGX Merchant'})
+                  </p>
+                </div>
+              </div>
+
+              {payoutSuccessMsg ? (
+                <div className="p-4 rounded-2xl bg-emerald-950/70 border border-emerald-400 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 shrink-0" />
+                  <span>{payoutSuccessMsg}</span>
+                </div>
+              ) : (
+                <form onSubmit={handleDisbursePayout} className="space-y-4 text-xs">
+                  {/* Available Balance Callout */}
+                  <div className="p-3.5 rounded-2xl bg-[#030614] border border-emerald-500/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+                        Current Matured Net Balance
+                      </span>
+                      <div className="text-xl font-black text-emerald-400 font-mono mt-0.5">
+                        ${(app.balance?.netBalance || 0).toFixed(2)} USD
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      14-Day Hold Cleared
+                    </span>
+                  </div>
+
+                  {/* Method Switcher */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-semibold">Disbursement Rail</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPayoutMethod('crypto_usdc')
+                          if (app.payoutSettings?.cryptoUsdc?.address) {
+                            setPayoutDestination(app.payoutSettings.cryptoUsdc.address)
+                          }
+                        }}
+                        className={`p-2 rounded-xl border text-center transition-all cursor-pointer font-bold ${
+                          payoutMethod === 'crypto_usdc'
+                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                            : 'bg-[#030614] border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        Crypto USDC
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPayoutMethod('bank_swift')
+                          if (app.payoutSettings?.bankSwift?.ibanOrAccountNumber) {
+                            setPayoutDestination(
+                              `${app.payoutSettings.bankSwift.bankName || ''} / IBAN: ${app.payoutSettings.bankSwift.ibanOrAccountNumber} (SWIFT: ${app.payoutSettings.bankSwift.swiftBic || ''})`
+                            )
+                          }
+                        }}
+                        className={`p-2 rounded-xl border text-center transition-all cursor-pointer font-bold ${
+                          payoutMethod === 'bank_swift'
+                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                            : 'bg-[#030614] border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        Bank SWIFT Wire
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Amount Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-semibold flex items-center justify-between">
+                      <span>Disbursed Amount ($ USD)</span>
+                      <button
+                        type="button"
+                        onClick={() => setPayoutAmount(String(app.balance?.netBalance || 0))}
+                        className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
+                      >
+                        Max (${(app.balance?.netBalance || 0).toFixed(2)})
+                      </button>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="1"
+                      required
+                      value={payoutAmount}
+                      onChange={(e) => setPayoutAmount(e.target.value)}
+                      placeholder="Enter amount sent to merchant..."
+                      className="w-full rounded-xl border border-emerald-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 font-mono text-sm"
+                    />
+                  </div>
+
+                  {/* Destination Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-semibold">
+                      Recipient Coordinates (Address / Account)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={payoutDestination}
+                      onChange={(e) => setPayoutDestination(e.target.value)}
+                      placeholder="e.g. 0x... or Bank Name & IBAN"
+                      className="w-full rounded-xl border border-emerald-500/40 bg-[#060c24] px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 font-mono text-xs"
+                    />
+                  </div>
+
+                  {/* Reference / TxID Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-semibold">
+                      Wire MT103 Ref / Crypto TxID
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={payoutReference}
+                      onChange={(e) => setPayoutReference(e.target.value)}
+                      placeholder="e.g. FED-WIRE-992144 or 0x8a92f..."
+                      className="w-full rounded-xl border border-emerald-500/40 bg-[#060c24] px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 font-mono text-xs"
+                    />
+                  </div>
+
+                  {/* Notes Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-slate-300 font-semibold">Internal Notes / Settlement Remarks</label>
+                    <input
+                      type="text"
+                      value={payoutNotes}
+                      onChange={(e) => setPayoutNotes(e.target.value)}
+                      placeholder="e.g. Day 14 matured gross volume payout"
+                      className="w-full rounded-xl border border-emerald-500/40 bg-[#060c24] px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 text-xs"
+                    />
+                  </div>
+
+                  {payoutErrorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{payoutErrorMsg}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsPayoutModalOpen(false)}
+                      className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={payoutSubmitting}
+                      className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.5)] hover:shadow-[0_0_25px_rgba(16,185,129,0.7)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {payoutSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                      <span>Record Daily Deposit</span>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

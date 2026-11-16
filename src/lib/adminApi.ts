@@ -210,6 +210,23 @@ export interface ApplicationItem {
     failureCount?: number
     gracePeriodEnd?: string
   }
+  payoutSettings?: {
+    preferredMethod?: 'crypto_usdc' | 'bank_swift'
+    cryptoUsdc?: {
+      address: string
+      network: string
+    }
+    bankSwift?: {
+      beneficiaryName: string
+      bankName: string
+      swiftBic: string
+      ibanOrAccountNumber: string
+      bankCountry: string
+      routingNumber?: string
+      bankAddress?: string
+    }
+    updatedAt?: string
+  }
   cryptoPayment?: {
     currency: 'BTC' | 'USDC'
     network: string
@@ -707,9 +724,15 @@ export const adminApi = {
 
   recordMerchantPayout: async (
     merchantId: string,
-    payload: { amount?: number; reference?: string; notes?: string }
+    payload: {
+      amount: number
+      method?: 'crypto_usdc' | 'bank_swift'
+      destination?: string
+      reference?: string
+      notes?: string
+    }
   ) => {
-    return adminRequest<{ message: string }>(`/admin/merchants/${merchantId}/payout`, {
+    return adminRequest<{ message: string; data?: unknown }>(`/admin/merchants/${merchantId}/payout`, {
       method: 'POST',
       body: JSON.stringify(payload),
     })

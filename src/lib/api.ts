@@ -64,6 +64,44 @@ export interface ApiMerchant {
     failureCount?: number
     gracePeriodEnd?: string
   }
+  payoutSettings?: {
+    preferredMethod?: 'crypto_usdc' | 'bank_swift'
+    cryptoUsdc?: {
+      address: string
+      network: string
+    }
+    bankSwift?: {
+      beneficiaryName: string
+      bankName: string
+      swiftBic: string
+      ibanOrAccountNumber: string
+      bankCountry: string
+      routingNumber?: string
+      bankAddress?: string
+    }
+    updatedAt?: string
+  }
+  arxopayWholesale?: {
+    setupFee?: {
+      amount: number
+      currency: string
+      network?: string
+      txHash?: string
+      paidAt?: string
+      status: 'none' | 'pending' | 'verified'
+    }
+    monthlyMaintenance?: {
+      amount: number
+      currency?: string
+      network?: string
+      txHash?: string
+      screenshotUrl?: string
+      screenshotName?: string
+      lastPaidAt?: string
+      nextDueAt?: string
+      status: 'none' | 'current' | 'due' | 'pending_verification'
+    }
+  }
 }
 
 export interface ApiNotification {
@@ -452,6 +490,43 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(payload),
       })
+    },
+  },
+
+  payout: {
+    updateSettings: async (payload: {
+      preferredMethod: 'crypto_usdc' | 'bank_swift'
+      cryptoUsdc?: { address: string; network: string }
+      bankSwift?: {
+        beneficiaryName: string
+        bankName: string
+        swiftBic: string
+        ibanOrAccountNumber: string
+        bankCountry: string
+        routingNumber?: string
+        bankAddress?: string
+      }
+    }) => {
+      return request<{ message: string; data: ApiMerchant['payoutSettings'] }>('/merchants/payout-settings', {
+        method: 'PUT',
+        body: JSON.stringify(payload),
+      })
+    },
+
+    submitMonthlyMaintenance: async (formData: FormData) => {
+      const token = getStoredToken()
+      const res = await fetch(`${API_BASE}/merchants/monthly-maintenance/pay`, {
+        method: 'POST',
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+        body: formData,
+      })
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || `Request failed with status ${res.status}`)
+      }
+      return res.json()
     },
   },
 }
