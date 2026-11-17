@@ -437,6 +437,9 @@ export default function UnderwritingDesk({
     setMessagingApp(app)
     setNewMessageText(defaultMsg || '')
     setLoadingMessages(true)
+    setApplications((prev) =>
+      prev.map((a) => (a._id === app._id ? { ...a, unreadMessagesCount: 0 } : a))
+    )
     try {
       const res = await adminApi.getMerchantMessages(app._id)
       if (res.success && res.data) {
@@ -903,10 +906,16 @@ export default function UnderwritingDesk({
                           <button
                             type="button"
                             onClick={() => openMessageModal(app)}
-                            className="p-1.5 rounded-lg bg-[#081335] hover:bg-[#0e2158] border border-cyan-400/50 text-cyan-300 hover:text-white cursor-pointer transition-all"
-                            title="Direct Message"
+                            className="relative p-1.5 rounded-lg bg-[#081335] hover:bg-[#0e2158] border border-cyan-400/50 text-cyan-300 hover:text-white cursor-pointer transition-all"
+                            title={app.unreadMessagesCount ? `${app.unreadMessagesCount} unread message(s)` : "Direct Message"}
                           >
                             <MessageSquare className="h-3.5 w-3.5 text-cyan-400" />
+                            {Boolean(app.unreadMessagesCount && app.unreadMessagesCount > 0) && (
+                              <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-white font-black text-[9px] shadow-[0_0_8px_rgba(244,63,94,1)] animate-pulse">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                                <span className="relative">{app.unreadMessagesCount}</span>
+                              </span>
+                            )}
                           </button>
 
                           <button
@@ -1101,10 +1110,22 @@ export default function UnderwritingDesk({
                   <button
                     type="button"
                     onClick={() => openMessageModal(app)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-[#09153a] hover:bg-[#0f215c] border border-cyan-400/50 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                    className={`relative flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                      Boolean(app.unreadMessagesCount && app.unreadMessagesCount > 0)
+                        ? 'bg-rose-950/60 border-rose-500 text-rose-200 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse'
+                        : 'bg-[#09153a] hover:bg-[#0f215c] border-cyan-400/50 text-cyan-300'
+                    }`}
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
                     <span>Message</span>
+                    {Boolean(app.unreadMessagesCount && app.unreadMessagesCount > 0) && (
+                      <span className="relative flex items-center justify-center ml-1">
+                        <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-rose-400 opacity-75"></span>
+                        <span className="relative h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white font-black text-[9px] flex items-center justify-center shadow-[0_0_8px_rgba(244,63,94,1)]">
+                          {app.unreadMessagesCount}
+                        </span>
+                      </span>
+                    )}
                   </button>
 
                   <button

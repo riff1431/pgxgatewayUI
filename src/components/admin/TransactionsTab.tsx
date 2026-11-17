@@ -260,7 +260,7 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
               <tr className="border-b border-cyan-500/20 bg-[#09153d]/50 text-slate-300 font-bold uppercase tracking-wider text-[10px]">
                 <th className="px-4 py-3.5 whitespace-nowrap">Date / Time</th>
                 <th className="px-4 py-3.5 whitespace-nowrap">Transaction ID</th>
-                <th className="px-4 py-3.5 whitespace-nowrap">Merchant Ref ID</th>
+                <th className="px-4 py-3.5 whitespace-nowrap">Merchant & Ref ID</th>
                 <th className="px-4 py-3.5 whitespace-nowrap">Customer / Order</th>
                 <th className="px-4 py-3.5 whitespace-nowrap text-right">Gross Sale</th>
                 {isSuperAdmin && (
@@ -325,11 +325,16 @@ export default function TransactionsTab({ onShowToast, isSuperAdmin = false }: T
                         </button>
                       </td>
 
-                      {/* Merchant Ref ID */}
+                      {/* Merchant & Ref ID */}
                       <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className="font-mono px-2 py-0.5 rounded-md bg-purple-500/10 border border-fuchsia-400/40 text-fuchsia-300 font-semibold text-[11px]">
-                          {txn.merchantRefId}
-                        </span>
+                        <div className="font-bold text-white text-xs truncate max-w-[170px]" title={txn.merchantName || 'Direct Merchant'}>
+                          {txn.merchantName || 'Direct Merchant'}
+                        </div>
+                        <div className="mt-0.5">
+                          <span className="font-mono px-2 py-0.5 rounded-md bg-purple-500/10 border border-fuchsia-400/40 text-fuchsia-300 font-semibold text-[10px]">
+                            {txn.merchantRefId}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Customer / Order */}

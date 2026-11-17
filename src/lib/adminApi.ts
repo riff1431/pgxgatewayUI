@@ -132,6 +132,7 @@ export interface ApplicationItem {
   refId?: string
   resellerId?: string
   tier?: number
+  unreadMessagesCount?: number
   fullName: string
   businessEmail: string
   phone: string
@@ -314,6 +315,7 @@ export interface TransactionItem {
   resellerId?: string
   merchantId: string
   merchantRefId: string
+  merchantName?: string
   stripePaymentIntentId?: string
   stripeSessionId?: string
   currency: string

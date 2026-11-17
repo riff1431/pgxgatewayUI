@@ -86,8 +86,11 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fuchsia-500 text-[10px] font-black text-white flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)] animate-pulse">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                  <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative w-4 h-4 rounded-full bg-rose-500 text-[10px] font-black text-white flex items-center justify-center shadow-[0_0_8px_rgba(244,63,94,1)] animate-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
                   </span>
                 )}
               </Link>

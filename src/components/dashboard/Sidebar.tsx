@@ -89,8 +89,11 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
               <div className="text-xs font-bold text-white truncate flex items-center gap-1.5">
                 <span className="truncate">{activeItem.label}</span>
                 {Boolean(activeItem.badge && activeItem.badge > 0) && (
-                  <span className="w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_6px_rgba(217,70,239,0.9)]">
-                    {activeItem.badge}
+                  <span className="relative flex items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center shadow-[0_0_8px_rgba(244,63,94,1)] animate-pulse">
+                      {activeItem.badge}
+                    </span>
                   </span>
                 )}
                 {activeItem.isOfferNew && (
@@ -213,8 +216,11 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
                       <div className="flex items-center gap-1.5 shrink-0">
                         {Boolean(item.badge && item.badge > 0) && (
-                          <span className="w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_6px_rgba(217,70,239,0.9)]">
-                            {item.badge}
+                          <span className="relative flex items-center justify-center">
+                            <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-rose-400 opacity-75"></span>
+                            <span className="relative h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white font-black text-[9px] flex items-center justify-center shadow-[0_0_8px_rgba(244,63,94,1)] animate-pulse">
+                              {item.badge}
+                            </span>
                           </span>
                         )}
 
@@ -296,8 +302,11 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                 </div>
 
                 {Boolean(item.badge && item.badge > 0) && (
-                  <span className="w-5 h-5 rounded-full bg-fuchsia-600 text-white text-[10px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(217,70,239,0.9)]">
-                    {item.badge}
+                  <span className="relative flex items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative h-5 min-w-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center shadow-[0_0_10px_rgba(244,63,94,1)] animate-pulse">
+                      {item.badge}
+                    </span>
                   </span>
                 )}
 
