@@ -182,7 +182,7 @@ export default function DashboardPage() {
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 hidden md:block">
-                Test your hosted card checkout with your Merchant Ref ID (<code className="text-cyan-300 font-bold">{merchant?.refId || 'PGX_REF_...'}</code>) in the API & Integration tab.
+                Test your hosted card checkout with your Merchant Ref ID (<code className="text-cyan-300 font-bold">{merchant?.refId || 'PGX-PX-001'}</code>) in the API & Integration tab.
               </p>
             </div>
           </div>

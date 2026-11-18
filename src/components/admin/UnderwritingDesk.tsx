@@ -597,7 +597,7 @@ export default function UnderwritingDesk({
                     {m.legalName || m.fullName}
                   </div>
                   <div className="text-[10px] font-mono text-cyan-300 truncate mt-0.5">
-                    {m.refId || 'PGX_REF_...'}
+                    {m.refId || 'PGX-PX-001'}
                   </div>
                 </div>
                 <button

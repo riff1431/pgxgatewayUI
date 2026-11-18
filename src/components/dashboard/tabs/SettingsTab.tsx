@@ -102,7 +102,7 @@ export default function SettingsTab() {
 
   const merchantId = merchant?.id || merchant?._id || ''
   const refId =
-    merchant?.refId || (merchantId ? `PGX_REF_${merchantId.slice(-6).toUpperCase()}` : '')
+    merchant?.refId || (merchantId ? `PGX-PX-${merchantId.slice(-4).toUpperCase()}` : 'PGX-PX-001')
   const checkoutUrl = refId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/checkout?ref=${refId}&amount=100.00` : ''
   const liveSecretKey = merchantId ? `pgx_live_sk_${merchantId.slice(-8)}_sec` : '—'
 
