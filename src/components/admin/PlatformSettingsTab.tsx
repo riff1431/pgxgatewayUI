@@ -137,7 +137,7 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
           </div>
         </div>
         <a
-          href="https://pgxdigital.shop"
+          href="https://pgxmarketplace.shop"
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-cyan-500/30 transition-colors shrink-0"
