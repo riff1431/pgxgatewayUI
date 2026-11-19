@@ -13,9 +13,13 @@ import {
   AlertCircle,
   CheckCircle2,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Mail,
+  KeyRound,
+  X
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { api } from '@/lib/api'
 
 interface Step1AccountProps {
   onNext: () => void | Promise<void>
@@ -36,6 +40,9 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const isSignInRoute = location.pathname === '/login' || searchParams.get('mode') === 'signin'
+  const isResetMode = searchParams.get('mode') === 'reset'
+  const resetTokenParam = searchParams.get('token') || ''
+  const resetEmailParam = searchParams.get('email') || ''
 
   const { register, login, updateProfile, logout, merchant, isAuthenticated } = useAuth()
   
@@ -44,6 +51,22 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
+
+  // Forgot password modal state
+  const [showForgotModal, setShowForgotModal] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSubmitting, setForgotSubmitting] = useState(false)
+  const [forgotSuccess, setForgotSuccess] = useState<string | null>(null)
+  const [forgotError, setForgotError] = useState<string | null>(null)
+
+  // Reset password form state (when in isResetMode)
+  const [resetNewPassword, setResetNewPassword] = useState('')
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('')
+  const [resetEmail, setResetEmail] = useState(resetEmailParam)
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetSubmitting, setResetSubmitting] = useState(false)
+  const [resetSuccess, setResetSuccess] = useState<string | null>(null)
+  const [resetError, setResetError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     fullName: merchant?.fullName || '',
@@ -255,8 +278,179 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
     }, 100)
   }
 
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!forgotEmail || !forgotEmail.includes('@')) {
+      setForgotError('Please enter a valid business email address.')
+      return
+    }
+    setForgotSubmitting(true)
+    setForgotError(null)
+    setForgotSuccess(null)
+    try {
+      const res = await api.auth.forgotPassword({ email: forgotEmail.trim() })
+      setForgotSuccess(res.message || 'If an account exists with this email, a password reset link has been dispatched.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to dispatch reset email. Please try again.'
+      setForgotError(msg)
+    } finally {
+      setForgotSubmitting(false)
+    }
+  }
+
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!resetNewPassword || resetNewPassword.length < 8) {
+      setResetError('Password must be at least 8 characters long.')
+      return
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetError('Passwords do not match. Please verify both fields.')
+      return
+    }
+    setResetSubmitting(true)
+    setResetError(null)
+    setResetSuccess(null)
+    try {
+      const res = await api.auth.resetPassword({
+        token: resetTokenParam,
+        email: (resetEmail || resetEmailParam).trim(),
+        password: resetNewPassword,
+      })
+      setResetSuccess(res.message || 'Password reset successfully! Redirecting to sign in...')
+      setTimeout(() => {
+        navigate('/login')
+      }, 2000)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid or expired password reset link. Please request a new one.'
+      setResetError(msg)
+    } finally {
+      setResetSubmitting(false)
+    }
+  }
+
+  if (isResetMode) {
+    return (
+      <form onSubmit={handleResetSubmit} noValidate className="space-y-6">
+        <div className="flex items-center gap-3.5 pb-3 border-b border-cyan-500/20">
+          <div className="w-12 h-12 rounded-full bg-cyan-600/20 border-2 border-cyan-400 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(0,240,255,0.6)] shrink-0">
+            <KeyRound className="h-6 w-6" />
+          </div>
+          <div>
+            <div className="text-xs font-black text-cyan-400 uppercase tracking-wider">
+              Security Verification
+            </div>
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              Create New Password
+            </h2>
+            <p className="text-xs text-slate-400">
+              Enter and confirm your new secure password for your PGX Gateway account.
+            </p>
+          </div>
+        </div>
+
+        {resetError && (
+          <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-500/60 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+            <span>{resetError}</span>
+          </div>
+        )}
+
+        {resetSuccess && (
+          <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-500/60 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+            <span>{resetSuccess}</span>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              Account Email
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/30 bg-[#060c24] overflow-hidden opacity-90">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                <Mail className="h-4 w-4" />
+              </div>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                readOnly={Boolean(resetEmailParam)}
+                placeholder="name@company.com"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-slate-300 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              New Password <span className="text-fuchsia-400">*</span>
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 focus-within:border-cyan-400 bg-[#060c24] overflow-hidden relative">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                <Lock className="h-4 w-4" />
+              </div>
+              <input
+                type={showResetPassword ? 'text' : 'password'}
+                value={resetNewPassword}
+                onChange={(e) => setResetNewPassword(e.target.value)}
+                placeholder="Minimum 8 characters"
+                className="w-full bg-transparent pl-3 pr-10 py-2.5 text-sm text-white focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(!showResetPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white"
+                tabIndex={-1}
+              >
+                {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">
+              Confirm New Password <span className="text-fuchsia-400">*</span>
+            </label>
+            <div className="flex rounded-xl border border-cyan-500/40 focus-within:border-cyan-400 bg-[#060c24] overflow-hidden">
+              <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                <Lock className="h-4 w-4" />
+              </div>
+              <input
+                type={showResetPassword ? 'text' : 'password'}
+                value={resetConfirmPassword}
+                onChange={(e) => setResetConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full bg-transparent px-3 py-2.5 text-sm text-white focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-cyan-500/20">
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            className="px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)]"
+          >
+            &larr; Cancel & Sign In
+          </button>
+          <button
+            type="submit"
+            disabled={resetSubmitting}
+            className="px-8 py-2.5 rounded-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-purple-600 text-white text-xs font-bold shadow-[0_0_22px_rgba(217,70,239,0.75)] hover:shadow-[0_0_30px_rgba(217,70,239,0.95)] cursor-pointer disabled:opacity-50"
+          >
+            {resetSubmitting ? 'Updating Password...' : 'Save New Password & Sign In'}
+          </button>
+        </div>
+      </form>
+    )
+  }
+
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <>
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
       {/* Step Header with Dual-Ring Purple Glow */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-cyan-500/20 gap-3">
         <div className="flex items-center gap-3.5 min-w-0">
@@ -559,14 +753,27 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
                 {isSignInMode ? 'Account Password' : 'Create Password'}{' '}
                 <span className="text-fuchsia-400">*</span>
               </label>
-              {!isSignInMode && formData.password && (
+              {isSignInMode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotEmail(formData.businessEmail || '')
+                    setShowForgotModal(true)
+                    setForgotSuccess(null)
+                    setForgotError(null)
+                  }}
+                  className="text-[11px] text-cyan-400 hover:text-cyan-300 font-medium transition-colors cursor-pointer"
+                >
+                  Forgot password?
+                </button>
+              ) : formData.password ? (
                 <span className="text-[10px] font-semibold text-slate-300">
                   Strength:{' '}
                   <span className={passwordStrength.label === 'Strong' ? 'text-emerald-400' : passwordStrength.label === 'Fair' ? 'text-amber-400' : 'text-red-400'}>
                     {passwordStrength.label}
                   </span>
                 </span>
-              )}
+              ) : null}
             </div>
             <div className={`flex rounded-xl border bg-[#060c24] overflow-hidden transition-all relative ${
               touched.password && errors.password
@@ -671,5 +878,92 @@ export default function Step1Account({ onNext, onBack }: Step1AccountProps) {
         </button>
       </div>
     </form>
+
+    {/* Forgot Password Modal */}
+    {showForgotModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+        <div className="relative w-full max-w-md rounded-2xl bg-[#070d24] border border-cyan-500/40 p-6 shadow-[0_0_50px_rgba(0,240,255,0.25)] space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-300">
+                <KeyRound className="w-4 h-4" />
+              </div>
+              <h3 className="text-base font-bold text-white">Reset Account Password</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(false)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Enter your registered business email. We will send a secure link to reset your password valid for 60 minutes.
+          </p>
+
+          {forgotError && (
+            <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/60 text-red-300 text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              <span>{forgotError}</span>
+            </div>
+          )}
+
+          {forgotSuccess && (
+            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/60 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>{forgotSuccess}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleForgotSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-200">
+                Business Email
+              </label>
+              <div className="flex rounded-xl border border-cyan-500/40 focus-within:border-cyan-400 bg-[#060c24] overflow-hidden">
+                <div className="w-11 bg-[#091332] border-r border-cyan-500/35 flex items-center justify-center text-cyan-400 shrink-0">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <input
+                  type="email"
+                  required
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full bg-transparent px-3 py-2.5 text-sm text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="px-4 py-2 rounded-full border border-slate-700 bg-slate-900/60 text-slate-300 text-xs font-semibold hover:bg-slate-800 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                disabled={forgotSubmitting}
+                className="px-6 py-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white text-xs font-bold shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {forgotSubmitting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <span>Send Reset Link</span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
+  </>
   )
 }

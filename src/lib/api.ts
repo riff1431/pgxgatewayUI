@@ -284,6 +284,20 @@ export const api = {
         body: JSON.stringify(payload),
       })
     },
+
+    forgotPassword: async (payload: { email: string }) => {
+      return request<{ message: string }>('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
+
+    resetPassword: async (payload: { token: string; email: string; password: string }) => {
+      return request<{ message: string }>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
   },
 
   // Merchant Application Flow
