@@ -9,7 +9,6 @@ import {
   ArrowRight, 
   Home as HomeIcon, 
   Zap, 
-  Building2, 
   Workflow, 
   Headphones,
   type LucideIcon
@@ -30,7 +29,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home', path: '/', icon: HomeIcon },
   { label: 'Solutions', path: '/solutions', icon: Zap },
-  { label: 'Industries', path: '/industries', icon: Building2 },
   { label: 'How It Works', path: '/how-it-works', icon: Workflow },
   { label: 'Support', path: '/support', icon: Headphones },
 ]

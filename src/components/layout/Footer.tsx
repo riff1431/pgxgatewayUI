@@ -96,32 +96,32 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm">
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   E-Commerce & Marketplaces
                 </Link>
               </li>
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   SaaS & Subscription
                 </Link>
               </li>
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   Digital Goods & Gaming
                 </Link>
               </li>
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   Forex & Financial Platforms
                 </Link>
               </li>
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   Travel & Hospitality
                 </Link>
               </li>
               <li>
-                <Link to="/industries" className="hover:text-fuchsia-300 transition-colors">
+                <Link to="/solutions" className="hover:text-fuchsia-300 transition-colors">
                   Web3 & Crypto On-Ramping
                 </Link>
               </li>

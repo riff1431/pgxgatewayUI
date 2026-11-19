@@ -11,7 +11,6 @@ import { BrandingProvider } from '@/context/BrandingContext'
 // Lazy-loaded route components for optimal initial bundle performance
 const Home = lazy(() => import('@/pages/Home'))
 const SolutionsPage = lazy(() => import('@/pages/SolutionsPage'))
-const IndustriesPage = lazy(() => import('@/pages/IndustriesPage'))
 const HowItWorksPage = lazy(() => import('@/pages/HowItWorksPage'))
 const SupportPage = lazy(() => import('@/pages/SupportPage'))
 const RegistrationPage = lazy(() => import('@/pages/RegistrationPage'))
@@ -43,7 +42,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/solutions" element={<SolutionsPage />} />
-            <Route path="/industries" element={<IndustriesPage />} />
+            <Route path="/industries" element={<Navigate to="/" replace />} />
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/support" element={<SupportPage />} />
             <Route path="/login" element={<RegistrationPage />} />
