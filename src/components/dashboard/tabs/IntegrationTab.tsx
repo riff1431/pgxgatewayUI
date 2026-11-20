@@ -699,9 +699,9 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
               <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
                 <pre>{`{
   "success": true,
-  "sessionId": "cs_test_a1b2c3d4e5f6g7h8",
-  "checkoutUrl": "https://checkout.stripe.com/c/pay/cs_test_...",
-  "mode": "ecom_bridge"
+  "paymentRef": "pgx_ord_100234",
+  "checkoutUrl": "https://api.pgxmarketplace.shop/api/gateway-bridge/pay?s=...",
+  "mode": "live"
 }`}</pre>
               </div>
             </div>
@@ -729,6 +729,10 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200">
                   <div className="text-slate-400 text-[10px] pb-1">// Frontend JavaScript:</div>
                   <code>window.location.href = data.checkoutUrl;</code>
+                </div>
+
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs leading-relaxed">
+                  <strong>Zero Client-Side SDK Rule:</strong> Do not load Stripe.js or call <code>stripe.redirectToCheckout()</code> on your storefront. Redirecting directly to <code>checkoutUrl</code> protects your merchant origin and guarantees seamless checkout.
                 </div>
 
                 <div className="space-y-2 pt-2 text-xs text-slate-400">
