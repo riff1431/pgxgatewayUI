@@ -253,7 +253,7 @@ const response = await fetch('https://api.pgxgateway.com/api/v1/checkout/session
 const data = await response.json();
 
 if (data.success && data.checkoutUrl) {
-  // Redirect buyer to the cloaked Stripe checkout page
+  // Redirect buyer directly to the secure hosted checkout page
   window.location.href = data.checkoutUrl;
 } else {
   console.error('Checkout error:', data.message);
@@ -281,7 +281,7 @@ $response = json_decode(curl_exec($ch), true);
 curl_close($ch);
 
 if (!empty($response['checkoutUrl'])) {
-    // Redirect customer to Stripe Checkout
+    // Redirect customer directly to the secure hosted checkout page
     header('Location: ' . $response['checkoutUrl']);
     exit;
 } else {
@@ -543,6 +543,45 @@ if data.get("success") and data.get("checkoutUrl"):
                 <span className="text-xs font-bold text-white truncate">E-Commerce Storefront Bridge</span>
               </div>
               <p className="text-[11px] text-slate-400">Zero Stripe keys or KYC needed on merchant side.</p>
+            </div>
+          </div>
+
+          {/* 3-Step Quick Integration Workflow Overview */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-cyan-500/10 via-[#060b20] to-blue-500/10 border border-cyan-500/30 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+                1
+              </div>
+              <div className="text-xs space-y-1">
+                <strong className="text-white block font-bold text-sm">1. Initiate Payment</strong>
+                <p className="text-slate-300 leading-relaxed">
+                  Call <code className="text-cyan-300 font-mono">POST /checkout/session</code> from your backend server when customer clicks pay.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+                2
+              </div>
+              <div className="text-xs space-y-1">
+                <strong className="text-white block font-bold text-sm">2. Native Redirect</strong>
+                <p className="text-slate-300 leading-relaxed">
+                  Redirect the buyer&apos;s browser directly to <code className="text-cyan-300 font-mono">checkoutUrl</code>. Zero client-side SDKs required.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+                3
+              </div>
+              <div className="text-xs space-y-1">
+                <strong className="text-white block font-bold text-sm">3. Auto Settlement</strong>
+                <p className="text-slate-300 leading-relaxed">
+                  Your server receives instant signed Webhook notification and updates order status automatically.
+                </p>
+              </div>
             </div>
           </div>
 
