@@ -152,6 +152,7 @@ export interface ApplicationItem {
   processingStatementDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
   accountMode?: 'trial' | 'live' | 'suspended'
+  assignedBridge?: 'marketplace' | 'leads'
   trial?: {
     isActive: boolean
     startedAt?: string
@@ -481,6 +482,7 @@ export const adminApi = {
       status: 'approved' | 'rejected' | 'under_review'
       approveMode?: 'trial' | 'live'
       trialHours?: number
+      assignedBridge?: 'marketplace' | 'leads'
       offer?: {
         rate?: string
         volume?: string
@@ -497,6 +499,13 @@ export const adminApi = {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/review`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
+    })
+  },
+
+  updateMerchantBridge: async (id: string, assignedBridge: 'marketplace' | 'leads') => {
+    return adminRequest<ApplicationItem>(`/admin/applications/${id}/bridge`, {
+      method: 'PATCH',
+      body: JSON.stringify({ assignedBridge }),
     })
   },
 

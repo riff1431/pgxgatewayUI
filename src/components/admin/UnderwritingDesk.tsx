@@ -776,6 +776,16 @@ export default function UnderwritingDesk({
                               <span className="text-[10px] text-slate-400 capitalize truncate max-w-[80px]">
                                 {app.industry?.replace('-', ' ') || 'General'}
                               </span>
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
+                                  app.assignedBridge === 'leads'
+                                    ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40'
+                                    : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40'
+                                }`}
+                                title={app.assignedBridge === 'leads' ? 'PGX Leads Bridge (Stripe #2)' : 'PGX MarketPlace Bridge (Stripe #1)'}
+                              >
+                                {app.assignedBridge === 'leads' ? 'Leads #2' : 'Market #1'}
+                              </span>
                             </div>
                           </div>
                         </div>
