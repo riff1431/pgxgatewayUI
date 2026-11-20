@@ -738,7 +738,8 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
               <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
                 <pre>{`{
   "success": true,
-  "paymentRef": "pgx_ord_100234",
+  "paymentRef": "pgx_4045",
+  "sessionId": "pgx_4045",
   "checkoutUrl": "https://api.pgxmarketplace.shop/api/gateway-bridge/pay?s=...",
   "mode": "live"
 }`}</pre>
@@ -801,19 +802,22 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  On your <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">successUrl</code>, verify the charge using the returned session ID:
+                  On your <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">successUrl</code>, verify the charge using either the returned <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">paymentRef</code> or <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">sessionId</code>:
                 </p>
 
                 <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto">
                   <div className="text-slate-400 text-[10px] pb-1">// GET Request:</div>
-                  <code>GET /api/v1/checkout/session/&#123;sessionId&#125;</code>
+                  <code>GET /api/v1/checkout/session/&#123;paymentRef&#125;</code>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
                   <pre>{`{
   "success": true,
+  "status": "completed",
+  "paymentRef": "pgx_4045",
+  "sessionId": "pgx_4045",
   "transaction": {
-    "transactionId": "TXN_ECOM_5485_1AEEDE",
+    "transactionId": "TXN_ECOM_4045_1AEEDE",
     "status": "completed",
     "grossAmount": 49.99,
     "currency": "USD"
