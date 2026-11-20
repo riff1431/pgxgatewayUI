@@ -794,15 +794,17 @@ export default function ApplicationReviewModal({
                     <span className="font-bold text-white">{app.hostingProvider || 'Cloud Infrastructure'}</span>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-[#040817] border border-cyan-500/10">
-                    <span className="text-[10px] text-slate-400 block flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3 text-cyan-400" />
-                      Assigned Stripe Bridge
-                    </span>
-                    <span className={`font-bold font-mono text-xs ${selectedBridge === 'leads' ? 'text-amber-400' : 'text-cyan-300'}`}>
-                      {selectedBridge === 'leads' ? 'PGX Leads (#2)' : 'PGX MarketPlace (#1)'}
-                    </span>
-                  </div>
+                  {isSuperAdmin && (
+                    <div className="p-3 rounded-xl bg-[#040817] border border-cyan-500/10">
+                      <span className="text-[10px] text-slate-400 block flex items-center gap-1">
+                        <ShieldCheck className="h-3 w-3 text-cyan-400" />
+                        Assigned Stripe Bridge
+                      </span>
+                      <span className={`font-bold font-mono text-xs ${selectedBridge === 'leads' ? 'text-amber-400' : 'text-cyan-300'}`}>
+                        {selectedBridge === 'leads' ? 'PGX Leads (#2)' : 'PGX MarketPlace (#1)'}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {app.gitRepoUrl && (
@@ -1095,77 +1097,79 @@ export default function ApplicationReviewModal({
                 </div>
               )}
 
-              {/* E-Commerce Bridge Routing & Risk Sharding */}
-              <div className="p-3.5 sm:p-4 rounded-2xl bg-[#081232] border border-cyan-500/30 space-y-3 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-cyan-500/15">
-                  <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <Server className="h-4 w-4 text-cyan-400" />
-                    <span>E-Commerce Bridge Routing & Risk Sharding</span>
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-                      Active: {selectedBridge === 'leads' ? 'PGX Leads (Stripe #2)' : 'PGX MarketPlace (Stripe #1)'}
+              {/* E-Commerce Bridge Routing & Risk Sharding (Platform Super Admin & Root Admin Only) */}
+              {isSuperAdmin && (
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-[#081232] border border-cyan-500/30 space-y-3 shadow-[0_0_15px_rgba(0,240,255,0.1)]">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-cyan-500/15">
+                    <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Server className="h-4 w-4 text-cyan-400" />
+                      <span>E-Commerce Bridge Routing & Risk Sharding</span>
                     </span>
-                    {bridgeUpdatedMsg && (
-                      <span className="text-[10px] font-bold text-emerald-400 animate-fade-in">
-                        {bridgeUpdatedMsg}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+                        Active: {selectedBridge === 'leads' ? 'PGX Leads (Stripe #2)' : 'PGX MarketPlace (Stripe #1)'}
                       </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    disabled={bridgeUpdating}
-                    onClick={() => handleUpdateBridge('marketplace')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      selectedBridge === 'marketplace'
-                        ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_12px_rgba(0,240,255,0.25)]'
-                        : 'bg-[#040817] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-bold text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${selectedBridge === 'marketplace' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
-                        PGX MarketPlace (Bridge 1)
-                      </span>
-                      <span className="text-[10px] font-mono text-cyan-400">Stripe #1</span>
+                      {bridgeUpdatedMsg && (
+                        <span className="text-[10px] font-bold text-emerald-400 animate-fade-in">
+                          {bridgeUpdatedMsg}
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                      SaaS, Digital Software, Developer Licenses & Digital Goods (pgxmarketplace.shop)
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={bridgeUpdating}
-                    onClick={() => handleUpdateBridge('leads')}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      selectedBridge === 'leads'
-                        ? 'bg-amber-500/20 border-amber-400 text-white shadow-[0_0_12px_rgba(245,158,11,0.25)]'
-                        : 'bg-[#040817] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between font-bold text-xs">
-                      <span className="flex items-center gap-1.5">
-                        <span className={`w-2 h-2 rounded-full ${selectedBridge === 'leads' ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`} />
-                        PGX Leads (Bridge 2)
-                      </span>
-                      <span className="text-[10px] font-mono text-amber-400">Stripe #2</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-snug">
-                      B2B Intelligence, Verified Prospect Packs, Lead Databases (pgxleads.shop)
-                    </p>
-                  </button>
-                </div>
-                {bridgeUpdating && (
-                  <div className="flex items-center gap-2 text-[11px] text-cyan-300">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>Updating merchant bridge routing...</span>
                   </div>
-                )}
-              </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      disabled={bridgeUpdating}
+                      onClick={() => handleUpdateBridge('marketplace')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedBridge === 'marketplace'
+                          ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_12px_rgba(0,240,255,0.25)]'
+                          : 'bg-[#040817] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedBridge === 'marketplace' ? 'bg-cyan-400 animate-pulse' : 'bg-slate-600'}`} />
+                          PGX MarketPlace (Bridge 1)
+                        </span>
+                        <span className="text-[10px] font-mono text-cyan-400">Stripe #1</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                        SaaS, Digital Software, Developer Licenses & Digital Goods (pgxmarketplace.shop)
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={bridgeUpdating}
+                      onClick={() => handleUpdateBridge('leads')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedBridge === 'leads'
+                          ? 'bg-amber-500/20 border-amber-400 text-white shadow-[0_0_12px_rgba(245,158,11,0.25)]'
+                          : 'bg-[#040817] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedBridge === 'leads' ? 'bg-amber-400 animate-pulse' : 'bg-slate-600'}`} />
+                          PGX Leads (Bridge 2)
+                        </span>
+                        <span className="text-[10px] font-mono text-amber-400">Stripe #2</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                        B2B Intelligence, Verified Prospect Packs, Lead Databases (pgxleads.shop)
+                      </p>
+                    </button>
+                  </div>
+                  {bridgeUpdating && (
+                    <div className="flex items-center gap-2 text-[11px] text-cyan-300">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span>Updating merchant bridge routing...</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Underwriter Quick Tier Presets */}
               <div className="p-3 sm:p-3.5 rounded-2xl bg-[#08102b] border border-cyan-500/25 space-y-2">
