@@ -51,7 +51,11 @@ export default function AdminPage() {
   const [copiedReferral, setCopiedReferral] = useState(false)
   const [pendingReviewsCount, setPendingReviewsCount] = useState(0)
 
-  const isSuperAdminUser = adminUser?.role === 'super_admin' || getStoredAdminUser()?.role === 'super_admin'
+  const isSuperAdminUser =
+    adminUser?.role === 'super_admin' ||
+    getStoredAdminUser()?.role === 'super_admin' ||
+    adminUser?.resellerId === 'admin_root' ||
+    getStoredAdminUser()?.resellerId === 'admin_root'
   const resellerId = adminUser?.resellerId || 'admin_root'
   const referralLink = typeof window !== 'undefined'
     ? `${window.location.origin}/register?reseller=${resellerId}`
