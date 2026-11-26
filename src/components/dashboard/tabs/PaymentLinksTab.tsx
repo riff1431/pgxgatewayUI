@@ -173,6 +173,45 @@ export default function PaymentLinksTab() {
         </span>
       </div>
 
+      {/* 3-Step Quick Payment Links Guide */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-cyan-500/10 via-[#060b20] to-blue-500/10 border border-cyan-500/30 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+            1
+          </div>
+          <div className="text-xs space-y-1">
+            <strong className="text-white block font-bold text-sm">1. Create Payment Link</strong>
+            <p className="text-slate-300 leading-relaxed">
+              Enter item title, amount, and currency. Choose <span className="text-cyan-300 font-semibold">Reusable</span> for multiple buyers or <span className="text-cyan-300 font-semibold">One-Time</span> for single invoices.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+            2
+          </div>
+          <div className="text-xs space-y-1">
+            <strong className="text-white block font-bold text-sm">2. Share Link Anywhere</strong>
+            <p className="text-slate-300 leading-relaxed">
+              Click <span className="text-cyan-300 font-semibold">Copy Link</span> and send the <code className="text-cyan-300 font-mono">/pay/...</code> URL via WhatsApp, email, DM, or invoice. Buyers pay via Card, Apple Pay, Google Pay, or local methods.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="w-7 h-7 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,240,255,0.4)]">
+            3
+          </div>
+          <div className="text-xs space-y-1">
+            <strong className="text-white block font-bold text-sm">3. Track & Auto-Settle</strong>
+            <p className="text-slate-300 leading-relaxed">
+              Payments appear instantly in your <span className="text-cyan-300 font-semibold">Transactions</span> ledger and update link volume automatically. Pause or delete links anytime.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Activation Notice */}
       {!isCheckoutReady && (
         <div className="p-4 rounded-2xl bg-amber-950/50 border border-amber-400/60 text-amber-200 text-xs flex items-start gap-3">
