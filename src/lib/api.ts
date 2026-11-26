@@ -121,6 +121,25 @@ export interface ApiNotification {
   updatedAt?: string
 }
 
+export interface PaymentLinkItem {
+  _id: string
+  slug: string
+  merchantId: string
+  merchantRefId: string
+  resellerId: string
+  title: string
+  description?: string
+  amount: number
+  currency: string
+  reusable: boolean
+  status: 'active' | 'disabled' | 'completed'
+  totalPayments: number
+  totalVolume: number
+  lastPaidAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface ReviewItem {
   _id: string
   id?: string
@@ -541,6 +560,35 @@ export const api = {
         throw new Error(errData.message || `Request failed with status ${res.status}`)
       }
       return res.json()
+    },
+  },
+
+  paymentLinks: {
+    list: async () => {
+      return request<PaymentLinkItem[]>('/payment-links', { method: 'GET' })
+    },
+    create: async (payload: {
+      title: string
+      description?: string
+      amount: number
+      currency?: string
+      reusable?: boolean
+    }) => {
+      return request<PaymentLinkItem>('/payment-links', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+    },
+    updateStatus: async (id: string, status: 'active' | 'disabled') => {
+      return request<PaymentLinkItem>(`/payment-links/${encodeURIComponent(id)}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      })
+    },
+    remove: async (id: string) => {
+      return request<unknown>(`/payment-links/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
     },
   },
 }

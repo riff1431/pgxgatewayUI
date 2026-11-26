@@ -21,6 +21,19 @@ export interface CheckoutSessionResult {
   message?: string
 }
 
+export interface PublicPaymentLinkData {
+  paymentLink: {
+    slug: string
+    title: string
+    description?: string
+    amount: number
+    currency: string
+    reusable: boolean
+    status: 'active' | 'disabled' | 'completed'
+  }
+  merchant: PublicMerchantProfile | null
+}
+
 export interface CheckoutSessionStatus {
   success: boolean
   status?: 'pending' | 'succeeded' | 'failed' | 'refunded'
@@ -85,5 +98,36 @@ export const checkoutApi = {
         message: err instanceof Error ? err.message : 'Failed to retrieve session status',
       }
     }
+  },
+
+  getPublicPaymentLink: async (slug: string): Promise<PublicPaymentLinkData | null> => {
+    const res = await fetch(`${API_BASE}/payment-links/public/${encodeURIComponent(slug.trim())}`)
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok || !json.success || !json.paymentLink) {
+      return null
+    }
+    return {
+      paymentLink: json.paymentLink,
+      merchant: json.merchant || null,
+    }
+  },
+
+  createPaymentLinkCheckout: async (
+    slug: string,
+    payload: { customerEmail?: string } = {}
+  ): Promise<CheckoutSessionResult> => {
+    const res = await fetch(`${API_BASE}/payment-links/public/${encodeURIComponent(slug.trim())}/checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      throw new Error(json.message || `Checkout initiation failed with status ${res.status}`)
+    }
+    return json
   },
 }

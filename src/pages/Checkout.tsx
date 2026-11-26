@@ -3,10 +3,9 @@ import { Link, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Check,
-  CreditCard,
+  ExternalLink,
   Lock,
   ShieldCheck,
-  Coins,
   Loader2,
   AlertCircle,
 } from 'lucide-react'
@@ -38,12 +37,12 @@ export default function Checkout() {
 
   const [merchantProfile, setMerchantProfile] = useState<PublicMerchantProfile | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
-  const [method, setMethod] = useState<'card' | 'wallet'>('card')
-  const [cardName, setCardName] = useState('')
-  const [cardNumber, setCardNumber] = useState('')
+  const [customerEmail, setCustomerEmail] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [checkoutError, setCheckoutError] = useState<string | null>(null)
-  const [paidSuccess, setPaidSuccess] = useState<boolean>(statusParam === 'success')
+  const [checkoutError, setCheckoutError] = useState<string | null>(
+    statusParam === 'cancelled' ? 'Payment was cancelled. You can retry checkout below.' : null
+  )
+  const paidSuccess = statusParam === 'success'
 
   // Load Merchant Public Profile by Ref ID
   useEffect(() => {
@@ -80,28 +79,19 @@ export default function Checkout() {
         amount,
         currency: currencyParam,
         orderId: orderIdParam,
+        customerEmail: customerEmail.trim() || undefined,
         productName: merchantProfile ? `${merchantProfile.businessName} Purchase` : `Order #${orderIdParam}`,
       })
 
       if (res.checkoutUrl) {
-        // Direct redirect to Stripe Hosted Checkout
         window.location.href = res.checkoutUrl
         return
       }
 
-      // If simulated or immediate confirmation
-      setPaidSuccess(true)
+      setCheckoutError('Checkout URL was not returned by gateway.')
+      setIsProcessing(false)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Checkout initiation failed'
-      // If Stripe credentials are not configured by reseller yet, show helpful fallback
-      if (msg.includes('setup mode') || msg.includes('Stripe credentials')) {
-        setCheckoutError('Admin has not yet saved Stripe API keys in the Settings tab. Running in simulated authorization mode.')
-        setTimeout(() => {
-          setPaidSuccess(true)
-          setIsProcessing(false)
-        }, 1200)
-        return
-      }
       setCheckoutError(msg)
       setIsProcessing(false)
     }
@@ -223,40 +213,7 @@ export default function Checkout() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Payment Method Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-slate-300">Select Payment Rails</label>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant={method === 'card' ? 'default' : 'outline'}
-                  className={`gap-1.5 sm:gap-2 h-auto py-2.5 sm:py-3 px-2 flex-col items-center justify-center text-xs font-bold transition-all min-h-[44px] ${
-                    method === 'card'
-                      ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
-                      : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
-                  }`}
-                  onClick={() => setMethod('card')}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  <span>Stripe Card</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant={method === 'wallet' ? 'default' : 'outline'}
-                  className={`gap-1.5 sm:gap-2 h-auto py-2.5 sm:py-3 px-2 flex-col items-center justify-center text-xs font-bold transition-all min-h-[44px] ${
-                    method === 'wallet'
-                      ? 'bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white shadow-[0_0_18px_rgba(217,70,239,0.7)] border border-fuchsia-400'
-                      : 'border-slate-700 text-slate-400 hover:text-white bg-[#060c24]'
-                  }`}
-                  onClick={() => setMethod('wallet')}
-                >
-                  <Coins className="h-4 w-4" />
-                  <span>Crypto Rails</span>
-                </Button>
-              </div>
-            </div>
-
+          <CardContent className="space-y-4">
             {/* Error Message */}
             {checkoutError && (
               <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-300 text-xs flex items-start gap-2.5">
@@ -265,86 +222,52 @@ export default function Checkout() {
               </div>
             )}
 
-            {/* Card Form */}
-            {method === 'card' && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Cardholder Full Name</label>
-                  <Input
-                    placeholder="Cardholder Name"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 text-base sm:text-sm min-h-[44px]"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Card Number</label>
-                  <Input
-                    placeholder="4111 2222 3333 4444"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 font-mono text-base sm:text-sm min-h-[44px]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Expires</label>
-                    <Input
-                      placeholder="MM/YY"
-                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Security CVC</label>
-                    <Input
-                      placeholder="CVC"
-                      type="password"
-                      maxLength={4}
-                      className="bg-[#060c24] border-cyan-500/40 text-white font-mono text-base sm:text-sm min-h-[44px]"
-                    />
-                  </div>
-                </div>
+            <div className="p-4 rounded-2xl bg-[#07102e] border border-cyan-500/30 space-y-2 text-xs">
+              <div className="flex justify-between text-slate-400">
+                <span>Order Reference</span>
+                <span className="font-mono text-slate-200">{orderIdParam}</span>
               </div>
-            )}
-
-            {method === 'wallet' && (
-              <div className="space-y-3 p-4 rounded-2xl bg-[#060c24] border border-cyan-500/30 text-xs">
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-slate-300">Digital Asset Currency</label>
-                  <Input defaultValue="USDT (Polygon PoS)" readOnly className="bg-[#040817] font-mono text-cyan-300 text-base sm:text-sm min-h-[44px]" />
-                </div>
-                <p className="text-slate-400 text-[11px]">
-                  Smart contract escrow deposit address generated and verified on polygonscan.
-                </p>
+              <div className="flex justify-between text-slate-400">
+                <span>Total Due</span>
+                <span className="font-bold text-white">${amount.toFixed(2)} {currencyParam}</span>
               </div>
-            )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-300">Receipt Email (Optional)</label>
+              <Input
+                type="email"
+                placeholder="customer@example.com"
+                value={customerEmail}
+                onChange={(e) => setCustomerEmail(e.target.value)}
+                className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 text-base sm:text-sm min-h-[44px]"
+              />
+            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3">
             <Button
               className="w-full gap-2 py-4 sm:py-6 text-sm font-extrabold min-h-[48px] bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 hover:from-cyan-400 hover:via-blue-500 hover:to-cyan-400 text-white shadow-[0_0_25px_rgba(0,240,255,0.7)] cursor-pointer"
               size="lg"
-              disabled={isProcessing}
+              disabled={isProcessing || !refParam}
               onClick={handlePayment}
             >
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Connecting to Stripe Secure Gateway...</span>
+                  <span>Connecting to Secure Checkout...</span>
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="h-5 w-5" />
-                  <span>Pay ${amount.toFixed(2)} {currencyParam}</span>
+                  <ExternalLink className="h-5 w-5" />
+                  <span>Proceed to Pay ${amount.toFixed(2)} {currencyParam}</span>
                 </>
               )}
             </Button>
 
             <div className="text-[11px] text-center text-slate-400 flex items-center justify-center gap-1.5">
               <Lock className="h-3 w-3 text-emerald-400" />
-              <span>Directly authenticated with Stripe & PGX multi-merchant routing.</span>
+              <span>Supports Cards, Apple Pay, Google Pay, Link, and eligible local payment methods.</span>
             </div>
           </CardFooter>
         </Card>
