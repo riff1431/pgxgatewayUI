@@ -95,7 +95,7 @@ export default function MerchantTransactionsTab() {
 
   // Filters
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'refunded'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'succeeded' | 'pending' | 'failed' | 'refunded'>('all')
 
   const fetchTransactions = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
@@ -331,7 +331,7 @@ export default function MerchantTransactionsTab() {
 
             {activeView === 'transactions' && (
               <div className="flex items-center gap-1 p-1 rounded-xl bg-[#030614] border border-cyan-500/20 shrink-0">
-                {(['all', 'succeeded', 'pending', 'refunded'] as const).map((st) => (
+                {(['all', 'succeeded', 'pending', 'failed', 'refunded'] as const).map((st) => (
                   <button
                     key={st}
                     type="button"
@@ -452,37 +452,51 @@ export default function MerchantTransactionsTab() {
 
                         {/* Hold & Reserve Schedule */}
                         <td className="p-3.5 whitespace-nowrap">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5">
-                              {t.settlementStatus === 'available' ? (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
-                                  AVAILABLE
-                                </span>
-                              ) : t.settlementStatus === 'paid_out' ? (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
-                                  PAID OUT
-                                </span>
-                              ) : (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                                  ON HOLD ({holdDays}D)
-                                </span>
-                              )}
-                              {holdDate && (
-                                <span className="text-[11px] text-slate-300 flex items-center gap-1 font-mono">
-                                  <Calendar className="w-3 h-3 text-cyan-400" />
-                                  {holdDate}
-                                </span>
+                          {t.status === 'failed' ? (
+                            <div className="space-y-1">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 font-bold border border-rose-500/30">
+                                NO SETTLEMENT (FAILED)
+                              </span>
+                            </div>
+                          ) : t.status === 'pending' ? (
+                            <div className="space-y-1">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
+                                AWAITING PAYMENT
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5">
+                                {t.settlementStatus === 'available' ? (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                                    AVAILABLE
+                                  </span>
+                                ) : t.settlementStatus === 'paid_out' ? (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
+                                    PAID OUT
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+                                    ON HOLD ({holdDays}D)
+                                  </span>
+                                )}
+                                {holdDate && (
+                                  <span className="text-[11px] text-slate-300 flex items-center gap-1 font-mono">
+                                    <Calendar className="w-3 h-3 text-cyan-400" />
+                                    {holdDate}
+                                  </span>
+                                )}
+                              </div>
+
+                              {t.rollingReserveAmount !== undefined && t.rollingReserveAmount > 0 && (
+                                <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
+                                  <Lock className="w-2.5 h-2.5 text-cyan-400" />
+                                  <span>Rolling Reserve ({reserveRate}%): ${t.rollingReserveAmount.toFixed(2)}</span>
+                                  {reserveDate && <span className="text-slate-500">({reserveDate})</span>}
+                                </div>
                               )}
                             </div>
-
-                            {t.rollingReserveAmount !== undefined && t.rollingReserveAmount > 0 && (
-                              <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
-                                <Lock className="w-2.5 h-2.5 text-cyan-400" />
-                                <span>Rolling Reserve ({reserveRate}%): ${t.rollingReserveAmount.toFixed(2)}</span>
-                                {reserveDate && <span className="text-slate-500">({reserveDate})</span>}
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </td>
                       </tr>
                     )
