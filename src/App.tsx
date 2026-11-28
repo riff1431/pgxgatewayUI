@@ -18,6 +18,7 @@ const SupportPage = lazy(() => import('@/pages/SupportPage'))
 const RegistrationPage = lazy(() => import('@/pages/RegistrationPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const Checkout = lazy(() => import('@/pages/Checkout'))
+const WhiteLabelCheckoutPage = lazy(() => import('@/pages/WhiteLabelCheckoutPage'))
 const PayLinkPage = lazy(() => import('@/pages/PayLinkPage'))
 const AdminPage = lazy(() => import('@/pages/AdminPage'))
 const SuperAdminPage = lazy(() => import('@/pages/SuperAdminPage'))
@@ -52,6 +53,7 @@ function AppContent() {
             <Route path="/register" element={<RegistrationPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout/:paymentId" element={<WhiteLabelCheckoutPage />} />
             <Route path="/pay/:slug" element={<PayLinkPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/*" element={<AdminPage />} />

@@ -89,6 +89,9 @@ export interface OnePaySettingsPayload {
   testEndpointSecret?: string
   webhookUrl?: string
   enabled?: boolean
+  customCheckoutEnabled?: boolean
+  customCheckoutApiBase?: string
+  customCheckoutFrontendBase?: string
 }
 
 export interface OnePaySettingsResponse {
@@ -107,6 +110,9 @@ export interface OnePaySettingsResponse {
   webhookUrl: string
   enabled: boolean
   isConfigured: boolean
+  customCheckoutEnabled?: boolean
+  customCheckoutApiBase?: string
+  customCheckoutFrontendBase?: string
 }
 
 export interface UpdatePlatformSettingsPayload {

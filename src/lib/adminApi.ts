@@ -275,6 +275,10 @@ export interface SystemConfigData {
   supportTelegram?: string
   supportWhatsapp?: string
   updatedAt?: string
+  onePayCheckout?: {
+    customCheckoutEnabled: boolean
+    checkoutApiBase: string
+  }
 }
 
 export interface MerchantMessageItem {

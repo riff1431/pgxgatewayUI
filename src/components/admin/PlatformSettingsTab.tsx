@@ -51,6 +51,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [onePayLiveWebhookSecret, setOnePayLiveWebhookSecret] = useState('')
   const [onePayTestWebhookSecret, setOnePayTestWebhookSecret] = useState('')
   const [onePayLiveEndpointSecret, setOnePayLiveEndpointSecret] = useState('')
+  const [onePayCustomCheckoutEnabled, setOnePayCustomCheckoutEnabled] = useState(false)
+  const [onePayCustomCheckoutApiBase, setOnePayCustomCheckoutApiBase] = useState('https://pay.pgxgateway.com/api')
+  const [onePayCustomCheckoutFrontendBase, setOnePayCustomCheckoutFrontendBase] = useState('https://pgxgateway.com')
 
   const loadSettings = useCallback(async () => {
     setLoading(true)
@@ -73,6 +76,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         setOnePayLiveWebhookSecret(data.onePay.liveWebhookSecret || '')
         setOnePayTestWebhookSecret(data.onePay.testWebhookSecret || '')
         setOnePayLiveEndpointSecret(data.onePay.liveEndpointSecret || '')
+        setOnePayCustomCheckoutEnabled(Boolean(data.onePay.customCheckoutEnabled))
+        setOnePayCustomCheckoutApiBase(data.onePay.customCheckoutApiBase || 'https://pay.pgxgateway.com/api')
+        setOnePayCustomCheckoutFrontendBase(data.onePay.customCheckoutFrontendBase || 'https://pgxgateway.com')
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error connecting to backend'
@@ -103,6 +109,9 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
           liveWebhookSecret: onePayLiveWebhookSecret,
           testWebhookSecret: onePayTestWebhookSecret,
           liveEndpointSecret: onePayLiveEndpointSecret,
+          customCheckoutEnabled: onePayCustomCheckoutEnabled,
+          customCheckoutApiBase: onePayCustomCheckoutApiBase.trim(),
+          customCheckoutFrontendBase: onePayCustomCheckoutFrontendBase.trim(),
         },
       })
       if (updated?.onePay) {
@@ -114,6 +123,11 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
         setOnePayLiveWebhookSecret(updated.onePay.liveWebhookSecret || '')
         setOnePayTestWebhookSecret(updated.onePay.testWebhookSecret || '')
         setOnePayLiveEndpointSecret(updated.onePay.liveEndpointSecret || '')
+        setOnePayCustomCheckoutEnabled(Boolean(updated.onePay.customCheckoutEnabled))
+        setOnePayCustomCheckoutApiBase(updated.onePay.customCheckoutApiBase || onePayCustomCheckoutApiBase)
+        setOnePayCustomCheckoutFrontendBase(
+          updated.onePay.customCheckoutFrontendBase || onePayCustomCheckoutFrontendBase
+        )
       }
       onSuccessToast?.(
         'Platform Settings Updated',
@@ -435,6 +449,50 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
               placeholder="Paste endpoint secret to rotate"
               className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
             />
+          </div>
+        </div>
+
+        {/* White-Label Custom Checkout Configuration */}
+        <div className="pt-4 border-t border-emerald-500/20 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h4 className="text-sm font-bold text-white">White-Label Custom Checkout (Hide Provider Branding)</h4>
+              <p className="text-[11px] text-slate-400">
+                Routes Bridge #3 buyers to <span className="font-mono text-cyan-300">pgxgateway.com/checkout/&#123;id&#125;</span> using your custom checkout DNS hostname.
+              </p>
+            </div>
+            <label className="inline-flex items-center gap-2.5 cursor-pointer select-none px-3.5 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 shrink-0">
+              <input
+                type="checkbox"
+                checked={onePayCustomCheckoutEnabled}
+                onChange={(e) => setOnePayCustomCheckoutEnabled(e.target.checked)}
+                className="accent-cyan-400 w-4 h-4 cursor-pointer"
+              />
+              <span className="text-xs font-bold text-white">Use Custom Checkout UI</span>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-200">Custom Checkout API Base</label>
+              <input
+                type="url"
+                value={onePayCustomCheckoutApiBase}
+                onChange={(e) => setOnePayCustomCheckoutApiBase(e.target.value)}
+                placeholder="https://pay.pgxgateway.com/api"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-200">PGX Checkout Origin URL</label>
+              <input
+                type="url"
+                value={onePayCustomCheckoutFrontendBase}
+                onChange={(e) => setOnePayCustomCheckoutFrontendBase(e.target.value)}
+                placeholder="https://pgxgateway.com"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       </div>
