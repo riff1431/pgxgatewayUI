@@ -776,18 +776,35 @@ export default function UnderwritingDesk({
                               <span className="text-[10px] text-slate-400 capitalize truncate max-w-[80px]">
                                 {app.industry?.replace('-', ' ') || 'General'}
                               </span>
-                              {isSuperAdmin && (
-                                <span
-                                  className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
-                                    app.assignedBridge === 'leads'
-                                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40'
-                                      : 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40'
-                                  }`}
-                                  title={app.assignedBridge === 'leads' ? 'PGX Leads Bridge (Stripe #2)' : 'PGX MarketPlace Bridge (Stripe #1)'}
-                                >
-                                  {app.assignedBridge === 'leads' ? 'Leads #2' : 'Market #1'}
-                                </span>
-                              )}
+                              {isSuperAdmin && (() => {
+                                const bridge = app.assignedBridge || 'marketplace'
+                                const badgeMeta =
+                                  bridge === '1pay'
+                                    ? {
+                                        cls: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40',
+                                        title: '1pay.cx Card-to-Crypto (Bridge #3 — High Risk)',
+                                        label: '1pay #3',
+                                      }
+                                    : bridge === 'leads'
+                                      ? {
+                                          cls: 'bg-amber-500/15 text-amber-300 border border-amber-500/40',
+                                          title: 'PGX Leads Bridge (Stripe #2)',
+                                          label: 'Leads #2',
+                                        }
+                                      : {
+                                          cls: 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40',
+                                          title: 'PGX MarketPlace Bridge (Stripe #1)',
+                                          label: 'Market #1',
+                                        }
+                                return (
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${badgeMeta.cls}`}
+                                    title={badgeMeta.title}
+                                  >
+                                    {badgeMeta.label}
+                                  </span>
+                                )
+                              })()}
                             </div>
                           </div>
                         </div>

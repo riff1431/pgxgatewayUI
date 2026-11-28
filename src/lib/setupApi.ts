@@ -80,6 +80,35 @@ export interface SetupMessageItem {
   createdAt: string
 }
 
+export interface OnePaySettingsPayload {
+  liveApiKey?: string
+  testApiKey?: string
+  liveWebhookSecret?: string
+  testWebhookSecret?: string
+  liveEndpointSecret?: string
+  testEndpointSecret?: string
+  webhookUrl?: string
+  enabled?: boolean
+}
+
+export interface OnePaySettingsResponse {
+  liveApiKey: string
+  testApiKey: string
+  liveWebhookSecret: string
+  testWebhookSecret: string
+  liveEndpointSecret: string
+  testEndpointSecret: string
+  hasLiveApiKey: boolean
+  hasTestApiKey: boolean
+  hasLiveWebhookSecret: boolean
+  hasTestWebhookSecret: boolean
+  hasLiveEndpointSecret: boolean
+  hasTestEndpointSecret: boolean
+  webhookUrl: string
+  enabled: boolean
+  isConfigured: boolean
+}
+
 export interface UpdatePlatformSettingsPayload {
   siteName?: string
   setupFeePriceUSD?: number
@@ -93,6 +122,7 @@ export interface UpdatePlatformSettingsPayload {
     webhookSecret?: string
     mode?: 'test' | 'live'
   }
+  onePay?: OnePaySettingsPayload
 }
 
 export interface PlatformSettingsResponse {
@@ -110,6 +140,7 @@ export interface PlatformSettingsResponse {
     isConfigured: boolean
     mode: 'test' | 'live'
   }
+  onePay?: OnePaySettingsResponse
 }
 
 export interface AdminIntegrationMerchant {

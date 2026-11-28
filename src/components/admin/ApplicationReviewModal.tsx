@@ -124,9 +124,15 @@ export default function ApplicationReviewModal({
   const [approvalMode, setApprovalMode] = useState<'trial' | 'live'>('trial')
 
   // Bridge Routing & Risk Sharding Profile State
-  const [selectedBridge, setSelectedBridge] = useState<'marketplace' | 'leads'>(app?.assignedBridge || 'marketplace')
+  const [selectedBridge, setSelectedBridge] = useState<'marketplace' | 'leads' | '1pay'>(app?.assignedBridge || 'marketplace')
   const [bridgeUpdating, setBridgeUpdating] = useState(false)
   const [bridgeUpdatedMsg, setBridgeUpdatedMsg] = useState<string | null>(null)
+
+  const bridgeDisplayMap: Record<'marketplace' | 'leads' | '1pay', { short: string; full: string }> = {
+    marketplace: { short: 'PGX MarketPlace (#1)', full: 'PGX MarketPlace (Stripe #1)' },
+    leads: { short: 'PGX Leads (#2)', full: 'PGX Leads (Stripe #2)' },
+    '1pay': { short: '1pay.cx Card-to-Crypto (#3)', full: '1pay.cx Card-to-Crypto (#3)' },
+  }
 
   useEffect(() => {
     if (app?.assignedBridge) {
@@ -134,7 +140,7 @@ export default function ApplicationReviewModal({
     }
   }, [app?.assignedBridge])
 
-  const handleUpdateBridge = async (targetBridge: 'marketplace' | 'leads') => {
+  const handleUpdateBridge = async (targetBridge: 'marketplace' | 'leads' | '1pay') => {
     if (!app || bridgeUpdating || targetBridge === selectedBridge) return
     setBridgeUpdating(true)
     setBridgeUpdatedMsg(null)
@@ -143,7 +149,7 @@ export default function ApplicationReviewModal({
       if (res.success) {
         setSelectedBridge(targetBridge)
         app.assignedBridge = targetBridge
-        setBridgeUpdatedMsg(`Routing updated to ${targetBridge === 'leads' ? 'PGX Leads (Stripe #2)' : 'PGX MarketPlace (Stripe #1)'}`)
+        setBridgeUpdatedMsg(`Routing updated to ${bridgeDisplayMap[targetBridge].full}`)
         setTimeout(() => setBridgeUpdatedMsg(null), 3000)
       }
     } catch (err: unknown) {
@@ -800,8 +806,16 @@ export default function ApplicationReviewModal({
                         <ShieldCheck className="h-3 w-3 text-cyan-400" />
                         Assigned Stripe Bridge
                       </span>
-                      <span className={`font-bold font-mono text-xs ${selectedBridge === 'leads' ? 'text-amber-400' : 'text-cyan-300'}`}>
-                        {selectedBridge === 'leads' ? 'PGX Leads (#2)' : 'PGX MarketPlace (#1)'}
+                      <span
+                        className={`font-bold font-mono text-xs ${
+                          selectedBridge === '1pay'
+                            ? 'text-emerald-400'
+                            : selectedBridge === 'leads'
+                              ? 'text-amber-400'
+                              : 'text-cyan-300'
+                        }`}
+                      >
+                        {bridgeDisplayMap[selectedBridge].short}
                       </span>
                     </div>
                   )}
@@ -1107,7 +1121,7 @@ export default function ApplicationReviewModal({
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-                        Active: {selectedBridge === 'leads' ? 'PGX Leads (Stripe #2)' : 'PGX MarketPlace (Stripe #1)'}
+                        Active: {bridgeDisplayMap[selectedBridge].full}
                       </span>
                       {bridgeUpdatedMsg && (
                         <span className="text-[10px] font-bold text-emerald-400 animate-fade-in">
@@ -1117,7 +1131,7 @@ export default function ApplicationReviewModal({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <button
                       type="button"
                       disabled={bridgeUpdating}
@@ -1159,6 +1173,28 @@ export default function ApplicationReviewModal({
                       </div>
                       <p className="text-[11px] text-slate-400 mt-1 leading-snug">
                         B2B Intelligence, Verified Prospect Packs, Lead Databases (pgxleads.shop)
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={bridgeUpdating}
+                      onClick={() => handleUpdateBridge('1pay')}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        selectedBridge === '1pay'
+                          ? 'bg-emerald-500/20 border-emerald-400 text-white shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                          : 'bg-[#040817] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span className="flex items-center gap-1.5">
+                          <span className={`w-2 h-2 rounded-full ${selectedBridge === '1pay' ? 'bg-emerald-400 animate-pulse' : 'bg-slate-600'}`} />
+                          1pay.cx (Bridge 3)
+                        </span>
+                        <span className="text-[10px] font-mono text-emerald-400">High-Risk #3</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-1 leading-snug">
+                        Card-to-Crypto hosted checkout for high-risk verticals (api.1pay.cx)
                       </p>
                     </button>
                   </div>

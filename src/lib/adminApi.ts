@@ -127,6 +127,8 @@ export interface AdminStats {
   rejected: number
 }
 
+export type BridgeProfileType = 'marketplace' | 'leads' | '1pay'
+
 export interface ApplicationItem {
   _id: string
   refId?: string
@@ -152,7 +154,7 @@ export interface ApplicationItem {
   processingStatementDoc?: { name: string; url?: string; path?: string; size?: string; uploadedAt?: string }
   applicationStatus: 'draft' | 'under_review' | 'approved' | 'rejected'
   accountMode?: 'trial' | 'live' | 'suspended'
-  assignedBridge?: 'marketplace' | 'leads'
+  assignedBridge?: BridgeProfileType
   trial?: {
     isActive: boolean
     startedAt?: string
@@ -482,7 +484,7 @@ export const adminApi = {
       status: 'approved' | 'rejected' | 'under_review'
       approveMode?: 'trial' | 'live'
       trialHours?: number
-      assignedBridge?: 'marketplace' | 'leads'
+      assignedBridge?: BridgeProfileType
       offer?: {
         rate?: string
         volume?: string
@@ -502,7 +504,7 @@ export const adminApi = {
     })
   },
 
-  updateMerchantBridge: async (id: string, assignedBridge: 'marketplace' | 'leads') => {
+  updateMerchantBridge: async (id: string, assignedBridge: BridgeProfileType) => {
     return adminRequest<ApplicationItem>(`/admin/applications/${id}/bridge`, {
       method: 'PATCH',
       body: JSON.stringify({ assignedBridge }),

@@ -7,6 +7,8 @@ import {
   MessageSquare,
   Sparkles,
   ExternalLink,
+  KeyRound,
+  Webhook,
 } from 'lucide-react'
 import {
   fetchPlatformSettings,
@@ -40,6 +42,16 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
   const [affiliateCommissionRate, setAffiliateCommissionRate] = useState<number>(20.0)
   const [supportWhatsapp, setSupportWhatsapp] = useState('+1 (437) 577-8785')
 
+  // 1pay.cx Card-to-Crypto Bridge #3 DB Credentials
+  const [onePayEnabled, setOnePayEnabled] = useState(false)
+  const [onePayConfigured, setOnePayConfigured] = useState(false)
+  const [onePayWebhookUrl, setOnePayWebhookUrl] = useState('https://api.pgxgateway.com/api/v1/webhooks/1pay')
+  const [onePayLiveApiKey, setOnePayLiveApiKey] = useState('')
+  const [onePayTestApiKey, setOnePayTestApiKey] = useState('')
+  const [onePayLiveWebhookSecret, setOnePayLiveWebhookSecret] = useState('')
+  const [onePayTestWebhookSecret, setOnePayTestWebhookSecret] = useState('')
+  const [onePayLiveEndpointSecret, setOnePayLiveEndpointSecret] = useState('')
+
   const loadSettings = useCallback(async () => {
     setLoading(true)
     try {
@@ -52,6 +64,16 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
           ? data.supportWhatsapp
           : '+1 (437) 577-8785'
       )
+      if (data.onePay) {
+        setOnePayEnabled(Boolean(data.onePay.enabled))
+        setOnePayConfigured(Boolean(data.onePay.isConfigured))
+        setOnePayWebhookUrl(data.onePay.webhookUrl || 'https://api.pgxgateway.com/api/v1/webhooks/1pay')
+        setOnePayLiveApiKey(data.onePay.liveApiKey || '')
+        setOnePayTestApiKey(data.onePay.testApiKey || '')
+        setOnePayLiveWebhookSecret(data.onePay.liveWebhookSecret || '')
+        setOnePayTestWebhookSecret(data.onePay.testWebhookSecret || '')
+        setOnePayLiveEndpointSecret(data.onePay.liveEndpointSecret || '')
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error connecting to backend'
       onErrorToast?.('Failed to load platform settings', message)
@@ -68,15 +90,34 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
     e.preventDefault()
     setSaving(true)
     try {
-      await updatePlatformSettings({
+      const updated = await updatePlatformSettings({
         setupFeePriceUSD: Number(setupFeePriceUSD),
         officialGithubHandle: officialGithubHandle.trim().replace(/^@/, ''),
         affiliateCommissionRate: Number(affiliateCommissionRate),
         supportWhatsapp: supportWhatsapp.trim(),
+        onePay: {
+          enabled: onePayEnabled,
+          webhookUrl: onePayWebhookUrl.trim(),
+          liveApiKey: onePayLiveApiKey,
+          testApiKey: onePayTestApiKey,
+          liveWebhookSecret: onePayLiveWebhookSecret,
+          testWebhookSecret: onePayTestWebhookSecret,
+          liveEndpointSecret: onePayLiveEndpointSecret,
+        },
       })
+      if (updated?.onePay) {
+        setOnePayEnabled(Boolean(updated.onePay.enabled))
+        setOnePayConfigured(Boolean(updated.onePay.isConfigured))
+        setOnePayWebhookUrl(updated.onePay.webhookUrl || onePayWebhookUrl)
+        setOnePayLiveApiKey(updated.onePay.liveApiKey || '')
+        setOnePayTestApiKey(updated.onePay.testApiKey || '')
+        setOnePayLiveWebhookSecret(updated.onePay.liveWebhookSecret || '')
+        setOnePayTestWebhookSecret(updated.onePay.testWebhookSecret || '')
+        setOnePayLiveEndpointSecret(updated.onePay.liveEndpointSecret || '')
+      }
       onSuccessToast?.(
         'Platform Settings Updated',
-        'Setup fee, affiliate commissions, GitHub handle, and support desk saved successfully.'
+        'Setup fee, commissions, 1pay.cx DB credentials, GitHub handle, and support desk saved successfully.'
       )
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Server error occurred'
@@ -289,6 +330,111 @@ export default function PlatformSettingsTab({ onSuccessToast, onErrorToast }: Pl
                 &ldquo;Hi, I accepted the processing offer and want to pay Setup Fee via Crypto...&rdquo;
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Card 3: 1pay.cx Card-to-Crypto Bridge #3 Database Credentials */}
+      <div className="rounded-3xl bg-[#060b20]/90 border border-emerald-500/30 p-6 sm:p-8 space-y-6 w-full max-w-full min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <KeyRound className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <span>1pay.cx Card-to-Crypto Processor (Bridge #3)</span>
+                <span
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
+                    onePayConfigured && onePayEnabled
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      : 'bg-slate-800 text-slate-400 border-slate-700'
+                  }`}
+                >
+                  {onePayConfigured && onePayEnabled ? 'Active in MongoDB' : 'Disabled'}
+                </span>
+              </h3>
+              <p className="text-xs text-slate-300">
+                High-risk merchant processor stored securely in MongoDB (no environment variables required).
+              </p>
+            </div>
+          </div>
+
+          <label className="inline-flex items-center gap-2.5 cursor-pointer select-none px-3.5 py-2 rounded-xl bg-[#030614] border border-emerald-500/30">
+            <input
+              type="checkbox"
+              checked={onePayEnabled}
+              onChange={(e) => setOnePayEnabled(e.target.checked)}
+              className="accent-emerald-400 w-4 h-4 cursor-pointer"
+            />
+            <span className="text-xs font-bold text-white">Enable Bridge #3</span>
+          </label>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+            <Webhook className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Webhook Callback URL (Live & Test)</span>
+          </label>
+          <input
+            type="url"
+            value={onePayWebhookUrl}
+            onChange={(e) => setOnePayWebhookUrl(e.target.value)}
+            placeholder="https://api.pgxgateway.com/api/v1/webhooks/1pay"
+            className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-emerald-500/30 text-white font-mono text-xs focus:outline-none"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">Live API Key (pk_...)</label>
+            <input
+              type="text"
+              value={onePayLiveApiKey}
+              onChange={(e) => setOnePayLiveApiKey(e.target.value)}
+              placeholder="Paste pk_... to rotate"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">Test API Key (pk_test_...)</label>
+            <input
+              type="text"
+              value={onePayTestApiKey}
+              onChange={(e) => setOnePayTestApiKey(e.target.value)}
+              placeholder="Paste pk_test_... to rotate"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">Live Webhook Signing Secret (whsec_...)</label>
+            <input
+              type="text"
+              value={onePayLiveWebhookSecret}
+              onChange={(e) => setOnePayLiveWebhookSecret(e.target.value)}
+              placeholder="Paste whsec_... to rotate"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-200">Test Webhook Signing Secret (whsec_test_...)</label>
+            <input
+              type="text"
+              value={onePayTestWebhookSecret}
+              onChange={(e) => setOnePayTestWebhookSecret(e.target.value)}
+              placeholder="Paste whsec_test_... to rotate"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <label className="text-xs font-semibold text-slate-200">Registered Endpoint Signing Secret (Live)</label>
+            <input
+              type="text"
+              value={onePayLiveEndpointSecret}
+              onChange={(e) => setOnePayLiveEndpointSecret(e.target.value)}
+              placeholder="Paste endpoint secret to rotate"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white font-mono text-xs focus:outline-none"
+            />
           </div>
         </div>
       </div>
