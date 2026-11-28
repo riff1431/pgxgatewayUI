@@ -5,8 +5,10 @@ import Footer from '@/components/layout/Footer'
 import ScrollToTop from '@/components/layout/ScrollToTop'
 import PageLoader from '@/components/layout/PageLoader'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import LanguageWelcomeModal from '@/components/layout/LanguageWelcomeModal'
 import { AuthProvider } from '@/context/AuthContext'
 import { BrandingProvider } from '@/context/BrandingContext'
+import { LanguageProvider } from '@/context/LanguageContext'
 
 // Lazy-loaded route components for optimal initial bundle performance
 const Home = lazy(() => import('@/pages/Home'))
@@ -62,6 +64,9 @@ function AppContent() {
 
       {/* Public Pages Footer */}
       {!isAdmin && !isSuperAdmin && !isDashboard && <Footer />}
+
+      {/* First-Visit Multi-Language Selection Pop-up (suppressed on internal admin consoles) */}
+      {!isAdmin && !isSuperAdmin && <LanguageWelcomeModal />}
     </div>
   )
 }
@@ -70,11 +75,13 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <BrandingProvider>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </BrandingProvider>
+        <LanguageProvider>
+          <BrandingProvider>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </BrandingProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </ErrorBoundary>
   )

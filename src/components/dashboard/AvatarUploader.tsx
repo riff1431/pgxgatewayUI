@@ -10,6 +10,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import { AVATAR_PRESETS, type AvatarPreset } from '@/lib/avatarPresets'
 
 interface AvatarUploaderProps {
@@ -19,6 +20,7 @@ interface AvatarUploaderProps {
 
 export default function AvatarUploader({ className = '', onAvatarChanged }: AvatarUploaderProps) {
   const { merchant, uploadAvatar, setAvatarUrl, addToast } = useAuth()
+  const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
@@ -38,15 +40,23 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
       // Validate MIME type
       const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
       if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
-        setPreviewError('Please drop or select a valid image file (JPG, PNG, WEBP, GIF, or SVG).')
-        addToast('Invalid Format', 'Only image files are allowed.', 'error')
+        setPreviewError(t('dashboard.avatarUploader.errInvalidType'))
+        addToast(
+          t('dashboard.avatarUploader.errInvalidToastTitle'),
+          t('dashboard.avatarUploader.errInvalidToastDesc'),
+          'error'
+        )
         return
       }
 
       // 10MB limit
       if (file.size > 10 * 1024 * 1024) {
-        setPreviewError('File size exceeds the 10MB limit.')
-        addToast('File Too Large', 'Maximum avatar size is 10MB.', 'error')
+        setPreviewError(t('dashboard.avatarUploader.errTooLarge'))
+        addToast(
+          t('dashboard.avatarUploader.errLargeToastTitle'),
+          t('dashboard.avatarUploader.errLargeToastDesc'),
+          'error'
+        )
         return
       }
 
@@ -61,7 +71,7 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
         setUploading(false)
       }
     },
-    [uploadAvatar, addToast, onAvatarChanged]
+    [uploadAvatar, addToast, onAvatarChanged, t]
   )
 
   // Drag and Drop handlers
@@ -149,24 +159,24 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
               {uploading && (
                 <div className="absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center text-cyan-300 gap-1.5">
                   <Loader2 className="h-6 w-6 animate-spin" />
-                  <span className="text-[10px] font-bold">Syncing...</span>
+                  <span className="text-[10px] font-bold">{t('dashboard.avatarUploader.syncing')}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Active online indicator */}
-          <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#060b20] shadow-[0_0_8px_rgba(16,185,129,0.9)] flex items-center justify-center text-slate-950" title="Active Account">
+          <span className="absolute bottom-1 end-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-[#060b20] shadow-[0_0_8px_rgba(16,185,129,0.9)] flex items-center justify-center text-slate-950" title="Active Account">
             <Zap className="h-2.5 w-2.5 fill-current" />
           </span>
         </div>
 
         {/* User Info & Quick Controls */}
-        <div className="flex-1 text-center sm:text-left space-y-2">
+        <div className="flex-1 text-center sm:text-start space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <div className="text-[11px] font-black uppercase tracking-widest text-cyan-400">
-                Merchant Identity
+                {t('dashboard.avatarUploader.title')}
               </div>
               <h4 className="text-base sm:text-lg font-black text-white">
                 {merchant?.fullName || 'PGX Merchant'}
@@ -181,22 +191,22 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
                 className="self-center sm:self-auto px-3 py-1 rounded-full text-xs font-semibold text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Trash2 className="h-3 w-3" />
-                <span>Remove Avatar</span>
+                <span>{t('dashboard.avatarUploader.removeAvatar')}</span>
               </button>
             )}
           </div>
 
           <p className="text-xs text-slate-300 leading-relaxed max-w-md">
-            Personalize your underwriter presence. Upload your custom photo via drag-and-drop or select one of our futuristic cyber presets.
+            {t('dashboard.avatarUploader.desc')}
           </p>
 
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1 text-[11px]">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-400/40">
               <ShieldCheck className="h-3 w-3" />
-              {matchedPreset ? `Preset: ${matchedPreset.name}` : currentAvatar ? 'Custom CDN Upload' : 'Default Monogram'}
+              {matchedPreset ? matchedPreset.name : currentAvatar ? 'Custom CDN' : 'Default'}
             </span>
             <span className="text-slate-500">•</span>
-            <span className="text-slate-400">Synced across Top Navbar & Messages</span>
+            <span className="text-slate-400">{t('dashboard.avatarUploader.syncedNote')}</span>
           </div>
         </div>
       </div>
@@ -212,7 +222,7 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
       <div className="space-y-2">
         <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
           <UploadCloud className="h-4 w-4 text-cyan-400" />
-          <span>Drag & Drop Avatar Image Upload</span>
+          <span>{t('dashboard.avatarUploader.dragDropTitle')}</span>
         </label>
 
         <div
@@ -254,20 +264,20 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
           <div className="space-y-1">
             <div className="text-xs sm:text-sm font-bold text-white">
               {isDragging ? (
-                <span className="text-cyan-300">Drop image here to instantly set avatar</span>
+                <span className="text-cyan-300">{t('dashboard.avatarUploader.dropHere')}</span>
               ) : uploading ? (
-                <span className="text-cyan-300 animate-pulse">Streaming image to Cloudinary CDN...</span>
+                <span className="text-cyan-300 animate-pulse">{t('dashboard.avatarUploader.streaming')}</span>
               ) : (
                 <>
                   <span className="text-cyan-300 underline underline-offset-4 decoration-cyan-400/60">
-                    Click to browse
+                    {t('dashboard.avatarUploader.clickBrowse')}
                   </span>{' '}
-                  or drag & drop your avatar image
+                  {t('dashboard.avatarUploader.orDragDrop')}
                 </>
               )}
             </div>
             <div className="text-[11px] text-slate-400">
-              Supports PNG, JPG, WEBP, GIF, or SVG • Maximum file size 10MB
+              {t('dashboard.avatarUploader.supportsNote')}
             </div>
           </div>
         </div>
@@ -282,16 +292,16 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
             </div>
             <div>
               <h5 className="text-xs sm:text-sm font-bold text-white">
-                Pre-Made PGX Cyber Avatars
+                {t('dashboard.avatarUploader.presetsTitle')}
               </h5>
               <p className="text-[11px] text-slate-400">
-                Instant 1-click selection from our curated fintech persona collection.
+                {t('dashboard.avatarUploader.presetsDesc')}
               </p>
             </div>
           </div>
 
           <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider hidden sm:inline-block">
-            {AVATAR_PRESETS.length} Presets Available
+            {AVATAR_PRESETS.length} Presets
           </span>
         </div>
 
@@ -315,7 +325,7 @@ export default function AvatarUploader({ className = '', onAvatarChanged }: Avat
               >
                 {/* Active Checkmark Pill */}
                 {isSelected && (
-                  <span className="absolute top-2 right-2 w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,1)]">
+                  <span className="absolute top-2 end-2 w-5 h-5 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center shadow-[0_0_8px_rgba(0,240,255,1)]">
                     <Check className="h-3 w-3 stroke-[3]" />
                   </span>
                 )}

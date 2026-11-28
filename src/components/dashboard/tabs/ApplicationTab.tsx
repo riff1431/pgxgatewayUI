@@ -10,9 +10,11 @@ import {
   Store
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 export default function ApplicationTab() {
   const { merchant, applicationStatus } = useAuth()
+  const { t } = useTranslation()
 
   const isApproved = applicationStatus === 'approved'
   const isRejected = applicationStatus === 'rejected'
@@ -50,21 +52,25 @@ export default function ApplicationTab() {
           </div>
           <div>
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Application Lifecycle
+              {t('dashboard.applicationTab.lifecycleTitle')}
             </div>
             <h2 className="text-lg sm:text-xl font-black text-white">
               {isApproved
-                ? 'Application Approved & Live'
+                ? t('dashboard.applicationTab.statusApproved')
                 : isRejected
-                ? 'Application Declined'
-                : 'Underwriting Review In Progress'}
+                ? t('dashboard.statusCard.declined')
+                : applicationStatus === 'additional_info_required'
+                ? t('dashboard.statusCard.actionRequired')
+                : t('dashboard.statusCard.underReview')}
             </h2>
             <p className="text-xs text-slate-300">
               {isApproved
-                ? 'Your merchant processing account is active. Payment gateway credentials and settlement are live.'
+                ? t('dashboard.applicationTab.approvedDesc')
                 : isRejected
-                ? 'Your application could not be approved at this time. Contact your account manager for assistance.'
-                : 'Your business documentation and processing metrics are being verified by our compliance desk.'}
+                ? t('dashboard.applicationTab.declinedDesc')
+                : applicationStatus === 'additional_info_required'
+                ? t('dashboard.applicationTab.actionRequiredDesc')
+                : t('dashboard.applicationTab.underReviewDesc')}
             </p>
           </div>
         </div>
@@ -79,7 +85,11 @@ export default function ApplicationTab() {
                 : 'text-amber-300 bg-amber-500/10 border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.4)]'
             }`}
           >
-            {isApproved ? 'Approved' : isRejected ? 'Declined' : 'Under Review'}
+            {isApproved
+              ? t('dashboard.statusCard.approved')
+              : isRejected
+              ? t('dashboard.statusCard.declined')
+              : t('dashboard.applicationTab.statusPending')}
           </span>
         </div>
       </div>
@@ -94,24 +104,30 @@ export default function ApplicationTab() {
               <Store className="h-4 w-4" />
             </div>
             <h3 className="text-base font-bold text-white tracking-tight">
-              Business & Processing Details
+              {t('dashboard.applicationTab.businessTitle')}
             </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Legal Company Name</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.legalName')}
+              </span>
               <span className="font-bold text-white text-sm">{merchant?.legalName || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Industry</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.industry')}
+              </span>
               <span className="font-bold text-cyan-300 capitalize text-sm">{merchant?.industry ? merchant.industry.replace('-', ' ') : '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Website</span>
-              <span className="font-bold text-white truncate block">
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.website')}
+              </span>
+              <span className="font-bold text-white truncate block" dir="ltr">
                 {merchant?.website ? (
                   <a href={merchant.website} target="_blank" rel="noreferrer" className="text-cyan-400 underline hover:text-cyan-200">
                     {merchant.website}
@@ -123,24 +139,32 @@ export default function ApplicationTab() {
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Years in Business</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.yearsInBusiness')}
+              </span>
               <span className="font-bold text-white">{merchant?.yearsInBusiness || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Monthly Volume</span>
-              <span className="font-bold text-white">{merchant?.monthlyVolume || '—'}</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.monthlyVolume')}
+              </span>
+              <span className="font-bold text-white" dir="ltr">{merchant?.monthlyVolume || '—'}</span>
             </div>
 
             <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
-              <span className="text-slate-400 block text-[10px] uppercase font-semibold">Current Processor</span>
+              <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+                {t('dashboard.applicationTab.currentProcessor')}
+              </span>
               <span className="font-bold text-white">{merchant?.currentProcessor || '—'}</span>
             </div>
           </div>
 
           {/* Switch Reason */}
           <div className="p-3 rounded-xl bg-[#091332]/60 border border-cyan-500/25 text-xs">
-            <span className="text-slate-400 block text-[10px] uppercase font-semibold">Reason for Applying</span>
+            <span className="text-slate-400 block text-[10px] uppercase font-semibold">
+              {t('dashboard.applicationTab.reasonApplying')}
+            </span>
             <p className="text-slate-200 mt-1">
               {merchant?.switchReason || '—'}
             </p>
@@ -154,7 +178,7 @@ export default function ApplicationTab() {
               <User className="h-4 w-4" />
             </div>
             <h3 className="text-base font-bold text-white tracking-tight">
-              Authorized Account Director
+              {t('dashboard.applicationTab.directorTitle')}
             </h3>
           </div>
 
@@ -162,7 +186,7 @@ export default function ApplicationTab() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <User className="h-4 w-4 text-cyan-400" />
-                <span>Full Name:</span>
+                <span>{t('dashboard.applicationTab.fullName')}</span>
               </div>
               <span className="font-bold text-white">{merchant?.fullName || '—'}</span>
             </div>
@@ -170,33 +194,33 @@ export default function ApplicationTab() {
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <Mail className="h-4 w-4 text-cyan-400" />
-                <span>Business Email:</span>
+                <span>{t('dashboard.applicationTab.businessEmail')}</span>
               </div>
-              <span className="font-bold text-white">{merchant?.businessEmail || '—'}</span>
+              <span className="font-bold text-white" dir="ltr">{merchant?.businessEmail || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <Phone className="h-4 w-4 text-cyan-400" />
-                <span>Phone:</span>
+                <span>{t('dashboard.applicationTab.phone')}</span>
               </div>
-              <span className="font-bold text-white">{merchant?.phone || '—'}</span>
+              <span className="font-bold text-white" dir="ltr">{merchant?.phone || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <Send className="h-4 w-4 text-sky-400" />
-                <span>Telegram:</span>
+                <span>{t('dashboard.applicationTab.telegram')}</span>
               </div>
-              <span className="font-bold text-white">{merchant?.telegram || '—'}</span>
+              <span className="font-bold text-white" dir="ltr">{merchant?.telegram || '—'}</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
               <div className="flex items-center gap-2.5 text-slate-300">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                <span>Terms of Service Agreement:</span>
+                <span>{t('dashboard.applicationTab.tosLabel')}</span>
               </div>
-              <span className="font-bold text-emerald-400">Accepted & Verified</span>
+              <span className="font-bold text-emerald-400">{t('dashboard.applicationTab.tosAccepted')}</span>
             </div>
           </div>
         </div>

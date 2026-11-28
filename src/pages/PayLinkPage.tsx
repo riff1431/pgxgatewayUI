@@ -1,13 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import {
-  Check,
-  Lock,
-  ShieldCheck,
-  Loader2,
-  AlertCircle,
-  ExternalLink,
-} from 'lucide-react'
+import { Check, Lock, ShieldCheck, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,8 +13,10 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { checkoutApi, type PublicPaymentLinkData } from '@/lib/checkoutApi'
+import { useTranslation } from '@/context/LanguageContext'
 
 export default function PayLinkPage() {
+  const { t } = useTranslation()
   const { slug = '' } = useParams<{ slug: string }>()
   const [searchParams] = useSearchParams()
   const statusParam = searchParams.get('status')
@@ -31,9 +26,10 @@ export default function PayLinkPage() {
   const [loading, setLoading] = useState(true)
   const [customerEmail, setCustomerEmail] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(
-    statusParam === 'cancelled' ? 'Payment was cancelled. You can try again below.' : null
-  )
+  const [dismissedCancelled, setDismissedCancelled] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const error =
+    actionError ?? (!dismissedCancelled && statusParam === 'cancelled' ? t('payLink.cancelledMsg') : null)
 
   useEffect(() => {
     let active = true
@@ -56,7 +52,8 @@ export default function PayLinkPage() {
 
   const handleProceedToPay = async () => {
     if (!slug) return
-    setError(null)
+    setActionError(null)
+    setDismissedCancelled(true)
     setIsProcessing(true)
     try {
       const res = await checkoutApi.createPaymentLinkCheckout(slug, {
@@ -66,10 +63,10 @@ export default function PayLinkPage() {
         window.location.href = res.checkoutUrl
         return
       }
-      setError('Checkout URL was not returned by gateway.')
+      setActionError(t('payLink.errMissingUrl'))
       setIsProcessing(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Unable to initialize checkout.')
+      setActionError(err instanceof Error ? err.message : t('payLink.errInitFailed'))
       setIsProcessing(false)
     }
   }
@@ -78,7 +75,7 @@ export default function PayLinkPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-slate-300 text-xs">
         <Loader2 className="h-7 w-7 animate-spin text-cyan-400" />
-        <span>Loading secure payment link...</span>
+        <span>{t('payLink.loading')}</span>
       </div>
     )
   }
@@ -89,11 +86,11 @@ export default function PayLinkPage() {
         <Card className="border-[1.5px] border-red-500/60 bg-[#050b1f]/95 text-center p-6 space-y-4">
           <AlertCircle className="h-10 w-10 text-red-400 mx-auto" />
           <div className="space-y-1">
-            <h1 className="text-lg font-bold text-white">Payment Link Not Found</h1>
-            <p className="text-xs text-slate-400">This payment link does not exist or has been removed.</p>
+            <h1 className="text-lg font-bold text-white">{t('payLink.notFoundTitle')}</h1>
+            <p className="text-xs text-slate-400">{t('payLink.notFoundDesc')}</p>
           </div>
           <Button asChild variant="outline" className="border-cyan-500/40 text-cyan-300">
-            <Link to="/">Back to Home</Link>
+            <Link to="/">{t('payLink.backHome')}</Link>
           </Button>
         </Card>
       </div>
@@ -107,10 +104,10 @@ export default function PayLinkPage() {
     <div className="max-w-lg mx-auto px-3 sm:px-4 py-8 sm:py-12 space-y-6 relative animate-fade-in">
       <div className="flex items-center justify-between">
         <Badge variant="outline" className="text-xs gap-1 border-cyan-500/40 text-cyan-300 bg-cyan-950/40">
-          <Lock className="h-3 w-3 text-cyan-400" /> 256-bit Encrypted
+          <Lock className="h-3 w-3 text-cyan-400" /> {t('payLink.badgeEncrypted')}
         </Badge>
         <Badge variant="outline" className="text-xs gap-1 border-emerald-500/40 text-emerald-300 bg-emerald-950/40">
-          <ShieldCheck className="h-3 w-3 text-emerald-400" /> Hosted Checkout
+          <ShieldCheck className="h-3 w-3 text-emerald-400" /> {t('payLink.badgeHosted')}
         </Badge>
       </div>
 
@@ -120,27 +117,35 @@ export default function PayLinkPage() {
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 mx-auto flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)] mb-3">
               <Check className="h-8 w-8 stroke-[3]" />
             </div>
-            <CardTitle className="text-2xl font-black text-white">Payment Confirmed</CardTitle>
+            <CardTitle className="text-2xl font-black text-white">
+              {t('payLink.successTitle')}
+            </CardTitle>
             <CardDescription className="text-slate-300 text-xs">
-              Your payment for <span className="text-white font-semibold">{paymentLink.title}</span> has been processed.
+              {t('payLink.successDescPrefix')}{' '}
+              <span className="text-white font-semibold">{paymentLink.title}</span>{' '}
+              {t('payLink.successDescSuffix')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-xs">
             <div className="p-4 rounded-2xl bg-[#07102e] border border-cyan-500/30 space-y-2">
               <div className="flex justify-between text-slate-400">
-                <span>Merchant</span>
-                <span className="font-bold text-white">{merchant?.businessName || 'Verified Merchant'}</span>
+                <span>{t('payLink.merchantLabel')}</span>
+                <span className="font-bold text-white">
+                  {merchant?.businessName || t('payLink.verifiedMerchantFallback')}
+                </span>
               </div>
               <div className="flex justify-between text-slate-400">
-                <span>Amount Paid</span>
-                <span className="font-black text-emerald-400 text-base">
+                <span>{t('payLink.amountPaidLabel')}</span>
+                <span dir="ltr" className="font-black text-emerald-400 text-base">
                   {paymentLink.amount.toFixed(2)} {paymentLink.currency}
                 </span>
               </div>
               {sessionIdParam && (
                 <div className="flex justify-between text-slate-400">
-                  <span>Reference</span>
-                  <span className="font-mono text-[10px] text-slate-300 truncate max-w-[200px]">{sessionIdParam}</span>
+                  <span>{t('payLink.referenceLabel')}</span>
+                  <span dir="ltr" className="font-mono text-[10px] text-slate-300 truncate max-w-[200px]">
+                    {sessionIdParam}
+                  </span>
                 </div>
               )}
             </div>
@@ -150,26 +155,34 @@ export default function PayLinkPage() {
         <Card className="border-[1.5px] border-cyan-400/70 shadow-[0_0_30px_rgba(0,240,255,0.25)] bg-[#050b1f]/95 backdrop-blur-xl">
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-cyan-300">{merchant?.businessName || 'Verified Merchant'}</span>
+              <span className="text-xs font-semibold text-cyan-300">
+                {merchant?.businessName || t('payLink.verifiedMerchantFallback')}
+              </span>
               {merchant?.isVerified && (
                 <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1 bg-emerald-950/50 border border-emerald-500/40 px-2 py-0.5 rounded-full">
-                  <ShieldCheck className="h-3 w-3" /> Verified
+                  <ShieldCheck className="h-3 w-3" /> {t('payLink.verifiedBadge')}
                 </span>
               )}
             </div>
 
             <div className="flex items-start justify-between gap-4">
               <div>
-                <CardTitle className="text-xl sm:text-2xl font-black text-white">{paymentLink.title}</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-black text-white">
+                  {paymentLink.title}
+                </CardTitle>
                 {paymentLink.description && (
-                  <CardDescription className="text-slate-300 text-xs mt-1">{paymentLink.description}</CardDescription>
+                  <CardDescription className="text-slate-300 text-xs mt-1">
+                    {paymentLink.description}
+                  </CardDescription>
                 )}
               </div>
-              <div className="text-right shrink-0">
-                <div className="text-2xl sm:text-3xl font-black text-white">
+              <div className="text-end shrink-0">
+                <div dir="ltr" className="text-2xl sm:text-3xl font-black text-white">
                   {paymentLink.amount.toFixed(2)}
                 </div>
-                <div className="text-[10px] font-bold text-cyan-400 uppercase">{paymentLink.currency}</div>
+                <div className="text-[10px] font-bold text-cyan-400 uppercase">
+                  {paymentLink.currency}
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -180,8 +193,8 @@ export default function PayLinkPage() {
                 <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
                 <span>
                   {paymentLink.status === 'completed'
-                    ? 'This one-time payment link has already been paid.'
-                    : 'This payment link is currently paused by the merchant.'}
+                    ? t('payLink.statusCompletedMsg')
+                    : t('payLink.statusDisabledMsg')}
                 </span>
               </div>
             )}
@@ -195,10 +208,13 @@ export default function PayLinkPage() {
 
             {paymentLink.status === 'active' && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Receipt Email (Optional)</label>
+                <label className="text-xs font-semibold text-slate-300">
+                  {t('payLink.receiptEmailLabel')}
+                </label>
                 <Input
                   type="email"
-                  placeholder="buyer@example.com"
+                  dir="ltr"
+                  placeholder={t('payLink.receiptEmailPlaceholder')}
                   value={customerEmail}
                   onChange={(e) => setCustomerEmail(e.target.value)}
                   className="bg-[#060c24] border-cyan-500/40 text-white placeholder-slate-500 text-base sm:text-sm min-h-[44px]"
@@ -216,20 +232,23 @@ export default function PayLinkPage() {
               {isProcessing ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Opening Secure Checkout...</span>
+                  <span>{t('payLink.openingCheckout')}</span>
                 </>
               ) : (
                 <>
                   <ExternalLink className="h-4 w-4" />
                   <span>
-                    Pay {paymentLink.amount.toFixed(2)} {paymentLink.currency}
+                    {t('payLink.payBtn', {
+                      amount: paymentLink.amount.toFixed(2),
+                      currency: paymentLink.currency,
+                    })}
                   </span>
                 </>
               )}
             </Button>
 
             <p className="text-[11px] text-center text-slate-400">
-              Supports Cards, Apple Pay, Google Pay, Link, and eligible local payment methods at checkout.
+              {t('payLink.supportedMethods')}
             </p>
           </CardFooter>
         </Card>

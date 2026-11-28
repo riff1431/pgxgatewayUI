@@ -13,6 +13,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { api } from '@/lib/api'
+import { useTranslation } from '@/context/LanguageContext'
 
 interface MonthlyMaintenanceModalProps {
   isOpen: boolean
@@ -67,6 +68,7 @@ export default function MonthlyMaintenanceModal({
   amount = 499,
   onSuccess,
 }: MonthlyMaintenanceModalProps) {
+  const { t } = useTranslation()
   const [selectedAsset, setSelectedAsset] = useState<CryptoAsset>('USDT_TRC20')
   const [txHash, setTxHash] = useState('')
   const [notes, setNotes] = useState('')
@@ -81,6 +83,13 @@ export default function MonthlyMaintenanceModal({
   if (!isOpen) return null
 
   const activeWallet = CRYPTO_WALLETS[selectedAsset]
+
+  const badgeMap: Record<CryptoAsset, string> = {
+    USDT_TRC20: t('dashboard.monthlyModal.badgeFast'),
+    USDT_ERC20: t('dashboard.monthlyModal.badgeEth'),
+    BTC: t('dashboard.monthlyModal.badgeBtc'),
+    USDC_ERC20: t('dashboard.monthlyModal.badgeCircle'),
+  }
 
   const handleCopy = () => {
     navigator.clipboard.writeText(activeWallet.address)
@@ -111,7 +120,7 @@ export default function MonthlyMaintenanceModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!txHash.trim()) {
-      setError('Please provide the transaction hash (TxID) for payment verification.')
+      setError(t('dashboard.monthlyModal.errMissingTx'))
       return
     }
 
@@ -131,7 +140,7 @@ export default function MonthlyMaintenanceModal({
       setIsSuccess(true)
       if (onSuccess) onSuccess()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to submit payment proof.')
+      setError(err instanceof Error ? err.message : t('dashboard.monthlyModal.errFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -144,7 +153,7 @@ export default function MonthlyMaintenanceModal({
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+          className="absolute top-5 end-5 p-2 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
@@ -157,14 +166,13 @@ export default function MonthlyMaintenanceModal({
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="text-xl font-black text-white tracking-tight">
-                Monthly Maintenance Payment Due
+                {t('dashboard.monthlyModal.title')}
               </h2>
-              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">
-                30-Day Cycle
-              </span>
             </div>
             <p className="text-xs text-slate-300 mt-1">
-              Gateway infrastructure &amp; underwriting maintenance for {merchantLegalName || merchantRefId || 'your account'}.
+              {t('dashboard.monthlyModal.subtitle', {
+                account: merchantLegalName || merchantRefId || t('dashboard.monthlyModal.defaultAccount'),
+              })}
             </p>
           </div>
         </div>
@@ -176,9 +184,9 @@ export default function MonthlyMaintenanceModal({
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white">Payment Proof Submitted Successfully!</h3>
+              <h3 className="text-lg font-bold text-white">{t('dashboard.monthlyModal.successTitle')}</h3>
               <p className="text-xs text-slate-300 max-w-md mx-auto">
-                Your ${amount} monthly maintenance proof and TxID have been recorded. Our desk will confirm the on-chain transfer within 1–2 hours.
+                {t('dashboard.monthlyModal.successDesc', { amount })}
               </p>
             </div>
             <button
@@ -186,7 +194,7 @@ export default function MonthlyMaintenanceModal({
               onClick={onClose}
               className="px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.5)] cursor-pointer"
             >
-              Close Window
+              {t('dashboard.monthlyModal.closeWindow')}
             </button>
           </div>
         ) : (
@@ -197,23 +205,23 @@ export default function MonthlyMaintenanceModal({
               <div>
                 <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>30-Day Recurring Maintenance</span>
+                  <span>{t('dashboard.monthlyModal.recurringLabel')}</span>
                 </div>
-                <div className="text-2xl font-black text-white font-mono mt-0.5">
+                <div className="text-2xl font-black text-white font-mono mt-0.5" dir="ltr">
                   ${amount}.00 <span className="text-xs font-normal text-slate-400">USD</span>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 rounded-full uppercase">
-                  Crypto Only
+                  {t('dashboard.monthlyModal.cryptoOnly')}
                 </span>
-                <p className="text-[10px] text-slate-400 mt-1">Instant On-Chain Receipt</p>
+                <p className="text-[10px] text-slate-400 mt-1">{t('dashboard.monthlyModal.instantReceipt')}</p>
               </div>
             </div>
 
             {/* Asset Selection Buttons */}
             <div className="space-y-2">
-              <label className="text-slate-300 font-semibold">Select Settlement Crypto Rail</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.monthlyModal.selectRail')}</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {(Object.keys(CRYPTO_WALLETS) as CryptoAsset[]).map((key) => {
                   const w = CRYPTO_WALLETS[key]
@@ -223,7 +231,7 @@ export default function MonthlyMaintenanceModal({
                       key={key}
                       type="button"
                       onClick={() => setSelectedAsset(key)}
-                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-start transition-all cursor-pointer ${
                         isSelected
                           ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_15px_rgba(0,240,255,0.3)]'
                           : 'bg-[#030614] border-slate-700/60 text-slate-400 hover:text-white hover:border-slate-500'
@@ -241,13 +249,13 @@ export default function MonthlyMaintenanceModal({
             <div className="p-4 rounded-2xl bg-[#030614] border border-cyan-500/30 space-y-2.5">
               <div className="flex items-center justify-between text-slate-400">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">
-                  {activeWallet.label} Receiving Address
+                  {t('dashboard.monthlyModal.walletLabel', { label: activeWallet.label })}
                 </span>
-                <span className="text-[10px] text-emerald-400">{activeWallet.badge}</span>
+                <span className="text-[10px] text-emerald-400">{badgeMap[selectedAsset]}</span>
               </div>
 
               <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#09153a] border border-cyan-500/40">
-                <span className="font-mono text-cyan-300 font-semibold break-all select-all flex-1 text-[11px]">
+                <span dir="ltr" className="font-mono text-cyan-300 font-semibold break-all select-all flex-1 text-[11px]">
                   {activeWallet.address}
                 </span>
                 <button
@@ -256,28 +264,33 @@ export default function MonthlyMaintenanceModal({
                   className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 font-bold text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
                 >
                   {copiedAddress ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedAddress ? 'Copied' : 'Copy'}</span>
+                  <span>{copiedAddress ? t('dashboard.monthlyModal.copied') : t('dashboard.monthlyModal.copy')}</span>
                 </button>
               </div>
 
               <p className="text-[10px] text-amber-300/80 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3 shrink-0" />
-                <span>Send only {activeWallet.currency} on the {activeWallet.network} network. Cross-chain sends will be lost.</span>
+                <span>
+                  {t('dashboard.monthlyModal.networkWarning', {
+                    currency: activeWallet.currency,
+                    network: activeWallet.network,
+                  })}
+                </span>
               </p>
             </div>
 
             {/* Transaction Hash Input */}
             <div className="space-y-1.5">
               <label className="text-slate-300 font-semibold flex items-center justify-between">
-                <span>Transaction Hash (TxID)</span>
-                <span className="text-rose-400 font-normal">*Required</span>
+                <span>{t('dashboard.monthlyModal.txHashLabel')}</span>
               </label>
               <input
                 type="text"
                 required
+                dir="ltr"
                 value={txHash}
                 onChange={(e) => setTxHash(e.target.value)}
-                placeholder="Paste the on-chain transaction hash or transfer ID..."
+                placeholder={t('dashboard.monthlyModal.txHashPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono text-xs"
               />
             </div>
@@ -285,8 +298,8 @@ export default function MonthlyMaintenanceModal({
             {/* Payment Proof / Screenshot Upload */}
             <div className="space-y-1.5">
               <label className="text-slate-300 font-semibold flex items-center justify-between">
-                <span>Attach Payment Screenshot / Proof</span>
-                <span className="text-cyan-400 font-normal">Optional but Recommended</span>
+                <span>{t('dashboard.monthlyModal.screenshotLabel')}</span>
+                <span className="text-cyan-400 font-normal">{t('dashboard.monthlyModal.screenshotOptional')}</span>
               </label>
 
               <input
@@ -304,8 +317,8 @@ export default function MonthlyMaintenanceModal({
                   className="w-full p-4 rounded-xl border border-dashed border-cyan-500/40 bg-[#030614] hover:bg-[#071330] text-slate-400 hover:text-white flex flex-col items-center justify-center gap-2 transition-all cursor-pointer"
                 >
                   <Upload className="w-5 h-5 text-cyan-400" />
-                  <span className="font-semibold text-xs">Click to browse or drag payment screenshot here</span>
-                  <span className="text-[10px] text-slate-500">Supports PNG, JPG, WEBP, or PDF (Max 10MB)</span>
+                  <span className="font-semibold text-xs">{t('dashboard.monthlyModal.uploadCta')}</span>
+                  <span className="text-[10px] text-slate-500">{t('dashboard.monthlyModal.uploadFormats')}</span>
                 </button>
               ) : (
                 <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/40 flex items-center justify-between gap-3">
@@ -333,7 +346,7 @@ export default function MonthlyMaintenanceModal({
                     type="button"
                     onClick={handleRemoveFile}
                     className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 transition-colors cursor-pointer"
-                    title="Remove File"
+                    title={t('dashboard.monthlyModal.removeFile')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -343,12 +356,12 @@ export default function MonthlyMaintenanceModal({
 
             {/* Notes Input */}
             <div className="space-y-1.5">
-              <label className="text-slate-300 font-semibold">Additional Notes / Sender Details (Optional)</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.monthlyModal.notesLabel')}</label>
               <input
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="e.g. Sent from Binance account / John Doe"
+                placeholder={t('dashboard.monthlyModal.notesPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
               />
             </div>
@@ -364,7 +377,7 @@ export default function MonthlyMaintenanceModal({
             <div className="flex items-center justify-between gap-3 pt-2">
               <div className="text-[10px] text-slate-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span>Processed via PGX Digital Underwriting Escrow</span>
+                <span>{t('dashboard.monthlyModal.escrowNote')}</span>
               </div>
 
               <button
@@ -373,7 +386,9 @@ export default function MonthlyMaintenanceModal({
                 className="px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs shadow-[0_0_20px_rgba(0,240,255,0.45)] hover:shadow-[0_0_25px_rgba(0,240,255,0.7)] cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {submitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                <span>Submit Payment Proof</span>
+                <span>
+                  {submitting ? t('dashboard.monthlyModal.submittingBtn') : t('dashboard.monthlyModal.submitBtn')}
+                </span>
               </button>
             </div>
           </form>

@@ -1,25 +1,27 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  ArrowRight, 
-  Check, 
-  CheckCircle2, 
-  Code2, 
-  Copy, 
-  CreditCard, 
-  Globe2, 
+import {
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Code2,
+  Copy,
+  CreditCard,
+  Globe2,
   Lock,
   ShieldCheck,
   Layers,
   Terminal,
-  ArrowRightLeft 
+  ArrowRightLeft,
 } from 'lucide-react'
 import ApprovalBadge from '@/components/brand/ApprovalBadge'
 import HologramCard from '@/components/brand/HologramCard'
 import IndustriesBar from '@/components/brand/IndustriesBar'
 import ReviewsMarquee from '@/components/brand/ReviewsMarquee'
+import { useTranslation } from '@/context/LanguageContext'
 
 export default function Home() {
+  const { t } = useTranslation()
   const [copiedCode, setCopiedCode] = useState(false)
 
   const codeSnippet = `import { PGXGateway } from '@pgxgateway/sdk'
@@ -44,7 +46,6 @@ const session = await pgx.checkouts.create({
 
   return (
     <div className="min-h-screen text-slate-100 relative overflow-hidden">
-      
       {/* Background Ambient Cyber Lights */}
       <div className="absolute top-20 left-1/4 w-[600px] h-[600px] bg-cyan-600/10 blur-[180px] rounded-full pointer-events-none -z-10" />
       <div className="absolute top-1/3 right-1/4 w-[550px] h-[550px] bg-fuchsia-600/10 blur-[180px] rounded-full pointer-events-none -z-10" />
@@ -53,33 +54,31 @@ const session = await pgx.checkouts.create({
       {/* Hero Section */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
           {/* Left Column: Headlines & High-Impact CTAs */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-center lg:text-left">
-            
+          <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-center lg:text-start">
             {/* Top Live Status Pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-cyan-400/50 bg-[#071330]/80 shadow-[0_0_15px_rgba(0,240,255,0.3)] backdrop-blur-md">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
               <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
-                Enterprise & High-Volume Processing Live
+                {t('home.heroPillLive')}
               </span>
               <span className="hidden sm:inline text-slate-500">|</span>
               <span className="hidden sm:inline text-xs font-semibold text-fuchsia-300">
-                99% Approval Rate
+                {t('home.heroPillApproval')}
               </span>
             </div>
 
             {/* Main Headline */}
             <div className="space-y-3">
               <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-white drop-shadow-[0_2px_15px_rgba(255,255,255,0.25)]">
-                The Next-Gen Global{' '}
+                {t('home.heroTitlePrefix')}{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-fuchsia-400">
-                  Payment Gateway
+                  {t('home.heroTitleHighlight')}
                 </span>{' '}
-                for Modern Commerce
+                {t('home.heroTitleSuffix')}
               </h1>
               <p className="text-sm sm:text-lg lg:text-xl text-slate-300 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                Empowering high-growth merchants with intelligent multi-acquirer cascades, sub-second global settlements, and frictionless 3DS2 checkout. Approved and live in under 24 hours.
+                {t('home.heroSubtitle')}
               </p>
             </div>
 
@@ -90,7 +89,7 @@ const session = await pgx.checkouts.create({
                 className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-extrabold text-sm sm:text-base border border-fuchsia-400 shadow-[0_0_25px_rgba(217,70,239,0.7)] hover:shadow-[0_0_35px_rgba(217,70,239,0.9)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <ArrowRight className="h-5 w-5 text-white group-hover:translate-x-1 transition-transform" />
-                <span>Apply as Merchant</span>
+                <span>{t('home.ctaApply')}</span>
                 <ArrowRight className="h-4 w-4 text-white" />
               </Link>
 
@@ -99,7 +98,7 @@ const session = await pgx.checkouts.create({
                 className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-[#060b20]/90 hover:bg-[#0c1538] text-cyan-300 hover:text-white font-bold text-sm sm:text-base border border-cyan-400/60 shadow-[0_0_18px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.5)] transition-all duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <CreditCard className="h-5 w-5 text-cyan-400" />
-                <span>Explore Checkout Demo</span>
+                <span>{t('home.ctaDemo')}</span>
               </Link>
             </div>
 
@@ -107,25 +106,23 @@ const session = await pgx.checkouts.create({
             <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-slate-300">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-cyan-400" />
-                <span>Zero Rolling Reserve Options</span>
+                <span>{t('home.badgeZeroReserve')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-fuchsia-400" />
-                <span>Daily & Instant Payouts</span>
+                <span>{t('home.badgeDailyPayouts')}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>PCI-DSS Level 1 Certified</span>
+                <span>{t('home.badgePci')}</span>
               </div>
             </div>
-
           </div>
 
           {/* Right Column: 3D Holographic Card & Planet Earth Visual */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            
             {/* Top 3D Approval Badge Accent */}
-            <div className="absolute -top-12 -left-6 sm:-left-10 z-20 hidden sm:block">
+            <div className="absolute -top-12 -start-6 sm:-start-10 z-20 hidden sm:block">
               <ApprovalBadge size="sm" />
             </div>
 
@@ -138,9 +135,7 @@ const session = await pgx.checkouts.create({
             <div className="sm:hidden mt-4">
               <ApprovalBadge size="sm" />
             </div>
-
           </div>
-
         </div>
       </section>
 
@@ -148,68 +143,65 @@ const session = await pgx.checkouts.create({
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-400/60 shadow-[0_0_25px_rgba(0,240,255,0.25)] p-4 sm:p-8 backdrop-blur-xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-cyan-500/20">
-            
             <div className="space-y-1 pt-4 md:pt-0">
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">
+              <div dir="ltr" className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">
                 $500M+
               </div>
               <p className="text-xs sm:text-sm font-semibold text-slate-400">
-                Processed Annually
+                {t('home.statVolumeLabel')}
               </p>
             </div>
 
             <div className="space-y-1 pt-4 md:pt-0">
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-300">
+              <div dir="ltr" className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-300">
                 99.2%
               </div>
               <p className="text-xs sm:text-sm font-semibold text-slate-400">
-                Clean Approval Ratio
+                {t('home.statApprovalLabel')}
               </p>
             </div>
 
             <div className="space-y-1 pt-4 md:pt-0">
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">
+              <div dir="ltr" className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">
                 150+
               </div>
               <p className="text-xs sm:text-sm font-semibold text-slate-400">
-                Global Currencies & Crypto
+                {t('home.statCurrenciesLabel')}
               </p>
             </div>
 
             <div className="space-y-1 pt-4 md:pt-0">
-              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-200">
+              <div dir="ltr" className="text-3xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-200">
                 &lt; 24h
               </div>
               <p className="text-xs sm:text-sm font-semibold text-slate-400">
-                Average Approval & Go-Live
+                {t('home.statGoLiveLabel')}
               </p>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* Industries We Approve Section (Full Bar from Wireframe) */}
+      {/* Industries We Approve Section */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <div className="text-xs font-black tracking-widest text-cyan-400 uppercase">
-              Global Acceptance
+              {t('home.sectorsEyebrow')}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Industries & High-Volume Sectors We Power
+              {t('home.sectorsTitle')}
             </h2>
           </div>
           <Link
             to="/register"
             className="text-xs font-bold text-fuchsia-400 hover:text-fuchsia-300 flex items-center gap-1 transition-colors"
           >
-            <span>Check Industry Eligibility</span>
+            <span>{t('home.sectorsLink')}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        {/* The Reusable 7+ Industry Component */}
         <IndustriesBar />
       </section>
 
@@ -218,79 +210,71 @@ const session = await pgx.checkouts.create({
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-fuchsia-500/40 bg-purple-600/10 text-fuchsia-300 text-xs font-bold shadow-[0_0_10px_rgba(217,70,239,0.3)]">
             <Layers className="h-3.5 w-3.5" />
-            <span>Built For Scale & Reliability</span>
+            <span>{t('home.archPill')}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
-            Enterprise Payment Infrastructure
+            {t('home.archTitle')}
           </h2>
-          <p className="text-sm sm:text-base text-slate-300">
-            Engineered from the ground up for high-velocity transactions, zero downtime, and maximum conversion rates across all major credit card brands.
-          </p>
+          <p className="text-sm sm:text-base text-slate-300">{t('home.archSubtitle')}</p>
         </div>
 
         {/* 4 Feature Cyber Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          {/* Card 1 */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/40 p-6 space-y-4 backdrop-blur-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,240,255,0.35)] transition-all duration-300 group">
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/80 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.5)] group-hover:scale-110 transition-transform">
               <ArrowRightLeft className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
-                Smart Cascading
+                {t('home.card1Title')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Automatic multi-acquirer failover routes declined payments dynamically to maximize authorization rates by up to 18%.
+                {t('home.card1Desc')}
               </p>
             </div>
           </div>
 
-          {/* Card 2 */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-purple-500/40 p-6 space-y-4 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:border-fuchsia-400 hover:shadow-[0_0_30px_rgba(217,70,239,0.35)] transition-all duration-300 group">
             <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-fuchsia-400/80 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)] group-hover:scale-110 transition-transform">
               <ShieldCheck className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-fuchsia-300 transition-colors">
-                Enterprise Fraud Protection & 3DS2
+                {t('home.card2Title')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Frictionless 3D Secure 2.0 with machine learning anomaly detection to stop chargebacks before they strike.
+                {t('home.card2Desc')}
               </p>
             </div>
           </div>
 
-          {/* Card 3 */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/40 p-6 space-y-4 backdrop-blur-xl shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(0,240,255,0.35)] transition-all duration-300 group">
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/80 flex items-center justify-center text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.5)] group-hover:scale-110 transition-transform">
               <Globe2 className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
-                Multi-Currency Payouts
+                {t('home.card3Title')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Accept local payments in 150+ fiat currencies and settle directly into USD, EUR, GBP, USDT, or Bitcoin same-day.
+                {t('home.card3Desc')}
               </p>
             </div>
           </div>
 
-          {/* Card 4 */}
           <div className="rounded-3xl bg-[#060b20]/90 border border-purple-500/40 p-6 space-y-4 backdrop-blur-xl shadow-[0_0_20px_rgba(168,85,247,0.15)] hover:border-fuchsia-400 hover:shadow-[0_0_30px_rgba(217,70,239,0.35)] transition-all duration-300 group">
             <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-fuchsia-400/80 flex items-center justify-center text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.5)] group-hover:scale-110 transition-transform">
               <Lock className="h-6 w-6" />
             </div>
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white group-hover:text-fuchsia-300 transition-colors">
-                Bank-Grade Tokenization
+                {t('home.card4Title')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                PCI-DSS Level 1 compliant token vaulting keeps sensitive customer card data securely isolated from your servers.
+                {t('home.card4Desc')}
               </p>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -298,31 +282,30 @@ const session = await pgx.checkouts.create({
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="rounded-3xl bg-[#060b20]/95 border-2 border-cyan-400/60 shadow-[0_0_35px_rgba(0,240,255,0.3)] p-6 sm:p-10 backdrop-blur-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
             {/* Left: Developer Pitch */}
             <div className="lg:col-span-5 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-400/40 bg-cyan-500/10 text-cyan-300 text-xs font-bold">
                 <Code2 className="h-4 w-4" />
-                <span>Developer Experience</span>
+                <span>{t('home.devPill')}</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
-                Integrate in 15 Minutes with Drop-In SDKs
+                {t('home.devTitle')}
               </h2>
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                RESTful APIs, real-time webhooks, and drop-in client components designed for fast integration and rock-solid reliability.
+                {t('home.devSubtitle')}
               </p>
               <ul className="space-y-2.5 text-xs sm:text-sm text-slate-300">
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-cyan-400" />
-                  <span>Sub-second cryptographic webhook delivery</span>
+                  <Check className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <span>{t('home.devBullet1')}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-cyan-400" />
-                  <span>Hosted Checkout, Embedded Elements, or Direct API</span>
+                  <Check className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <span>{t('home.devBullet2')}</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-cyan-400" />
-                  <span>Full Sandbox environment with simulated cards</span>
+                  <Check className="h-4 w-4 text-cyan-400 shrink-0" />
+                  <span>{t('home.devBullet3')}</span>
                 </li>
               </ul>
               <div className="pt-2">
@@ -330,16 +313,15 @@ const session = await pgx.checkouts.create({
                   to="/checkout"
                   className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-fuchsia-400 hover:text-fuchsia-300 underline underline-offset-4"
                 >
-                  <span>Test interactive checkout session</span>
+                  <span>{t('home.devTestLink')}</span>
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
 
-            {/* Right: Interactive Cyber Terminal */}
-            <div className="lg:col-span-7">
+            {/* Right: Interactive Cyber Terminal (always LTR for code readability) */}
+            <div className="lg:col-span-7" dir="ltr">
               <div className="rounded-2xl bg-[#030617] border border-cyan-500/40 overflow-hidden shadow-2xl">
-                {/* Terminal Header */}
                 <div className="px-4 py-3 bg-[#070e28] border-b border-cyan-500/30 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -358,36 +340,49 @@ const session = await pgx.checkouts.create({
                     {copiedCode ? (
                       <>
                         <Check className="h-3.5 w-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">Copied!</span>
+                        <span className="text-emerald-400">{t('common.copied')}</span>
                       </>
                     ) : (
                       <>
                         <Copy className="h-3.5 w-3.5" />
-                        <span>Copy</span>
+                        <span>{t('common.copy')}</span>
                       </>
                     )}
                   </button>
                 </div>
 
-                {/* Terminal Code Body */}
                 <div className="p-4 sm:p-5 font-mono text-xs sm:text-sm overflow-x-auto text-slate-200 leading-relaxed">
                   <pre>
-                    <span className="text-fuchsia-400">import</span> {'{ PGXGateway }'} <span className="text-fuchsia-400">from</span> <span className="text-cyan-300">'@pgxgateway/sdk'</span>{'\n\n'}
-                    <span className="text-fuchsia-400">const</span> pgx = <span className="text-fuchsia-400">new</span> <span className="text-teal-300">PGXGateway</span>({'{'}{'\n'}
-                    {'  '}apiKey: process.env.<span className="text-amber-300">PGX_SECRET_KEY</span>{'\n'}
-                    {'}'}){'\n\n'}
-                    <span className="text-slate-500">// Initialize instant global checkout</span>{'\n'}
-                    <span className="text-fuchsia-400">const</span> session = <span className="text-fuchsia-400">await</span> pgx.checkouts.<span className="text-teal-300">create</span>({'{'}{'\n'}
+                    <span className="text-fuchsia-400">import</span> {'{ PGXGateway }'}{' '}
+                    <span className="text-fuchsia-400">from</span>{' '}
+                    <span className="text-cyan-300">&apos;@pgxgateway/sdk&apos;</span>
+                    {'\n\n'}
+                    <span className="text-fuchsia-400">const</span> pgx ={' '}
+                    <span className="text-fuchsia-400">new</span>{' '}
+                    <span className="text-teal-300">PGXGateway</span>({'{'}
+                    {'\n'}
+                    {'  '}apiKey: process.env.<span className="text-amber-300">PGX_SECRET_KEY</span>
+                    {'\n'}
+                    {'}'})
+                    {'\n\n'}
+                    <span className="text-slate-500">{'// Initialize instant global checkout'}</span>
+                    {'\n'}
+                    <span className="text-fuchsia-400">const</span> session ={' '}
+                    <span className="text-fuchsia-400">await</span> pgx.checkouts.
+                    <span className="text-teal-300">create</span>({'{'}
+                    {'\n'}
                     {'  '}amount: <span className="text-amber-300">2500.00</span>,{'\n'}
-                    {'  '}currency: <span className="text-cyan-300">'USD'</span>,{'\n'}
-                    {'  '}customerEmail: <span className="text-cyan-300">'client@enterprise.com'</span>,{'\n'}
-                    {'  '}returnUrl: <span className="text-cyan-300">'https://merchant.com/order/success'</span>{'\n'}
+                    {'  '}currency: <span className="text-cyan-300">&apos;USD&apos;</span>,{'\n'}
+                    {'  '}customerEmail:{' '}
+                    <span className="text-cyan-300">&apos;client@enterprise.com&apos;</span>,{'\n'}
+                    {'  '}returnUrl:{' '}
+                    <span className="text-cyan-300">&apos;https://merchant.com/order/success&apos;</span>
+                    {'\n'}
                     {'}'})
                   </pre>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -398,17 +393,13 @@ const session = await pgx.checkouts.create({
       {/* Bottom Conversion CTA Banner */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="relative rounded-3xl overflow-hidden p-8 sm:p-12 text-center bg-gradient-to-r from-[#091136] via-[#150a32] to-[#091136] border-2 border-fuchsia-500/60 shadow-[0_0_40px_rgba(217,70,239,0.4)] space-y-6">
-          
-          {/* Ambient Inner Glow */}
           <div className="absolute inset-0 bg-radial from-fuchsia-600/15 via-transparent to-transparent pointer-events-none" />
 
           <div className="relative z-10 max-w-2xl mx-auto space-y-3">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
-              Ready to Supercharge Your Payment Flow?
+              {t('home.ctaBannerTitle')}
             </h2>
-            <p className="text-sm sm:text-base text-slate-300">
-              Join 1,200+ high-volume merchants worldwide. Complete the simple 3-step application and receive your customized processing offer within 24 hours.
-            </p>
+            <p className="text-sm sm:text-base text-slate-300">{t('home.ctaBannerSubtitle')}</p>
           </div>
 
           <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
@@ -416,17 +407,16 @@ const session = await pgx.checkouts.create({
               to="/register"
               className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white font-black text-base border border-fuchsia-400 shadow-[0_0_30px_rgba(217,70,239,0.8)] hover:scale-105 transition-all duration-300 cursor-pointer"
             >
-              Start Merchant Application Now
+              {t('home.ctaBannerPrimary')}
             </Link>
 
             <Link
               to="/register?step=1"
               className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-[#060b20]/80 hover:bg-[#0c1538] text-slate-200 hover:text-white font-bold text-base border border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all cursor-pointer"
             >
-              Sign In to Account
+              {t('home.ctaBannerSecondary')}
             </Link>
           </div>
-
         </div>
       </section>
 
@@ -435,7 +425,6 @@ const session = await pgx.checkouts.create({
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[120%] h-36 rounded-[100%] border-t-2 border-cyan-400 shadow-[0_-4px_30px_rgba(0,240,255,0.8),0_-12px_60px_rgba(217,70,239,0.6)]" />
         <div className="absolute left-1/2 -translate-x-1/2 top-0 w-64 h-2.5 bg-cyan-300 blur-sm rounded-full" />
       </div>
-
     </div>
   )
 }

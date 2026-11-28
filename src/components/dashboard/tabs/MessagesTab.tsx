@@ -21,6 +21,7 @@ import {
   Plus
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import { type ApiNotification } from '@/lib/api'
 
 // Label color map for glowing cyberpunk aesthetic
@@ -98,37 +99,14 @@ function getLabelStyle(label: string) {
   )
 }
 
-// Preset Quick Templates for instant inquiry creation
-const QUICK_TEMPLATES = [
-  {
-    title: 'Processing Volume Increase',
-    category: 'offer',
-    priority: 'high',
-    labels: ['Underwriting', 'Rates'],
-    body: 'We are anticipating a monthly volume surge over the next quarter and would like to request an underwriting review to raise our monthly processing ceiling and discuss tiered interchange rates.',
-  },
-  {
-    title: 'Multi-Currency & USDT Settlement Rails',
-    category: 'support',
-    priority: 'normal',
-    labels: ['Settlement', 'Technical'],
-    body: 'Could our dedicated account engineer clarify the available settlement cadences for USD and USDT cross-border acquiring, including rolling reserve release windows?',
-  },
-  {
-    title: 'KYC & Verification Document Submission',
-    category: 'compliance',
-    priority: 'high',
-    labels: ['KYC', 'Compliance'],
-    body: 'We have updated our company registration documents and would like to ensure all underwriting requirements are fulfilled for accelerated account activation.',
-  },
-  {
-    title: 'Webhook & API Gateway Integration',
-    category: 'general',
-    priority: 'normal',
-    labels: ['Technical', 'Support'],
-    body: 'Our engineering team is testing automated webhook callbacks for chargeback alerts and transaction authorizations. Could you provide staging sandbox keys?',
-  },
-]
+// Preset Quick Template shape for instant inquiry creation
+interface QuickTemplate {
+  title: string
+  category: 'support' | 'offer' | 'compliance' | 'general'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  labels: string[]
+  body: string
+}
 
 export default function MessagesTab() {
   const {
@@ -144,6 +122,38 @@ export default function MessagesTab() {
     toggleSound,
     testSound,
   } = useAuth()
+  const { t } = useTranslation()
+
+  const localizedQuickTemplates: QuickTemplate[] = [
+    {
+      title: t('dashboard.messagesTab.tpl1Title'),
+      category: 'offer',
+      priority: 'high',
+      labels: ['Underwriting', 'Rates'],
+      body: t('dashboard.messagesTab.tpl1Body'),
+    },
+    {
+      title: t('dashboard.messagesTab.tpl2Title'),
+      category: 'support',
+      priority: 'normal',
+      labels: ['Settlement', 'Technical'],
+      body: t('dashboard.messagesTab.tpl2Body'),
+    },
+    {
+      title: t('dashboard.messagesTab.tpl3Title'),
+      category: 'compliance',
+      priority: 'high',
+      labels: ['KYC', 'Compliance'],
+      body: t('dashboard.messagesTab.tpl3Body'),
+    },
+    {
+      title: t('dashboard.messagesTab.tpl4Title'),
+      category: 'general',
+      priority: 'normal',
+      labels: ['Technical', 'Support'],
+      body: t('dashboard.messagesTab.tpl4Body'),
+    },
+  ]
 
   // Filter & Search State
   const [filter, setFilter] = useState<string>('all')
@@ -279,10 +289,10 @@ export default function MessagesTab() {
   }
 
   // Apply Quick Template
-  const applyTemplate = (tpl: typeof QUICK_TEMPLATES[0]) => {
+  const applyTemplate = (tpl: QuickTemplate) => {
     setComposeSubject(tpl.title)
-    setComposeCategory(tpl.category as typeof composeCategory)
-    setComposePriority(tpl.priority as typeof composePriority)
+    setComposeCategory(tpl.category)
+    setComposePriority(tpl.priority)
     setComposeLabels(tpl.labels)
     setComposeBody(tpl.body)
   }
@@ -316,22 +326,22 @@ export default function MessagesTab() {
           </div>
           <div>
             <div className="text-[11px] font-black tracking-widest text-fuchsia-400 uppercase flex items-center gap-2">
-              <span>Real-Time Underwriting & Messaging Hub</span>
+              <span>{t('dashboard.messagesTab.hubBadge')}</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/50 text-cyan-300 text-[10px] font-mono">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Socket.IO Active
+                {t('dashboard.messagesTab.socketActive')}
               </span>
             </div>
             <h2 className="text-lg sm:text-2xl font-black text-white flex items-center gap-2 mt-0.5">
-              <span>Direct Underwriting Communications</span>
+              <span>{t('dashboard.messagesTab.title')}</span>
               {Boolean(unreadCount && unreadCount > 0) && (
                 <span className="px-2.5 py-0.5 rounded-full bg-fuchsia-600 text-white text-xs font-bold shadow-[0_0_12px_rgba(217,70,239,0.8)] animate-pulse">
-                  {unreadCount} Unread
+                  {t('dashboard.messagesTab.unreadBadge', { count: unreadCount })}
                 </span>
               )}
             </h2>
             <p className="text-xs text-slate-300 mt-1 max-w-2xl">
-              Live bidirectional messaging with our underwriting officers, compliance desk, and technical gateway engineers.
+              {t('dashboard.messagesTab.subtitle')}
             </p>
           </div>
         </div>
@@ -343,7 +353,7 @@ export default function MessagesTab() {
           <button
             type="button"
             onClick={toggleSound}
-            title={soundEnabled ? 'Mute Message Chimes' : 'Enable Message Chimes'}
+            title={soundEnabled ? t('dashboard.messagesTab.muteTitle') : t('dashboard.messagesTab.unmuteTitle')}
             className={`p-2.5 rounded-2xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               soundEnabled
                 ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.25)]'
@@ -351,7 +361,9 @@ export default function MessagesTab() {
             }`}
           >
             {soundEnabled ? <Volume2 className="h-4 w-4 text-cyan-300" /> : <VolumeX className="h-4 w-4" />}
-            <span className="hidden sm:inline">{soundEnabled ? 'Sound ON' : 'Muted'}</span>
+            <span className="hidden sm:inline">
+              {soundEnabled ? t('dashboard.messagesTab.soundOn') : t('dashboard.messagesTab.muted')}
+            </span>
           </button>
 
           {/* Test Sound Chime Button */}
@@ -359,7 +371,7 @@ export default function MessagesTab() {
             <button
               type="button"
               onClick={testSound}
-              title="Test Notification Chime"
+              title={t('dashboard.messagesTab.testSoundTitle')}
               className="p-2.5 rounded-2xl border border-cyan-500/30 bg-[#091332] text-slate-300 hover:text-cyan-300 text-xs font-semibold hover:border-cyan-400/60 transition-all cursor-pointer"
             >
               <Volume2 className="h-4 w-4 text-cyan-400" />
@@ -374,7 +386,7 @@ export default function MessagesTab() {
               className="px-3.5 py-2 rounded-2xl border border-cyan-400/60 bg-[#091332] text-xs font-bold text-cyan-300 hover:bg-cyan-500/15 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.2)]"
             >
               <CheckCheck className="h-4 w-4" />
-              <span>Mark All Read</span>
+              <span>{t('dashboard.messagesTab.markAllRead')}</span>
             </button>
           )}
 
@@ -385,7 +397,7 @@ export default function MessagesTab() {
             className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:via-fuchsia-500 hover:to-purple-600 text-white text-xs sm:text-sm font-bold shadow-[0_0_18px_rgba(217,70,239,0.7)] hover:shadow-[0_0_26px_rgba(217,70,239,0.9)] border border-fuchsia-400 transition-all flex items-center gap-2 cursor-pointer"
           >
             <Send className="h-4 w-4" />
-            <span>New Inquiry</span>
+            <span>{t('dashboard.messagesTab.newInquiry')}</span>
           </button>
         </div>
       </div>
@@ -396,13 +408,13 @@ export default function MessagesTab() {
         {/* Dynamic Label & Category Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-cyan-500/30 scrollbar-track-transparent w-full min-w-0 flex-1">
           {[
-            { id: 'all', label: `All (${notifications.length})`, icon: Mail },
-            { id: 'unread', label: `Unread (${unreadCount})`, icon: Bell },
-            { id: 'starred', label: `Starred (${starredCount})`, icon: Star },
-            { id: 'underwriting', label: 'Underwriting', icon: ShieldCheck },
-            { id: 'urgent', label: `Urgent (${urgentCount})`, icon: AlertTriangle },
-            { id: 'offer', label: 'Offers', icon: Tag },
-            { id: 'compliance', label: 'Compliance', icon: ShieldAlert },
+            { id: 'all', label: t('dashboard.messagesTab.filterAll', { count: notifications.length }), icon: Mail },
+            { id: 'unread', label: t('dashboard.messagesTab.filterUnread', { count: unreadCount }), icon: Bell },
+            { id: 'starred', label: t('dashboard.messagesTab.filterStarred', { count: starredCount }), icon: Star },
+            { id: 'underwriting', label: t('dashboard.messagesTab.filterUnderwriting'), icon: ShieldCheck },
+            { id: 'urgent', label: t('dashboard.messagesTab.filterUrgent', { count: urgentCount }), icon: AlertTriangle },
+            { id: 'offer', label: t('dashboard.messagesTab.filterOffers'), icon: Tag },
+            { id: 'compliance', label: t('dashboard.messagesTab.filterCompliance'), icon: ShieldAlert },
           ].map((tab) => {
             const Icon = tab.icon
             const isActive = filter === tab.id
@@ -431,24 +443,24 @@ export default function MessagesTab() {
             onChange={(e) => setPriorityFilter(e.target.value as 'all' | 'urgent' | 'high')}
             className="rounded-xl border border-cyan-500/40 bg-[#060c24] px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer hidden sm:block"
           >
-            <option value="all">All Priorities</option>
-            <option value="urgent">Urgent Only</option>
-            <option value="high">High + Urgent</option>
+            <option value="all">{t('dashboard.messagesTab.prioAll')}</option>
+            <option value="urgent">{t('dashboard.messagesTab.prioUrgent')}</option>
+            <option value="high">{t('dashboard.messagesTab.prioHigh')}</option>
           </select>
 
           <div className="relative flex-1 sm:w-56">
-            <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+            <Search className="absolute start-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search messages..."
-              className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+              placeholder={t('dashboard.messagesTab.searchPlaceholder')}
+              className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] ps-8 pe-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs"
+                className="absolute end-2.5 top-2 text-slate-400 hover:text-white text-xs"
               >
                 &times;
               </button>
@@ -462,18 +474,18 @@ export default function MessagesTab() {
         {filteredNotifications.length === 0 ? (
           <div className="p-12 text-center rounded-3xl bg-[#060b20]/90 border border-cyan-500/25 text-slate-400 text-xs space-y-3">
             <Mail className="h-8 w-8 mx-auto text-slate-500 stroke-[1.5]" />
-            <div className="font-bold text-white text-sm">No communications found</div>
+            <div className="font-bold text-white text-sm">{t('dashboard.messagesTab.emptyTitle')}</div>
             <p className="max-w-md mx-auto text-slate-400 text-xs">
               {searchQuery
-                ? `No messages matched "${searchQuery}". Try clearing search filter.`
-                : 'Your inbox is clear. Live updates and responses from the Underwriting desk will appear here automatically.'}
+                ? t('dashboard.messagesTab.emptySearch', { query: searchQuery })
+                : t('dashboard.messagesTab.emptyInbox')}
             </p>
             {filter !== 'all' && (
               <button
                 onClick={() => setFilter('all')}
                 className="px-4 py-1.5 rounded-full border border-cyan-400/50 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/10 cursor-pointer"
               >
-                View All Messages
+                {t('dashboard.messagesTab.viewAllBtn')}
               </button>
             )}
           </div>
@@ -535,7 +547,7 @@ export default function MessagesTab() {
                       
                       {/* Sender badge */}
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-800/80 border border-slate-700 text-cyan-300 font-mono">
-                        {isFromMerchant ? 'You' : msg.senderName || 'PGX Underwriting'}
+                        {isFromMerchant ? t('dashboard.messagesTab.you') : msg.senderName || t('dashboard.messagesTab.defaultSender')}
                       </span>
 
                       {/* Subject */}
@@ -551,12 +563,12 @@ export default function MessagesTab() {
                       {/* Priority Tag */}
                       {isUrgent && (
                         <span className="px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-400 text-rose-300 text-[10px] font-bold flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
-                          <AlertTriangle className="h-3 w-3" /> Urgent
+                          <AlertTriangle className="h-3 w-3" /> {t('dashboard.messagesTab.urgentTag')}
                         </span>
                       )}
 
                       {/* Timestamp */}
-                      <span className="text-[10px] text-slate-400 font-mono ml-auto">
+                      <span className="text-[10px] text-slate-400 font-mono ms-auto">
                         {new Date(msg.createdAt).toLocaleString([], {
                           month: 'short',
                           day: 'numeric',
@@ -589,7 +601,7 @@ export default function MessagesTab() {
 
                       {msg.readAt && (
                         <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
-                          <Check className="h-3 w-3 text-cyan-400" /> Read
+                          <Check className="h-3 w-3 text-cyan-400" /> {t('dashboard.messagesTab.readTag')}
                         </span>
                       )}
                     </div>
@@ -609,7 +621,7 @@ export default function MessagesTab() {
                         ? 'text-yellow-400 hover:text-yellow-300 bg-yellow-400/10'
                         : 'text-slate-500 hover:text-yellow-400 hover:bg-yellow-400/10'
                     }`}
-                    title={isStarred ? 'Unstar Message' : 'Star / Pin Message'}
+                    title={isStarred ? t('dashboard.messagesTab.unstarTitle') : t('dashboard.messagesTab.starTitle')}
                   >
                     <Star className={`h-4 w-4 ${isStarred ? 'fill-yellow-400' : ''}`} />
                   </button>
@@ -620,7 +632,7 @@ export default function MessagesTab() {
                       type="button"
                       onClick={() => markOneAsRead(msg._id)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/15 transition-colors cursor-pointer"
-                      title="Mark as Read"
+                      title={t('dashboard.messagesTab.markReadTitle')}
                     >
                       <Check className="h-4 w-4" />
                     </button>
@@ -631,7 +643,7 @@ export default function MessagesTab() {
                     type="button"
                     onClick={() => deleteMessage(msg._id)}
                     className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer opacity-0 group-hover:opacity-100"
-                    title="Dismiss / Delete Message"
+                    title={t('dashboard.messagesTab.deleteTitle')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -657,11 +669,11 @@ export default function MessagesTab() {
                     </div>
                   )}
                   <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-cyan-300 font-mono">
-                    {selectedMessage.senderRole === 'merchant' ? 'You' : selectedMessage.senderName || 'PGX Underwriting'}
+                    {selectedMessage.senderRole === 'merchant' ? t('dashboard.messagesTab.you') : selectedMessage.senderName || t('dashboard.messagesTab.defaultSender')}
                   </span>
                   {selectedMessage.priority === 'urgent' && (
                     <span className="px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-400 text-rose-300 text-[10px] font-bold">
-                      🚨 Urgent
+                      🚨 {t('dashboard.messagesTab.urgentTag')}
                     </span>
                   )}
                   <span className="text-[10px] text-slate-400 font-mono">
@@ -682,7 +694,7 @@ export default function MessagesTab() {
                       ? 'border-yellow-400/60 bg-yellow-400/10 text-yellow-300'
                       : 'border-slate-700 bg-slate-800 text-slate-400 hover:text-white'
                   }`}
-                  title="Star / Unstar"
+                  title={t('dashboard.messagesTab.starTitle')}
                 >
                   <Star className={`h-4 w-4 ${selectedMessage.labels?.includes('Starred') ? 'fill-yellow-400' : ''}`} />
                 </button>
@@ -701,7 +713,7 @@ export default function MessagesTab() {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
                 <Tag className="h-3.5 w-3.5 text-cyan-400" />
-                <span>Labels:</span>
+                <span>{t('dashboard.messagesTab.labelsHeading')}</span>
               </span>
 
               {selectedMessage.labels?.map((lbl) => {
@@ -731,21 +743,21 @@ export default function MessagesTab() {
                     autoFocus
                     value={newLabelInput}
                     onChange={(e) => setNewLabelInput(e.target.value)}
-                    placeholder="Label name..."
+                    placeholder={t('dashboard.messagesTab.labelPlaceholder')}
                     className="px-2 py-0.5 rounded-lg bg-[#060c24] border border-cyan-400 text-white text-xs focus:outline-none"
                   />
                   <button
                     type="submit"
                     className="px-2 py-0.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs"
                   >
-                    Add
+                    {t('dashboard.messagesTab.addBtn')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAddLabel(false)}
                     className="text-slate-400 hover:text-white text-xs"
                   >
-                    Cancel
+                    {t('dashboard.messagesTab.cancelBtn')}
                   </button>
                 </form>
               ) : (
@@ -755,7 +767,7 @@ export default function MessagesTab() {
                   className="px-2 py-0.5 rounded-lg border border-dashed border-cyan-500/40 text-[10px] text-cyan-300 hover:border-cyan-400 flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="h-3 w-3" />
-                  <span>Add Label</span>
+                  <span>{t('dashboard.messagesTab.addLabelBtn')}</span>
                 </button>
               )}
             </div>
@@ -770,9 +782,9 @@ export default function MessagesTab() {
               <div className="flex items-center justify-between text-xs font-bold text-cyan-300">
                 <span className="flex items-center gap-1.5">
                   <MessageSquare className="h-4 w-4" />
-                  <span>Reply to Underwriting Officer</span>
+                  <span>{t('dashboard.messagesTab.replyHeading')}</span>
                 </span>
-                <span className="text-[10px] text-slate-400">⚡ Instant Socket.IO Dispatch</span>
+                <span className="text-[10px] text-slate-400">⚡ {t('dashboard.messagesTab.instantDispatch')}</span>
               </div>
 
               <textarea
@@ -780,7 +792,7 @@ export default function MessagesTab() {
                 required
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                placeholder="Type your response here..."
+                placeholder={t('dashboard.messagesTab.replyPlaceholder')}
                 className="w-full rounded-2xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
               />
 
@@ -790,7 +802,7 @@ export default function MessagesTab() {
                   onClick={() => setSelectedMessage(null)}
                   className="w-full sm:w-auto min-h-[44px] px-4 py-2 rounded-xl sm:rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
                 >
-                  Close
+                  {t('dashboard.messagesTab.closeBtn')}
                 </button>
 
                 <button
@@ -801,12 +813,12 @@ export default function MessagesTab() {
                   {sendingReply ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span>Sending Reply...</span>
+                      <span>{t('dashboard.messagesTab.sendingReply')}</span>
                     </>
                   ) : (
                     <>
                       <Send className="h-3.5 w-3.5" />
-                      <span>Send Response</span>
+                      <span>{t('dashboard.messagesTab.sendResponse')}</span>
                     </>
                   )}
                 </button>
@@ -828,7 +840,7 @@ export default function MessagesTab() {
             <div className="flex items-center justify-between pb-3 border-b border-fuchsia-500/20">
               <div className="flex items-center gap-2.5">
                 <Headphones className="h-5 w-5 text-fuchsia-400" />
-                <h3 className="text-base sm:text-lg font-bold text-white">Underwriting & Concierge Desk</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">{t('dashboard.messagesTab.composeTitle')}</h3>
               </div>
               <button
                 type="button"
@@ -842,10 +854,10 @@ export default function MessagesTab() {
             {/* Quick Templates Selector */}
             <div className="space-y-1.5">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Quick Preset Templates:
+                {t('dashboard.messagesTab.quickTemplates')}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {QUICK_TEMPLATES.map((tpl) => (
+                {localizedQuickTemplates.map((tpl) => (
                   <button
                     key={tpl.title}
                     type="button"
@@ -861,56 +873,56 @@ export default function MessagesTab() {
             {/* Category & Priority */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Inquiry Category</label>
+                <label className="text-[11px] font-semibold text-slate-300">{t('dashboard.messagesTab.catLabel')}</label>
                 <select
                   value={composeCategory}
                   onChange={(e) => setComposeCategory(e.target.value as typeof composeCategory)}
                   className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
                 >
-                  <option value="support">Technical & Gateway Support</option>
-                  <option value="offer">Processing Rates & Limits Review</option>
-                  <option value="compliance">KYC & Compliance Verification</option>
-                  <option value="general">General Merchant Inquiry</option>
+                  <option value="support">{t('dashboard.messagesTab.catSupport')}</option>
+                  <option value="offer">{t('dashboard.messagesTab.catOffer')}</option>
+                  <option value="compliance">{t('dashboard.messagesTab.catCompliance')}</option>
+                  <option value="general">{t('dashboard.messagesTab.catGeneral')}</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Priority Level</label>
+                <label className="text-[11px] font-semibold text-slate-300">{t('dashboard.messagesTab.prioLabel')}</label>
                 <select
                   value={composePriority}
                   onChange={(e) => setComposePriority(e.target.value as typeof composePriority)}
                   className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-base sm:text-xs min-h-[44px] text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
                 >
-                  <option value="normal">Normal (Under 1 Hour)</option>
-                  <option value="high">High Priority</option>
-                  <option value="urgent">🚨 Urgent Attention</option>
-                  <option value="low">Low Priority</option>
+                  <option value="normal">{t('dashboard.messagesTab.prioNormal')}</option>
+                  <option value="high">{t('dashboard.messagesTab.prioHighOpt')}</option>
+                  <option value="urgent">🚨 {t('dashboard.messagesTab.prioUrgentOpt')}</option>
+                  <option value="low">{t('dashboard.messagesTab.prioLowOpt')}</option>
                 </select>
               </div>
             </div>
 
             {/* Subject */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Subject</label>
+              <label className="text-[11px] font-semibold text-slate-300">{t('dashboard.messagesTab.subjectLabel')}</label>
               <input
                 type="text"
                 required
                 value={composeSubject}
                 onChange={(e) => setComposeSubject(e.target.value)}
-                placeholder="e.g. USDT Payout Configuration or Rate Revision"
+                placeholder={t('dashboard.messagesTab.subjectPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-base sm:text-xs min-h-[44px] text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
             {/* Inquiry Content */}
             <div className="space-y-1">
-              <label className="text-[11px] font-semibold text-slate-300">Message Body</label>
+              <label className="text-[11px] font-semibold text-slate-300">{t('dashboard.messagesTab.bodyLabel')}</label>
               <textarea
                 required
                 rows={4}
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
-                placeholder="Describe your inquiry, volume requirements, or technical query in detail..."
+                placeholder={t('dashboard.messagesTab.bodyPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
               />
             </div>
@@ -922,7 +934,7 @@ export default function MessagesTab() {
                 onClick={() => setShowComposeModal(false)}
                 className="w-full sm:w-auto min-h-[44px] px-5 py-2 rounded-xl sm:rounded-full border border-slate-700 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
               >
-                Cancel
+                {t('dashboard.messagesTab.cancelBtn')}
               </button>
 
               <button
@@ -933,12 +945,12 @@ export default function MessagesTab() {
                 {submittingCompose ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Dispatched via Socket...</span>
+                    <span>{t('dashboard.messagesTab.sendingCompose')}</span>
                   </>
                 ) : (
                   <>
                     <Send className="h-3.5 w-3.5" />
-                    <span>Send to Underwriting</span>
+                    <span>{t('dashboard.messagesTab.sendToUnderwriting')}</span>
                   </>
                 )}
               </button>

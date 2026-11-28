@@ -1,9 +1,12 @@
+import { useTranslation } from '@/context/LanguageContext'
+
 interface ApprovalBadgeProps {
   className?: string
   size?: 'sm' | 'md' | 'lg'
 }
 
 export default function ApprovalBadge({ className = '', size = 'md' }: ApprovalBadgeProps) {
+  const { t } = useTranslation()
   const sizeClasses = {
     sm: 'w-28 sm:w-36',
     md: 'w-40 sm:w-48 lg:w-52',
@@ -20,7 +23,7 @@ export default function ApprovalBadge({ className = '', size = 'md' }: ApprovalB
       {/* 3D Luxury Emblem Asset with Hover Micro-Interaction */}
       <img
         src="/approval-badge-3d.png"
-        alt="99% Approval Rate For Our Gateway"
+        alt={t('brand.approvalAlt')}
         className={`${sizeClasses[size]} h-auto object-contain drop-shadow-[0_12px_28px_rgba(168,85,247,0.55)] transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-1`}
         loading="lazy"
       />

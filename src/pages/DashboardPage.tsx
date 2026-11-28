@@ -9,6 +9,7 @@ import HologramCard from '@/components/brand/HologramCard'
 import SetupPaymentModal from '@/components/dashboard/SetupPaymentModal'
 import MonthlyMaintenanceModal from '@/components/dashboard/MonthlyMaintenanceModal'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 // Dedicated Tab Views
 import ApplicationTab from '@/components/dashboard/tabs/ApplicationTab'
@@ -23,9 +24,12 @@ import PaymentLinksTab from '@/components/dashboard/tabs/PaymentLinksTab'
 
 export default function DashboardPage() {
   const { merchant } = useAuth()
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const displayName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
+  const displayName = merchant?.fullName
+    ? merchant.fullName.split(' ')[0]
+    : t('dashboard.layout.defaultMerchantName')
 
   // Derive active tab from searchParams (default: 'dashboard')
   const validTabs = ['dashboard', 'transactions', 'payment-links', 'integration', 'invoices', 'application', 'documents', 'messages', 'offer', 'settings']
@@ -113,9 +117,9 @@ export default function DashboardPage() {
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div>
-              <h4 className="font-bold text-white text-sm">Setup Fee Payment Received & Verified!</h4>
+              <h4 className="font-bold text-white text-sm">{t('dashboard.layout.setupSuccessTitle')}</h4>
               <p className="text-xs text-slate-300">
-                Your payment has been confirmed via PGX Digital. Your gateway integration and dedicated desk are now unlocked!
+                {t('dashboard.layout.setupSuccessDesc')}
               </p>
             </div>
           </div>
@@ -143,15 +147,14 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs sm:text-sm font-black text-white tracking-wide">
-                  Monthly Gateway Maintenance Due ($499.00 USD)
-                </span>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50">
-                  30-Day Billing Cycle
+                <span className="text-xs sm:text-sm font-black text-white tracking-wide" dir="ltr">
+                  {t('dashboard.layout.monthlyDueTitle', {
+                    amount: merchant?.arxopayWholesale?.monthlyMaintenance?.amount || 499,
+                  })}
                 </span>
               </div>
               <p className="text-[11px] text-slate-300">
-                Your 30-day live gateway maintenance is due. Please settle via USDT / USDC / BTC and attach payment proof.
+                {t('dashboard.layout.monthlyDueDesc')}
               </p>
             </div>
           </div>
@@ -160,7 +163,11 @@ export default function DashboardPage() {
             onClick={() => setIsMonthlyModalOpen(true)}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(0,240,255,0.5)] hover:shadow-[0_0_24px_rgba(0,240,255,0.8)] transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5 self-start sm:self-auto"
           >
-            <span>Pay Monthly $499 ⚡</span>
+            <span>
+              {t('dashboard.layout.payMonthlyBtn', {
+                amount: merchant?.arxopayWholesale?.monthlyMaintenance?.amount || 499,
+              })}
+            </span>
           </button>
         </div>
       )}
@@ -176,14 +183,16 @@ export default function DashboardPage() {
             <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs sm:text-sm font-black text-white tracking-wide">
-                  24-Hour Integration Sandbox Active
+                  {t('dashboard.layout.trialActiveTitle', {
+                    countdown: `${String(timeLeft.hours).padStart(2, '0')}h ${String(timeLeft.minutes).padStart(2, '0')}m ${String(timeLeft.seconds).padStart(2, '0')}s`,
+                  })}
                 </span>
-                <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-                  ⏳ {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m {String(timeLeft.seconds).padStart(2, '0')}s remaining
+                <span dir="ltr" className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                  ⏳ {String(timeLeft.hours).padStart(2, '0')}h {String(timeLeft.minutes).padStart(2, '0')}m {String(timeLeft.seconds).padStart(2, '0')}s
                 </span>
               </div>
               <p className="text-[11px] text-slate-300 hidden md:block">
-                Test your hosted card checkout with your Merchant Ref ID (<code className="text-cyan-300 font-bold">{merchant?.refId || 'PGX-PX-001'}</code>) in the API & Integration tab.
+                {t('dashboard.layout.trialActiveDesc', { refId: merchant?.refId || 'PGX-PX-001' })}
               </p>
             </div>
           </div>
@@ -194,12 +203,12 @@ export default function DashboardPage() {
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-purple-600 to-cyan-500 text-white font-extrabold text-xs shadow-[0_0_16px_rgba(217,70,239,0.5)] hover:shadow-[0_0_24px_rgba(217,70,239,0.8)] hover:brightness-110 transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-              <span>Pay Setup Fee & Go Live 🚀</span>
+              <span>{t('dashboard.layout.paySetupGoLiveBtn')}</span>
             </button>
           ) : (
             <div className="px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 font-bold text-xs shrink-0 flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.2)]">
               <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              <span>Partner Plan (Arxopay)</span>
+              <span>{t('dashboard.layout.partnerPlanBadge')}</span>
             </div>
           )}
         </div>
@@ -212,12 +221,12 @@ export default function DashboardPage() {
             <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
             <div className="space-y-0.5 min-w-0">
               <span className="text-xs sm:text-sm font-black text-amber-200 tracking-wide">
-                Integration Trial Expired — Checkout Sessions Paused
+                {t('dashboard.layout.trialExpiredTitle')}
               </span>
               <p className="text-[11px] text-amber-300/80">
-                {isArxo
-                  ? 'Your 24-hour sandbox testing period has ended. Your partner manager at Arxopay will submit your live activation request.'
-                  : 'Your 24-hour test period has ended. Settle your setup fee to instantly activate permanent live processing.'}
+                {t('dashboard.layout.trialExpiredDesc', {
+                  date: trialExpiresAt ? ` (${trialExpiresAt.toLocaleString()})` : '',
+                })}
               </p>
             </div>
           </div>
@@ -227,12 +236,12 @@ export default function DashboardPage() {
               onClick={() => setIsSetupModalOpen(true)}
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-xs shadow-[0_0_16px_rgba(245,158,11,0.5)] hover:brightness-110 transition-all cursor-pointer shrink-0"
             >
-              Activate Live Processing ({setupFeeFormatted})
+              {t('dashboard.layout.activateLiveBtn', { amount: setupFeeFormatted })}
             </button>
           ) : (
             <div className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-200 font-bold text-xs shrink-0 flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-amber-400" />
-              <span>Awaiting Partner Live Request</span>
+              <span>{t('dashboard.layout.awaitingPartnerBadge')}</span>
             </div>
           )}
         </div>
@@ -271,16 +280,16 @@ export default function DashboardPage() {
                   ) : null}
                   <div className="space-y-0.5 sm:space-y-1 min-w-0 flex-1">
                     <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] break-words">
-                      Welcome, {displayName}
+                      {t('dashboard.layout.welcome', { name: displayName })}
                     </h1>
                     <p className="text-xs sm:text-base text-slate-300">
-                      Track your application, configure website integration, and view your processing offer.
+                      {t('dashboard.layout.welcomeSub')}
                     </p>
                   </div>
                 </div>
 
                 {/* Hologram Card (right aligned) */}
-                <div className="hidden md:flex justify-end pr-4 shrink-0">
+                <div className="hidden md:flex justify-end pe-4 shrink-0">
                   <HologramCard size="sm" />
                 </div>
               </div>
@@ -296,11 +305,13 @@ export default function DashboardPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <span className="break-words">Developer API & Website Integration Hub</span>
-                      <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40 shrink-0">Developer Hub</span>
+                      <span className="break-words">{t('dashboard.layout.devHubTitle')}</span>
+                      <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-semibold border border-cyan-400/40 shrink-0">
+                        {t('dashboard.layout.devHubBadge')}
+                      </span>
                     </div>
                     <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 line-clamp-2 sm:line-clamp-none">
-                      Get your Merchant Ref ID, 1-endpoint Checkout API docs, ready-to-run code snippets (Node, PHP, Python, cURL), or request white-glove setup.
+                      {t('dashboard.layout.devHubDesc')}
                     </p>
                   </div>
                 </div>
@@ -308,7 +319,7 @@ export default function DashboardPage() {
                   type="button"
                   className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs group-hover:bg-cyan-300 transition-colors shrink-0"
                 >
-                  Open Workspace &rarr;
+                  {t('dashboard.layout.openWorkspaceBtn')}
                 </button>
               </div>
 

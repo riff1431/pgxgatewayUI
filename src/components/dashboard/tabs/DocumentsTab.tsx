@@ -18,6 +18,7 @@ import {
   type LucideIcon
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import { api } from '@/lib/api'
 
 interface DocRow {
@@ -35,6 +36,7 @@ interface DocRow {
 
 export default function DocumentsTab() {
   const { merchant, refreshStatus, addToast } = useAuth()
+  const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [activeUploadId, setActiveUploadId] = useState<DocRow['id'] | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -85,6 +87,22 @@ export default function DocumentsTab() {
       setDocs(buildDocsFromMerchant())
     }
   }, [merchant])
+
+  // Localized titles/subtitles reactive to language switch
+  const docCopy: Record<DocRow['id'], { title: string; subtitle: string }> = {
+    businessReg: {
+      title: t('dashboard.documentsTab.doc1Title'),
+      subtitle: t('dashboard.documentsTab.doc1Sub'),
+    },
+    directorId: {
+      title: t('dashboard.documentsTab.doc2Title'),
+      subtitle: t('dashboard.documentsTab.doc2Sub'),
+    },
+    processingStatement: {
+      title: t('dashboard.documentsTab.doc3Title'),
+      subtitle: t('dashboard.documentsTab.doc3Sub'),
+    },
+  }
 
   // Filter existing uploaded documents
   const uploadedDocs = docs.filter((d) => Boolean(d.fileUrl || d.fileName))
@@ -141,12 +159,12 @@ export default function DocumentsTab() {
 
       await refreshStatus()
       addToast(
-        'Document Uploaded to Cloudinary',
-        `${file.name} successfully updated in secure cloud storage.`,
+        t('dashboard.documentsTab.toastUploadedTitle'),
+        t('dashboard.documentsTab.toastUploadedDesc'),
         'success'
       )
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to upload document.'
+      const msg = err instanceof Error ? err.message : t('dashboard.documentsTab.errFallback')
       setErrorMsg(msg)
       setDocs((prev) =>
         prev.map((d) => (d.id === uploadTargetId ? { ...d, isUploading: false } : d))
@@ -172,20 +190,20 @@ export default function DocumentsTab() {
           </div>
           <div>
             <div className="text-[11px] font-black tracking-widest text-cyan-400 uppercase">
-              Compliance & Underwriting
+              {t('dashboard.documentsTab.complianceBadge')}
             </div>
             <h2 className="text-lg sm:text-xl font-black text-white">
-              KYC & Verification Document Center
+              {t('dashboard.documentsTab.title')}
             </h2>
             <p className="text-xs text-slate-300">
-              Manage and review all business and identity documents stored securely on Cloudinary.
+              {t('dashboard.documentsTab.desc')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/60 shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-            <CheckCircle2 className="h-3.5 w-3.5" /> 256-Bit Cloud Encrypted
+            <CheckCircle2 className="h-3.5 w-3.5" /> {t('dashboard.documentsTab.sslVault')}
           </span>
         </div>
       </div>
@@ -208,19 +226,19 @@ export default function DocumentsTab() {
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                <span>Active Documents Vault</span>
-                <span className="text-[11px] font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-400/40">
-                  {uploadedCount} of {docs.length} Uploaded
+                <span>{t('dashboard.documentsTab.vaultTitle')}</span>
+                <span className="text-[11px] font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-400/40" dir="ltr">
+                  {uploadedCount} / {docs.length}
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Verified compliance records archived in secure cloud storage.
+                {t('dashboard.documentsTab.vaultDesc')}
               </p>
             </div>
           </div>
 
           <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full flex items-center gap-1.5 self-start sm:self-auto shadow-[0_0_8px_rgba(16,185,129,0.2)]">
-            <ShieldCheck className="h-3.5 w-3.5" /> Cloud Storage Active
+            <ShieldCheck className="h-3.5 w-3.5" /> {t('dashboard.documentsTab.cloudinaryStored')}
           </span>
         </div>
 
@@ -245,24 +263,24 @@ export default function DocumentsTab() {
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs sm:text-sm font-bold text-white tracking-tight">
-                          {doc.title}
+                          {docCopy[doc.id].title}
                         </span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-500/15 border border-fuchsia-400/40 text-fuchsia-300 uppercase">
                           {isPdf ? 'PDF' : 'IMAGE'}
                         </span>
                         <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                          <CheckCircle2 className="h-3 w-3" /> Cloudinary Verified
+                          <CheckCircle2 className="h-3 w-3" /> {t('dashboard.documentsTab.statusVerified')}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 text-xs text-slate-400 flex-wrap">
-                        <span className="text-cyan-300 font-mono truncate max-w-[200px] sm:max-w-xs">
+                        <span dir="ltr" className="text-cyan-300 font-mono truncate max-w-[200px] sm:max-w-xs">
                           📄 {doc.fileName}
                         </span>
                         {doc.fileSize && (
                           <>
                             <span>•</span>
-                            <span className="text-slate-400">{doc.fileSize}</span>
+                            <span dir="ltr" className="text-slate-400">{doc.fileSize}</span>
                           </>
                         )}
                         {doc.uploadedAt && (
@@ -270,11 +288,7 @@ export default function DocumentsTab() {
                             <span>•</span>
                             <span className="text-slate-400 flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              {new Date(doc.uploadedAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
+                              {new Date(doc.uploadedAt).toLocaleDateString()}
                             </span>
                           </>
                         )}
@@ -292,10 +306,10 @@ export default function DocumentsTab() {
                           setPreviewDoc(doc)
                         }}
                         className="px-3.5 py-2 min-h-[40px] rounded-full text-xs font-bold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/25 border border-cyan-400/60 hover:border-cyan-400 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_0_8px_rgba(0,240,255,0.25)] flex-1 sm:flex-initial"
-                        title="Inspect document preview"
+                        title={t('dashboard.documentsTab.inspectTitle')}
                       >
                         <Eye className="h-3.5 w-3.5" />
-                        <span>View Document</span>
+                        <span>{t('dashboard.documentsTab.viewDocument')}</span>
                       </button>
                     )}
 
@@ -304,10 +318,10 @@ export default function DocumentsTab() {
                       disabled={doc.isUploading}
                       onClick={() => triggerUpload(doc.id)}
                       className="px-3.5 py-2 min-h-[40px] rounded-full text-xs font-semibold text-slate-300 hover:text-white bg-[#09153d] hover:bg-[#0d1d52] border border-slate-700 hover:border-cyan-400/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 flex-1 sm:flex-initial"
-                      title="Upload a new replacement version"
+                      title={t('dashboard.documentsTab.replaceTitle')}
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
-                      <span>Replace</span>
+                      <span>{t('dashboard.documentsTab.replace')}</span>
                     </button>
                   </div>
                 </div>
@@ -320,9 +334,9 @@ export default function DocumentsTab() {
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center text-cyan-400 mx-auto">
               <FileText className="h-6 w-6" />
             </div>
-            <h4 className="text-sm font-bold text-white">No Verification Documents in Vault</h4>
+            <h4 className="text-sm font-bold text-white">{t('dashboard.documentsTab.emptyTitle')}</h4>
             <p className="text-xs text-slate-400 max-w-md mx-auto">
-              Submit your Certificate of Incorporation, Director ID, and processing statements using the upload cards below to complete compliance review.
+              {t('dashboard.documentsTab.emptyDesc')}
             </p>
           </div>
         )}
@@ -333,9 +347,9 @@ export default function DocumentsTab() {
       <div className="space-y-3">
         <div className="px-1 flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
-            Upload & Update Verification Files
+            {t('dashboard.documentsTab.uploadSectionTitle')}
           </h3>
-          <span className="text-xs text-slate-400">Accepted formats: PDF, PNG, JPG (Max 15MB)</span>
+          <span className="text-xs text-slate-400">{t('dashboard.documentsTab.acceptedFormats')}</span>
         </div>
 
         <div className="space-y-4">
@@ -362,19 +376,19 @@ export default function DocumentsTab() {
                   </div>
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-white text-sm sm:text-base">{doc.title}</span>
+                      <span className="font-bold text-white text-sm sm:text-base">{docCopy[doc.id].title}</span>
                       {doc.required && <span className="text-fuchsia-400 font-bold text-xs">*</span>}
                       {hasFile && (
                         <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                          <CheckCircle2 className="h-3 w-3" /> Uploaded to Cloudinary
+                          <CheckCircle2 className="h-3 w-3" /> {t('dashboard.documentsTab.statusUploaded')}
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400">{doc.subtitle}</p>
+                    <p className="text-xs text-slate-400">{docCopy[doc.id].subtitle}</p>
 
                     {hasFile && (
                       <div className="pt-1 flex items-center gap-3 text-xs flex-wrap font-mono">
-                        <span className="text-cyan-300 truncate max-w-xs">
+                        <span dir="ltr" className="text-cyan-300 truncate max-w-xs">
                           📄 {doc.fileName} ({doc.fileSize || 'Attached'})
                         </span>
                         {doc.fileUrl && (
@@ -386,7 +400,7 @@ export default function DocumentsTab() {
                             }}
                             className="inline-flex items-center gap-1 text-cyan-400 underline hover:text-cyan-200 text-xs cursor-pointer"
                           >
-                            <span>Inspect Preview</span>
+                            <span>{t('dashboard.documentsTab.inspectPreview')}</span>
                             <Eye className="h-3 w-3" />
                           </button>
                         )}
@@ -406,7 +420,7 @@ export default function DocumentsTab() {
                       className="px-4 py-2.5 rounded-full text-xs font-semibold text-cyan-300 hover:text-white bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/50 transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      <span>View</span>
+                      <span>{t('dashboard.documentsTab.view')}</span>
                     </button>
                   )}
 
@@ -423,12 +437,12 @@ export default function DocumentsTab() {
                     {doc.isUploading ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Streaming to Cloudinary...</span>
+                        <span>{t('dashboard.documentsTab.streamingCloud')}</span>
                       </>
                     ) : (
                       <>
                         <Upload className="h-4 w-4" />
-                        <span>{hasFile ? 'Replace Document' : 'Upload Document'}</span>
+                        <span>{hasFile ? t('dashboard.documentsTab.replace') : t('dashboard.documentsTab.uploadBtn')}</span>
                       </>
                     )}
                   </button>
@@ -452,12 +466,12 @@ export default function DocumentsTab() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                    <span>{previewDoc.title}</span>
+                    <span>{docCopy[previewDoc.id].title}</span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300">
-                      Cloudinary Stored
+                      {t('dashboard.documentsTab.cloudinaryStored')}
                     </span>
                   </h3>
-                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2">
+                  <div className="text-xs text-slate-400 font-mono flex items-center gap-2" dir="ltr">
                     <span>{previewDoc.fileName}</span>
                     {previewDoc.fileSize && <span>• {previewDoc.fileSize}</span>}
                   </div>
@@ -468,7 +482,7 @@ export default function DocumentsTab() {
                 type="button"
                 onClick={() => setPreviewDoc(null)}
                 className="text-slate-400 hover:text-white p-2 rounded-full hover:bg-slate-800/60 transition-colors cursor-pointer"
-                title="Close viewer"
+                title={t('dashboard.documentsTab.closeViewerTitle')}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -482,13 +496,13 @@ export default function DocumentsTab() {
                     <div className="absolute inset-0 flex items-center justify-center bg-[#040817]/80 z-10">
                       <div className="flex flex-col items-center gap-2 text-cyan-400 text-xs">
                         <Loader2 className="h-8 w-8 animate-spin" />
-                        <span>Streaming document from Cloudinary...</span>
+                        <span>{t('dashboard.documentsTab.streamingDoc')}</span>
                       </div>
                     </div>
                   )}
                   <img
                     src={previewDoc.fileUrl}
-                    alt={previewDoc.title}
+                    alt={docCopy[previewDoc.id].title}
                     onLoad={() => setImgLoading(false)}
                     onError={() => setImgLoading(false)}
                     className="max-h-[55vh] max-w-full object-contain rounded-xl border border-cyan-500/30 shadow-[0_0_25px_rgba(0,240,255,0.25)]"
@@ -497,8 +511,8 @@ export default function DocumentsTab() {
               ) : (
                 <div className="text-center space-y-2 text-slate-400">
                   <AlertCircle className="h-8 w-8 text-amber-400 mx-auto" />
-                  <p className="text-sm font-semibold text-white">Preview unavailable</p>
-                  <p className="text-xs text-slate-400">No active URL found for this document record.</p>
+                  <p className="text-sm font-semibold text-white">{t('dashboard.documentsTab.previewUnavailable')}</p>
+                  <p className="text-xs text-slate-400">{t('dashboard.documentsTab.noActiveUrl')}</p>
                 </div>
               )}
             </div>
@@ -507,7 +521,7 @@ export default function DocumentsTab() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 shrink-0">
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                <span>256-Bit SSL Encrypted Cloud Vault</span>
+                <span>{t('dashboard.documentsTab.sslVault')}</span>
               </div>
 
               <div className="flex items-center gap-2.5">
@@ -518,7 +532,7 @@ export default function DocumentsTab() {
                     rel="noreferrer"
                     className="px-4 py-2 rounded-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/60 hover:border-cyan-400 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5"
                   >
-                    <span>Open in New Tab</span>
+                    <span>{t('dashboard.documentsTab.openNewTab')}</span>
                     <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 )}
@@ -528,7 +542,7 @@ export default function DocumentsTab() {
                   onClick={() => setPreviewDoc(null)}
                   className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.5)] cursor-pointer"
                 >
-                  Close Viewer
+                  {t('dashboard.documentsTab.closeViewer')}
                 </button>
               </div>
             </div>

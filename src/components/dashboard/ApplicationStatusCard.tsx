@@ -1,31 +1,33 @@
 import { Check, FileText } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 export default function ApplicationStatusCard({ className = '' }: { className?: string }) {
   const { applicationStatus, currentStep } = useAuth()
+  const { t } = useTranslation()
 
   // Format status badge
   const getStatusBadge = () => {
     switch (applicationStatus) {
       case 'approved':
         return {
-          label: 'Approved',
+          label: t('dashboard.statusCard.approved'),
           classes: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)]',
         }
       case 'rejected':
         return {
-          label: 'Application Declined',
+          label: t('dashboard.statusCard.declined'),
           classes: 'text-red-300 bg-red-500/10 border-red-400/80 shadow-[0_0_10px_rgba(239,68,68,0.4)]',
         }
       case 'additional_info_required':
         return {
-          label: 'Action Required',
+          label: t('dashboard.statusCard.actionRequired'),
           classes: 'text-amber-300 bg-amber-500/10 border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.4)]',
         }
       case 'under_review':
       default:
         return {
-          label: 'Under Review',
+          label: t('dashboard.statusCard.underReview'),
           classes: 'text-amber-300 bg-amber-500/10 border-amber-400/80 shadow-[0_0_10px_rgba(251,191,36,0.4)]',
         }
     }
@@ -44,7 +46,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
             <FileText className="h-4 w-4" />
           </div>
           <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-            Application Status
+            {t('dashboard.statusCard.title')}
           </h3>
         </div>
 
@@ -83,7 +85,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
             <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2 break-words">
-              Account & Contact
+              {t('dashboard.statusCard.step1')}
             </span>
           </div>
 
@@ -93,7 +95,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
               <Check className="h-5 w-5 stroke-[3]" />
             </div>
             <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 leading-tight mt-2 break-words">
-              Business & Processing
+              {t('dashboard.statusCard.step2')}
             </span>
           </div>
 
@@ -109,7 +111,7 @@ export default function ApplicationStatusCard({ className = '' }: { className?: 
               </div>
             )}
             <span className={`text-[10px] sm:text-[11px] leading-tight mt-2 ${isApproved ? 'font-medium text-slate-300' : 'font-semibold text-fuchsia-300'}`}>
-              Verification & Documents
+              {t('dashboard.statusCard.step3')}
             </span>
           </div>
 

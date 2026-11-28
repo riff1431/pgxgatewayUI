@@ -32,6 +32,7 @@ import {
 } from '@/lib/setupApi'
 import type { SetupStatusResponse, SetupMessageItem } from '@/lib/setupApi'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 function GithubIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
@@ -56,6 +57,7 @@ const ONBOARDING_MILESTONES = [
 
 export default function IntegrationTab() {
   const { merchant } = useAuth()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(true)
   const [setupData, setSetupData] = useState<SetupStatusResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -111,7 +113,7 @@ export default function IntegrationTab() {
         setMessages(msgs)
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to load integration details.')
+      setError(err instanceof Error ? err.message : t('dashboard.integrationTab.errLoad'))
     } finally {
       setLoading(false)
     }
@@ -155,7 +157,7 @@ export default function IntegrationTab() {
 
   const handleInitiatePayment = async () => {
     if (!websiteDomain.trim()) {
-      setError('Please provide your website domain.')
+      setError(t('dashboard.integrationTab.errDomain'))
       return
     }
     setPaying(true)
@@ -169,7 +171,7 @@ export default function IntegrationTab() {
         window.location.assign(res.checkoutUrl)
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to initiate setup payment.')
+      setError(err instanceof Error ? err.message : t('dashboard.integrationTab.errPay'))
       setPaying(false)
     }
   }
@@ -191,7 +193,7 @@ export default function IntegrationTab() {
       setSetupData((prev) => (prev ? { ...prev, ...updated } : prev))
       await loadStatus()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save collaboration data.')
+      setError(err instanceof Error ? err.message : t('dashboard.integrationTab.errCollab'))
     } finally {
       setSavingCollab(false)
     }
@@ -211,7 +213,7 @@ export default function IntegrationTab() {
       setMessages((prev) => [...prev, msg])
       setNewMessage('')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to send message.')
+      setError(err instanceof Error ? err.message : t('dashboard.integrationTab.errChat'))
     } finally {
       setSendingMsg(false)
     }
@@ -320,7 +322,7 @@ if data.get("success") and data.get("checkoutUrl"):
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-4">
         <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-        <p className="text-sm text-slate-400">Loading your integration workspace...</p>
+        <p className="text-sm text-slate-400">{t('dashboard.integrationTab.loading')}</p>
       </div>
     )
   }
@@ -357,6 +359,14 @@ if data.get("success") and data.get("checkoutUrl"):
     )
   )
   const isTrialLocked = !isLive && !isTrialActive
+  const milestoneLabels: Record<string, string> = {
+    payment_pending: t('dashboard.integrationTab.msPaymentPending'),
+    information_pending: t('dashboard.integrationTab.msInfoPending'),
+    under_review: t('dashboard.integrationTab.msUnderReview'),
+    in_development: t('dashboard.integrationTab.msInDev'),
+    integration_testing: t('dashboard.integrationTab.msTesting'),
+    delivered: t('dashboard.integrationTab.msDelivered'),
+  }
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in w-full min-w-0">
@@ -365,10 +375,10 @@ if data.get("success") and data.get("checkoutUrl"):
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
             <Code2 className="w-5 h-5 text-cyan-400" />
-            Website & Payment Gateway Integration
+            {t('dashboard.integrationTab.title')}
           </h2>
           <p className="text-xs text-slate-300">
-            Choose direct developer API integration or request full turnkey white-glove setup.
+            {t('dashboard.integrationTab.subtitle')}
           </p>
         </div>
 
@@ -383,8 +393,10 @@ if data.get("success") and data.get("checkoutUrl"):
             }`}
           >
             <Terminal className="w-4 h-4" />
-            <span>Developer API Docs</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/30 font-mono text-cyan-900 font-extrabold">Instant</span>
+            <span>{t('dashboard.integrationTab.tabApi')}</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/30 font-mono text-cyan-900 font-extrabold">
+              {t('dashboard.integrationTab.tabApiBadge')}
+            </span>
           </button>
           <button
             type="button"
@@ -396,7 +408,7 @@ if data.get("success") and data.get("checkoutUrl"):
             }`}
           >
             <GithubIcon className="w-4 h-4" />
-            <span>White-Glove Managed Desk</span>
+            <span>{t('dashboard.integrationTab.tabWhiteglove')}</span>
           </button>
         </div>
       </div>
@@ -404,7 +416,11 @@ if data.get("success") and data.get("checkoutUrl"):
       {paymentSuccessNotice && (
         <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
-          <span>Payment of ${setupData?.setupFeeAmount || 450}.00 confirmed! Your White-Glove Integration Desk is now unlocked.</span>
+          <span>
+            {t('dashboard.integrationTab.paymentSuccessNotice', {
+              amount: setupData?.setupFeeAmount || 450,
+            })}
+          </span>
         </div>
       )}
 
@@ -426,18 +442,18 @@ if data.get("success") and data.get("checkoutUrl"):
                 <Lock className="w-8 h-8" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl sm:text-2xl font-black text-white">24-Hour Integration Sandbox Expired</h3>
+                <h3 className="text-xl sm:text-2xl font-black text-white">{t('dashboard.integrationTab.expiredTitle')}</h3>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Your 24-hour test period has ended. Integration credentials and checkout session initiation are paused.
+                  {t('dashboard.integrationTab.expiredDesc')}
                 </p>
                 {trialExpiresAt && (
                   <p className="text-xs font-mono text-amber-300 bg-amber-500/10 py-1 px-3 rounded-full inline-block border border-amber-500/30">
-                    Expired on: {trialExpiresAt.toLocaleString()}
+                    {t('dashboard.integrationTab.expiredOn', { date: trialExpiresAt.toLocaleString() })}
                   </p>
                 )}
               </div>
               <p className="text-xs text-slate-400 max-w-md mx-auto">
-                Please contact underwriting support or complete your setup fee to unlock permanent live processing and production API credentials.
+                {t('dashboard.integrationTab.expiredHint')}
               </p>
             </div>
           ) : (
@@ -446,16 +462,16 @@ if data.get("success") and data.get("checkoutUrl"):
                 <Clock className="w-8 h-8 animate-pulse" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl sm:text-2xl font-black text-white">Integration Workspace Locked</h3>
+                <h3 className="text-xl sm:text-2xl font-black text-white">{t('dashboard.integrationTab.lockedTitle')}</h3>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Your 24-hour sandbox trial has not been activated yet by underwriting.
+                  {t('dashboard.integrationTab.lockedDesc')}
                 </p>
                 <p className="text-xs text-cyan-300 bg-cyan-500/10 py-1.5 px-4 rounded-full inline-block border border-cyan-500/30 font-semibold">
-                  Awaiting Underwriter Review • 24h Sandbox Activation Pending
+                  {t('dashboard.integrationTab.lockedBadge')}
                 </p>
               </div>
               <p className="text-xs text-slate-400 max-w-md mx-auto">
-                No integration details or setup information can be accessed until underwriting turns on your 24-hour trial period. Your Merchant Ref ID, API keys, and SDK endpoints will automatically unlock here once activated.
+                {t('dashboard.integrationTab.lockedHint')}
               </p>
             </div>
           )
@@ -466,16 +482,17 @@ if data.get("success") and data.get("checkoutUrl"):
             <div className="flex items-start gap-3">
               <Clock className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
-                <span className="font-bold text-white text-sm">24-Hour Integration Sandbox Policy</span>
+                <span className="font-bold text-white text-sm">{t('dashboard.integrationTab.sandboxPolicyTitle')}</span>
                 <p className="text-slate-300 leading-relaxed">
-                  Setup credentials and API endpoints are unlocked for a 24-hour sandbox testing window once approved by underwriting.
-                  If the account does not convert to permanent live mode within 24 hours, setup access and test sessions will be automatically disabled.
+                  {t('dashboard.integrationTab.sandboxPolicyDesc')}
                 </p>
               </div>
             </div>
             {merchant?.accountMode === 'trial' && trialExpiresAt && (
               <span className="font-mono text-cyan-300 font-bold px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/50 shrink-0 whitespace-nowrap self-start sm:self-auto">
-                Expires: {trialExpiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {t('dashboard.integrationTab.expiresAt', {
+                  time: trialExpiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                })}
               </span>
             )}
           </div>
@@ -485,64 +502,66 @@ if data.get("success") and data.get("checkoutUrl"):
             {/* Card 1: Merchant Ref ID */}
             <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Your Merchant Ref ID</span>
+                <span className="text-xs font-semibold text-slate-300">{t('dashboard.integrationTab.refCardTitle')}</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
                   merchant?.accountMode === 'trial'
                     ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.2)]'
                     : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
                 }`}>
-                  {merchant?.accountMode === 'trial' ? '24h Sandbox Active' : 'Live Active'}
+                  {merchant?.accountMode === 'trial'
+                    ? t('dashboard.integrationTab.badgeSandbox')
+                    : t('dashboard.integrationTab.badgeLive')}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#030614] border border-cyan-500/30">
-                <span className="font-mono text-xs font-bold text-cyan-300 truncate">{merchantRef}</span>
+                <span dir="ltr" className="font-mono text-xs font-bold text-cyan-300 truncate">{merchantRef}</span>
                 <button
                   type="button"
                   onClick={() => handleCopy(merchantRef, setCopiedRefId)}
                   className="px-2.5 py-1 rounded-lg bg-cyan-400 text-[#040819] font-bold text-[11px] hover:bg-cyan-300 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
                 >
                   {copiedRefId ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedRefId ? 'Copied' : 'Copy'}
+                  {copiedRefId ? t('dashboard.integrationTab.copied') : t('dashboard.integrationTab.copy')}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400">Pass this in every checkout session request.</p>
+              <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.refCardDesc')}</p>
             </div>
 
             {/* Card 2: API Base URL */}
             <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">API Base URL</span>
+                <span className="text-xs font-semibold text-slate-300">{t('dashboard.integrationTab.baseUrlTitle')}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
-                  Production / Sandbox
+                  {t('dashboard.integrationTab.prodSandbox')}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#030614] border border-cyan-500/30">
-                <span className="font-mono text-xs font-bold text-slate-200 truncate">https://api.pgxgateway.com/api/v1</span>
+                <span dir="ltr" className="font-mono text-xs font-bold text-slate-200 truncate">https://api.pgxgateway.com/api/v1</span>
                 <button
                   type="button"
                   onClick={() => handleCopy('https://api.pgxgateway.com/api/v1', setCopiedBaseUrl)}
                   className="px-2.5 py-1 rounded-lg bg-cyan-400 text-[#040819] font-bold text-[11px] hover:bg-cyan-300 transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
                 >
                   {copiedBaseUrl ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedBaseUrl ? 'Copied' : 'Copy'}
+                  {copiedBaseUrl ? t('dashboard.integrationTab.copied') : t('dashboard.integrationTab.copy')}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400">Standard HTTPS JSON API endpoint.</p>
+              <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.baseUrlDesc')}</p>
             </div>
 
             {/* Card 3: Cloaking Engine Status */}
             <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300">Cloaked Processing Engine</span>
+                <span className="text-xs font-semibold text-slate-300">{t('dashboard.integrationTab.engineTitle')}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
-                  Active
+                  {t('dashboard.integrationTab.engineActive')}
                 </span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="text-xs font-bold text-white truncate">E-Commerce Storefront Bridge</span>
+                <span className="text-xs font-bold text-white truncate">{t('dashboard.integrationTab.engineBridge')}</span>
               </div>
-              <p className="text-[11px] text-slate-400">Zero Stripe keys or KYC needed on merchant side.</p>
+              <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.engineDesc')}</p>
             </div>
           </div>
 
@@ -553,9 +572,9 @@ if data.get("success") and data.get("checkoutUrl"):
                 1
               </div>
               <div className="text-xs space-y-1">
-                <strong className="text-white block font-bold text-sm">1. Initiate Payment</strong>
+                <strong className="text-white block font-bold text-sm">{t('dashboard.integrationTab.wf1Title')}</strong>
                 <p className="text-slate-300 leading-relaxed">
-                  Call <code className="text-cyan-300 font-mono">POST /checkout/session</code> from your backend server when customer clicks pay.
+                  {t('dashboard.integrationTab.wf1Desc')}
                 </p>
               </div>
             </div>
@@ -565,9 +584,9 @@ if data.get("success") and data.get("checkoutUrl"):
                 2
               </div>
               <div className="text-xs space-y-1">
-                <strong className="text-white block font-bold text-sm">2. Native Redirect</strong>
+                <strong className="text-white block font-bold text-sm">{t('dashboard.integrationTab.wf2Title')}</strong>
                 <p className="text-slate-300 leading-relaxed">
-                  Redirect the buyer&apos;s browser directly to <code className="text-cyan-300 font-mono">checkoutUrl</code>. Zero client-side SDKs required.
+                  {t('dashboard.integrationTab.wf2Desc')}
                 </p>
               </div>
             </div>
@@ -577,9 +596,9 @@ if data.get("success") and data.get("checkoutUrl"):
                 3
               </div>
               <div className="text-xs space-y-1">
-                <strong className="text-white block font-bold text-sm">3. Auto Settlement</strong>
+                <strong className="text-white block font-bold text-sm">{t('dashboard.integrationTab.wf3Title')}</strong>
                 <p className="text-slate-300 leading-relaxed">
-                  Your server receives instant signed Webhook notification and updates order status automatically.
+                  {t('dashboard.integrationTab.wf3Desc')}
                 </p>
               </div>
             </div>
@@ -593,14 +612,14 @@ if data.get("success") and data.get("checkoutUrl"):
                   <FileCode className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span>Developer Environment Configuration (.env)</span>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+                    <span>{t('dashboard.integrationTab.envTitle')}</span>
                     <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">
-                      Copy &amp; Paste
+                      {t('dashboard.integrationTab.copyPaste')}
                     </span>
                   </h3>
                   <p className="text-xs text-slate-400">
-                    Add these two variables into your project&apos;s <code className="text-cyan-300 font-mono">.env</code> file. No Stripe API keys required.
+                    {t('dashboard.integrationTab.envDesc')}
                   </p>
                 </div>
               </div>
@@ -616,11 +635,11 @@ if data.get("success") and data.get("checkoutUrl"):
                 className="px-3.5 py-1.5 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.3)] self-start sm:self-auto"
               >
                 {copiedEnv ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedEnv ? 'Copied .env' : 'Copy .env Variables'}</span>
+                <span>{copiedEnv ? t('dashboard.integrationTab.copiedEnv') : t('dashboard.integrationTab.copyEnv')}</span>
               </button>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-[#060b20] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto shadow-inner">
+            <div dir="ltr" className="p-3.5 rounded-2xl bg-[#060b20] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto shadow-inner">
               <pre>{`# PGX Gateway API Configuration
 PGX_API_URL=https://api.pgxgateway.com/api/v1
 PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
@@ -635,14 +654,14 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   <Terminal className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>Step 1: Initiate Checkout Session</span>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 flex-wrap">
+                    <span>{t('dashboard.integrationTab.step1Title')}</span>
+                    <span dir="ltr" className="text-xs font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                       POST /checkout/session
                     </span>
                   </h3>
                   <p className="text-xs text-slate-300">
-                    Call this endpoint when the customer clicks &ldquo;Pay with Card&rdquo; on your store.
+                    {t('dashboard.integrationTab.step1Desc')}
                   </p>
                 </div>
               </div>
@@ -654,14 +673,14 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 className="px-3 py-1.5 rounded-xl bg-[#030614] hover:bg-[#09153a] border border-cyan-500/30 text-cyan-300 text-xs font-mono transition-colors flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
               >
                 {copiedEndpoint ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>Copy Endpoint</span>
+                <span>{copiedEndpoint ? t('dashboard.integrationTab.copied') : t('dashboard.integrationTab.copyEndpoint')}</span>
               </button>
             </div>
 
             {/* Language Tabs & Code Box */}
             <div className="space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-1 p-1 rounded-xl bg-[#030614] border border-cyan-500/20">
+                <div dir="ltr" className="flex items-center gap-1 p-1 rounded-xl bg-[#030614] border border-cyan-500/20">
                   {(['curl', 'nodejs', 'php', 'python'] as const).map((lang) => (
                     <button
                       key={lang}
@@ -687,55 +706,55 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   className="px-3 py-1.5 rounded-xl bg-cyan-400 text-[#040819] font-bold text-xs hover:bg-cyan-300 transition-colors flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.3)]"
                 >
                   {copiedSnippet ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copiedSnippet ? 'Copied Code' : 'Copy Code Snippet'}
+                  {copiedSnippet ? t('dashboard.integrationTab.copiedCode') : t('dashboard.integrationTab.copySnippet')}
                 </button>
               </div>
 
               {/* Code Pre Box */}
-              <div className="relative rounded-2xl bg-[#030614] border border-cyan-500/30 p-4 font-mono text-xs text-cyan-200 overflow-x-auto leading-relaxed shadow-inner">
+              <div dir="ltr" className="relative rounded-2xl bg-[#030614] border border-cyan-500/30 p-4 font-mono text-xs text-cyan-200 overflow-x-auto leading-relaxed shadow-inner">
                 <pre>{snippets[codeLang]}</pre>
               </div>
             </div>
 
             {/* Parameter Reference Grid */}
             <div className="space-y-2 pt-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Request Parameters:</h4>
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">{t('dashboard.integrationTab.reqParamsTitle')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
                 <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/20 space-y-1">
                   <div className="font-mono text-xs font-bold text-cyan-300 flex items-center justify-between">
-                    <span>refId</span>
-                    <span className="text-[10px] text-rose-400">required</span>
+                    <span dir="ltr">refId</span>
+                    <span className="text-[10px] text-rose-400">{t('dashboard.integrationTab.required')}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">Your Merchant Reference ID ({merchantRef}).</p>
+                  <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.paramRefIdDesc', { ref: merchantRef })}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/20 space-y-1">
                   <div className="font-mono text-xs font-bold text-cyan-300 flex items-center justify-between">
-                    <span>amount</span>
-                    <span className="text-[10px] text-rose-400">required</span>
+                    <span dir="ltr">amount</span>
+                    <span className="text-[10px] text-rose-400">{t('dashboard.integrationTab.required')}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">Numeric charge in dollars (e.g. 49.99).</p>
+                  <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.paramAmountDesc')}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/20 space-y-1">
                   <div className="font-mono text-xs font-bold text-cyan-300 flex items-center justify-between">
-                    <span>currency</span>
-                    <span className="text-[10px] text-slate-500">optional</span>
+                    <span dir="ltr">currency</span>
+                    <span className="text-[10px] text-slate-500">{t('dashboard.integrationTab.optional')}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">Default &ldquo;USD&rdquo; (supports EUR, GBP).</p>
+                  <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.paramCurrencyDesc')}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/20 space-y-1">
                   <div className="font-mono text-xs font-bold text-cyan-300 flex items-center justify-between">
-                    <span>orderId</span>
-                    <span className="text-[10px] text-slate-500">optional</span>
+                    <span dir="ltr">orderId</span>
+                    <span className="text-[10px] text-slate-500">{t('dashboard.integrationTab.optional')}</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">Your cart/order ID for reference tracking.</p>
+                  <p className="text-[11px] text-slate-400">{t('dashboard.integrationTab.paramOrderIdDesc')}</p>
                 </div>
               </div>
             </div>
 
             {/* Expected JSON Response */}
             <div className="space-y-1.5 pt-2">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Expected JSON Response:</h4>
-              <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">{t('dashboard.integrationTab.expectedResTitle')}</h4>
+              <div dir="ltr" className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
                 <pre>{`{
   "success": true,
   "paymentRef": "pgx_4045",
@@ -757,32 +776,32 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     <ExternalLink className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">Step 2: Redirect Customer</h3>
-                    <p className="text-xs text-slate-300">Seamlessly route customer to the secure checkout page</p>
+                    <h3 className="text-base font-bold text-white">{t('dashboard.integrationTab.step2Title')}</h3>
+                    <p className="text-xs text-slate-300">{t('dashboard.integrationTab.step2Desc')}</p>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Upon receiving <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">checkoutUrl</code>, immediately redirect the user’s browser.
+                  {t('dashboard.integrationTab.step2Intro')}
                 </p>
 
-                <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200">
-                  <div className="text-slate-400 text-[10px] pb-1">// Frontend JavaScript:</div>
+                <div dir="ltr" className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200">
+                  <div className="text-slate-400 text-[10px] pb-1">{t('dashboard.integrationTab.jsComment')}</div>
                   <code>window.location.href = data.checkoutUrl;</code>
                 </div>
 
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs leading-relaxed">
-                  <strong>Zero Client-Side SDK Rule:</strong> Do not load Stripe.js or call <code>stripe.redirectToCheckout()</code> on your storefront. Redirecting directly to <code>checkoutUrl</code> protects your merchant origin and guarantees seamless checkout.
+                  {t('dashboard.integrationTab.zeroSdkRule')}
                 </div>
 
                 <div className="space-y-2 pt-2 text-xs text-slate-400">
                   <div className="flex items-center gap-2 text-white">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Supports Apple Pay, Google Pay, Visa, Mastercard, AMEX</span>
+                    <span>{t('dashboard.integrationTab.supportsMethods')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-white">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span>Automatic 3D Secure 2.0 (liability-shifting fraud protection)</span>
+                    <span>{t('dashboard.integrationTab.supports3ds')}</span>
                   </div>
                 </div>
               </div>
@@ -796,21 +815,21 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">Step 3: Verify Payment Status</h3>
-                    <p className="text-xs text-slate-300">Confirm transaction completion anytime</p>
+                    <h3 className="text-base font-bold text-white">{t('dashboard.integrationTab.step3Title')}</h3>
+                    <p className="text-xs text-slate-300">{t('dashboard.integrationTab.step3Desc')}</p>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  On your <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">successUrl</code>, verify the charge using either the returned <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">paymentRef</code> or <code className="text-cyan-300 bg-[#030614] px-1.5 py-0.5 rounded font-mono">sessionId</code>:
+                  {t('dashboard.integrationTab.step3Intro')}
                 </p>
 
-                <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto">
-                  <div className="text-slate-400 text-[10px] pb-1">// GET Request:</div>
+                <div dir="ltr" className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-cyan-200 overflow-x-auto">
+                  <div className="text-slate-400 text-[10px] pb-1">{t('dashboard.integrationTab.getComment')}</div>
                   <code>GET /api/v1/checkout/session/&#123;paymentRef&#125;</code>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
+                <div dir="ltr" className="p-3.5 rounded-xl bg-[#030614] border border-cyan-500/20 font-mono text-xs text-emerald-300 overflow-x-auto">
                   <pre>{`{
   "success": true,
   "status": "completed",
@@ -836,21 +855,21 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   <CreditCard className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Sandbox Testing Credentials</h3>
-                  <p className="text-xs text-slate-300">Use these credentials to simulate test payments in sandbox mode</p>
+                  <h3 className="text-base font-bold text-white">{t('dashboard.integrationTab.sandboxCardTitle')}</h3>
+                  <p className="text-xs text-slate-300">{t('dashboard.integrationTab.sandboxCardDesc')}</p>
                 </div>
               </div>
 
               <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold self-start sm:self-auto">
-                Test Mode Active
+                {t('dashboard.integrationTab.testModeActive')}
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/30 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Test Card Number</div>
-                  <div className="font-mono text-xs font-bold text-cyan-300">4242 4242 4242 4242</div>
+                  <div className="text-[10px] text-slate-400 uppercase font-semibold">{t('dashboard.integrationTab.testCardNumber')}</div>
+                  <div dir="ltr" className="font-mono text-xs font-bold text-cyan-300">4242 4242 4242 4242</div>
                 </div>
                 <button
                   type="button"
@@ -862,18 +881,18 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
               </div>
 
               <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/30">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Expiration Date</div>
-                <div className="font-mono text-xs font-bold text-white">Any Future Date (e.g. 12/30)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t('dashboard.integrationTab.expirationDate')}</div>
+                <div className="font-mono text-xs font-bold text-white">{t('dashboard.integrationTab.expirationVal')}</div>
               </div>
 
               <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/30">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">CVC / CVV</div>
-                <div className="font-mono text-xs font-bold text-white">Any 3 Digits (e.g. 123)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t('dashboard.integrationTab.cvcCvv')}</div>
+                <div className="font-mono text-xs font-bold text-white">{t('dashboard.integrationTab.cvcVal')}</div>
               </div>
 
               <div className="p-3 rounded-xl bg-[#030614] border border-cyan-500/30">
-                <div className="text-[10px] text-slate-400 uppercase font-semibold">Postal / ZIP Code</div>
-                <div className="font-mono text-xs font-bold text-white">Any 5 Digits (e.g. 90210)</div>
+                <div className="text-[10px] text-slate-400 uppercase font-semibold">{t('dashboard.integrationTab.zipCode')}</div>
+                <div className="font-mono text-xs font-bold text-white">{t('dashboard.integrationTab.zipVal')}</div>
               </div>
             </div>
           </div>
@@ -885,9 +904,9 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 <GithubIcon className="w-5 h-5 text-cyan-400" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Prefer our engineers to integrate this for you?</h4>
+                <h4 className="text-sm font-bold text-white">{t('dashboard.integrationTab.preferManagedTitle')}</h4>
                 <p className="text-xs text-slate-400">
-                  Switch to our White-Glove Managed Desk to invite our team to your repository and receive 1-on-1 implementation.
+                  {t('dashboard.integrationTab.preferManagedDesc')}
                 </p>
               </div>
             </div>
@@ -896,7 +915,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
               onClick={() => setIntegrationMode('whiteglove')}
               className="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs transition-colors shrink-0 cursor-pointer"
             >
-              Open White-Glove Desk &rarr;
+              {t('dashboard.integrationTab.openWhiteGloveBtn')}
             </button>
           </div>
         </div>
@@ -917,16 +936,16 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2 flex-wrap">
-                    White-Glove Integration Desk
+                    {t('dashboard.integrationTab.wgTitle')}
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    Managed Payment Gateway Integration: 5-Business-Day Delivery Target after verified repository access.
+                    {t('dashboard.integrationTab.wgSubtitle')}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-[#040819]/80 border border-cyan-400/30 shrink-0 text-xs text-cyan-300 font-semibold self-start md:self-auto">
-                <Clock className="w-3.5 h-3.5" /> Target Delivery: 5 Business Days
+                <Clock className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.wgTarget')}
               </div>
             </div>
 
@@ -950,7 +969,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                       <div className="flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-wider">
                         {isPast ? <Check className="w-3 h-3 text-emerald-400" /> : <span>0{idx + 1}</span>}
                       </div>
-                      <div className="text-[11px] font-bold truncate">{step.label}</div>
+                      <div className="text-[11px] font-bold truncate">{milestoneLabels[step.id] || step.label}</div>
                     </div>
                   )
                 })}
@@ -965,53 +984,53 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
               <div className="lg:col-span-7 rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-4 sm:p-6 lg:p-8 space-y-6 flex flex-col justify-between w-full min-w-0">
                 <div className="space-y-4">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-xs font-semibold">
-                    <ShieldCheck className="w-3.5 h-3.5" /> 1-on-1 Engineering Setup
+                    <ShieldCheck className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.wgBadge')}
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                    We Build & Connect The Gateway Right Into Your Codebase
+                    {t('dashboard.integrationTab.wgHeroTitle')}
                   </h3>
                   <p className="text-sm text-slate-300 leading-relaxed">
-                    Rather than wrestling with webhook signatures, payment intents, and card compliance yourself, our platform integration engineers do it all for you.
+                    {t('dashboard.integrationTab.wgHeroDesc')}
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div className="p-4 rounded-2xl bg-[#091332] border border-cyan-500/20 space-y-1.5">
                       <div className="text-cyan-400 font-bold text-sm flex items-center gap-2">
-                        <GithubIcon className="w-4 h-4" /> Git Repo Collaboration
+                        <GithubIcon className="w-4 h-4" /> {t('dashboard.integrationTab.wgFeat1Title')}
                       </div>
                       <p className="text-xs text-slate-400">
-                        Invite our team directly as a collaborator on your GitHub repository.
+                        {t('dashboard.integrationTab.wgFeat1Desc')}
                       </p>
                     </div>
                     <div className="p-4 rounded-2xl bg-[#091332] border border-cyan-500/20 space-y-1.5">
                       <div className="text-cyan-400 font-bold text-sm flex items-center gap-2">
-                        <Lock className="w-4 h-4" /> Secure .env Vault
+                        <Lock className="w-4 h-4" /> {t('dashboard.integrationTab.wgFeat2Title')}
                       </div>
                       <p className="text-xs text-slate-400">
-                        Safely provide environment configuration and secrets in our encrypted desk.
+                        {t('dashboard.integrationTab.wgFeat2Desc')}
                       </p>
                     </div>
                     <div className="p-4 rounded-2xl bg-[#091332] border border-cyan-500/20 space-y-1.5">
                       <div className="text-cyan-400 font-bold text-sm flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4" /> Direct Developer Chat
+                        <MessageSquare className="w-4 h-4" /> {t('dashboard.integrationTab.wgFeat3Title')}
                       </div>
                       <p className="text-xs text-slate-400">
-                        Real-time message thread with Super Admin & integration engineers.
+                        {t('dashboard.integrationTab.wgFeat3Desc')}
                       </p>
                     </div>
                     <div className="p-4 rounded-2xl bg-[#091332] border border-cyan-500/20 space-y-1.5">
                       <div className="text-cyan-400 font-bold text-sm flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4" /> 3DS2 & Fraud Shield
+                        <ShieldCheck className="w-4 h-4" /> {t('dashboard.integrationTab.wgFeat4Title')}
                       </div>
                       <p className="text-xs text-slate-400">
-                        Tested end-to-end checkout with liability-shifting 3D Secure 2.0.
+                        {t('dashboard.integrationTab.wgFeat4Desc')}
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#030614] border border-cyan-500/20 text-xs text-slate-400">
-                  ⚡ <span className="text-white font-semibold">Affiliate Tracking:</span> If you joined via a partner link, your referrer earns a commission automatically upon setup confirmation.
+                  ⚡ {t('dashboard.integrationTab.affiliateNote')}
                 </div>
               </div>
 
@@ -1020,22 +1039,23 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
-                      One-Time Onboarding Fee
+                      {t('dashboard.integrationTab.oneTimeFee')}
                     </span>
-                    <span className="text-3xl font-black text-white">
+                    <span dir="ltr" className="text-3xl font-black text-white">
                       ${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}
-                      <span className="text-xs font-normal text-slate-400 ml-1">USD</span>
+                      <span className="text-xs font-normal text-slate-400 ms-1">USD</span>
                     </span>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-cyan-400" /> Store Website Domain
+                        <Globe className="w-3.5 h-3.5 text-cyan-400" /> {t('dashboard.integrationTab.domainLabel')}
                       </label>
                       <input
                         type="url"
-                        placeholder="https://myfashionbrand.com"
+                        dir="ltr"
+                        placeholder={t('dashboard.integrationTab.domainPlaceholder')}
                         value={websiteDomain}
                         onChange={(e) => setWebsiteDomain(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400"
@@ -1044,17 +1064,18 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                        <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> Git Repository Link
+                        <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> {t('dashboard.integrationTab.gitLabel')}
                       </label>
                       <input
                         type="url"
-                        placeholder="https://github.com/my-org/my-store"
+                        dir="ltr"
+                        placeholder={t('dashboard.integrationTab.gitPlaceholder')}
                         value={gitRepoUrl}
                         onChange={(e) => setGitRepoUrl(e.target.value)}
                         className="w-full px-4 py-2.5 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400"
                       />
                       <p className="text-[11px] text-slate-400">
-                        You can connect private repos directly after fee verification.
+                        {t('dashboard.integrationTab.gitHint')}
                       </p>
                     </div>
                   </div>
@@ -1070,19 +1091,23 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     {paying ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Opening Stripe Checkout...
+                        {t('dashboard.integrationTab.openingStripe')}
                       </>
                     ) : (
                       <>
                         <CreditCard className="w-4 h-4" />
-                        Pay with Card (${setupData?.setupFeePriceUSD?.toFixed(2) || '450.00'}) via Stripe
+                        {t('dashboard.integrationTab.payCardBtn', {
+                          amount: setupData?.setupFeePriceUSD?.toFixed(2) || '450.00',
+                        })}
                       </>
                     )}
                   </button>
 
                   <div className="relative flex py-1 items-center">
                     <div className="flex-grow border-t border-cyan-500/20"></div>
-                    <span className="flex-shrink mx-3 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Or Pay with Bitcoin</span>
+                    <span className="flex-shrink mx-3 text-[11px] text-slate-400 uppercase tracking-wider font-semibold">
+                      {t('dashboard.integrationTab.orBitcoin')}
+                    </span>
                     <div className="flex-grow border-t border-cyan-500/20"></div>
                   </div>
 
@@ -1095,13 +1120,13 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     className="w-full py-3 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs tracking-wide shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <MessageSquare className="w-4 h-4" />
-                    <span>Pay via Bitcoin (BTC on WhatsApp)</span>
+                    <span>{t('dashboard.integrationTab.payBtcBtn')}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
 
                   <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5 pt-1">
                     <Lock className="w-3 h-3 text-cyan-400" />
-                    <span>Processed securely via Stripe Checkout or Direct WhatsApp Finance Desk</span>
+                    <span>{t('dashboard.integrationTab.stripeSecured')}</span>
                   </div>
                 </div>
               </div>
@@ -1118,18 +1143,18 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                         <GithubIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">1. GitHub Repository Collaboration</h3>
-                        <p className="text-xs text-slate-300">Invite our official team account to your repo</p>
+                        <h3 className="text-lg font-bold text-white">{t('dashboard.integrationTab.collabTitle')}</h3>
+                        <p className="text-xs text-slate-300">{t('dashboard.integrationTab.collabSub')}</p>
                       </div>
                     </div>
                     {setupData?.gitCollabStatus === 'invite_sent' && (
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                        Invite Notified
+                        {t('dashboard.integrationTab.inviteSent')}
                       </span>
                     )}
                     {setupData?.gitCollabStatus === 'accepted' && (
                       <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        Collaborator Accepted
+                        {t('dashboard.integrationTab.inviteAccepted')}
                       </span>
                     )}
                   </div>
@@ -1137,10 +1162,10 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   {/* Official GitHub Account Copy Pill */}
                   <div className="p-4 rounded-2xl bg-[#030614] border border-cyan-500/30 space-y-2">
                     <div className="text-xs font-medium text-slate-300">
-                      Official Integration Team GitHub Handle:
+                      {t('dashboard.integrationTab.officialGithubLabel')}
                     </div>
                     <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#091332] border border-cyan-400/30">
-                      <div className="flex items-center gap-2 text-cyan-300 font-mono text-sm font-bold truncate">
+                      <div dir="ltr" className="flex items-center gap-2 text-cyan-300 font-mono text-sm font-bold truncate">
                         <GithubIcon className="w-4 h-4 text-cyan-400" />
                         @{setupData?.officialGithubHandle || 'pgxgateway'}
                       </div>
@@ -1151,29 +1176,30 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                       >
                         {copiedHandle ? (
                           <>
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Copied!
+                            <CheckCircle2 className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.copiedBang')}
                           </>
                         ) : (
                           <>
-                            <Copy className="w-3.5 h-3.5" /> Copy Username
+                            <Copy className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.copyUsername')}
                           </>
                         )}
                       </button>
                     </div>
                     <p className="text-[11px] text-slate-400 leading-normal">
-                      💡 In GitHub, go to <span className="text-white font-medium">Settings &rarr; Collaborators &rarr; Add People</span>, paste the username above, and grant Read/Write access.
+                      💡 {t('dashboard.integrationTab.githubGuide')}
                     </p>
                   </div>
 
                   {/* Git Repository Link Input */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                      <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> Your Git Repository URL
+                      <GitBranch className="w-3.5 h-3.5 text-cyan-400" /> {t('dashboard.integrationTab.yourRepoLabel')}
                     </label>
                     <div className="flex items-center gap-2">
                       <input
                         type="url"
-                        placeholder="https://github.com/my-org/my-store-frontend"
+                        dir="ltr"
+                        placeholder={t('dashboard.integrationTab.gitPlaceholder')}
                         value={gitRepoUrl}
                         onChange={(e) => setGitRepoUrl(e.target.value)}
                         className="flex-1 px-4 py-2 rounded-xl bg-[#040819] border border-cyan-500/30 text-white text-sm focus:outline-none focus:border-cyan-400"
@@ -1203,7 +1229,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     ) : (
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     )}
-                    I Have Sent The Collaboration Invite
+                    {t('dashboard.integrationTab.confirmInviteBtn')}
                   </button>
                 </div>
 
@@ -1214,8 +1240,8 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                       <Layers className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">2. Hosting & Technology Stack</h3>
-                      <p className="text-xs text-slate-300">Tell us where your website is deployed</p>
+                      <h3 className="text-lg font-bold text-white">{t('dashboard.integrationTab.hostingTitle')}</h3>
+                      <p className="text-xs text-slate-300">{t('dashboard.integrationTab.hostingSub')}</p>
                     </div>
                   </div>
 
@@ -1223,35 +1249,35 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     {/* Hosting Provider */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                        <Server className="w-3.5 h-3.5 text-cyan-400" /> Hosting Provider
+                        <Server className="w-3.5 h-3.5 text-cyan-400" /> {t('dashboard.integrationTab.hostingProviderLabel')}
                       </label>
                       <select
                         value={hostingProvider}
                         onChange={(e) => setHostingProvider(e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
                       >
-                        <option value="">Select Hosting...</option>
+                        <option value="">{t('dashboard.integrationTab.selectHosting')}</option>
                         <option value="Vercel">Vercel</option>
                         <option value="AWS">AWS (Amazon Web Services)</option>
                         <option value="Cloudflare">Cloudflare Pages / Workers</option>
                         <option value="DigitalOcean">DigitalOcean App Platform / Droplet</option>
                         <option value="VPS / Dedicated Server">Linux VPS / Dedicated Server</option>
                         <option value="Shopify">Shopify</option>
-                        <option value="Other">Other Hosting Provider</option>
+                        <option value="Other">{t('dashboard.integrationTab.hostingOther')}</option>
                       </select>
                     </div>
 
                     {/* Technology Stack */}
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                        <FileCode className="w-3.5 h-3.5 text-cyan-400" /> Technology Stack
+                        <FileCode className="w-3.5 h-3.5 text-cyan-400" /> {t('dashboard.integrationTab.techStackLabel')}
                       </label>
                       <select
                         value={techStack}
                         onChange={(e) => setTechStack(e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
                       >
-                        <option value="">Select Tech Stack...</option>
+                        <option value="">{t('dashboard.integrationTab.selectTech')}</option>
                         <option value="Next.js / React">Next.js / React (TypeScript)</option>
                         <option value="Node.js / Express">Node.js / Express API</option>
                         <option value="WooCommerce / WordPress">WooCommerce (WordPress)</option>
@@ -1266,10 +1292,11 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   {/* Preferred Domain */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-200">
-                      Preferred Production Store Domain
+                      {t('dashboard.integrationTab.preferredDomainLabel')}
                     </label>
                     <input
                       type="url"
+                      dir="ltr"
                       placeholder="https://mystore.com"
                       value={preferredDomain}
                       onChange={(e) => setPreferredDomain(e.target.value)}
@@ -1280,11 +1307,11 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   {/* Integration Notes */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-slate-200">
-                      Special Architecture or Integration Notes
+                      {t('dashboard.integrationTab.notesLabel')}
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Uses Redis for cart cache, custom checkout webhook path..."
+                      placeholder={t('dashboard.integrationTab.notesPlaceholder')}
                       value={integrationNotes}
                       onChange={(e) => setIntegrationNotes(e.target.value)}
                       className="w-full px-4 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
@@ -1301,9 +1328,9 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                       <Lock className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">3. Secure .env & Credentials Vault</h3>
+                      <h3 className="text-lg font-bold text-white">{t('dashboard.integrationTab.vaultTitle')}</h3>
                       <p className="text-xs text-slate-300">
-                        Secure credential vault (encrypted end-to-end; never sent over unencrypted channels)
+                        {t('dashboard.integrationTab.vaultDesc')}
                       </p>
                     </div>
                   </div>
@@ -1315,11 +1342,11 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   >
                     {showEnv ? (
                       <>
-                        <EyeOff className="w-3.5 h-3.5" /> Mask Secrets
+                        <EyeOff className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.maskSecrets')}
                       </>
                     ) : (
                       <>
-                        <Eye className="w-3.5 h-3.5" /> Reveal Secrets
+                        <Eye className="w-3.5 h-3.5" /> {t('dashboard.integrationTab.revealSecrets')}
                       </>
                     )}
                   </button>
@@ -1329,6 +1356,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   <div className="relative">
                     <textarea
                       rows={5}
+                      dir="ltr"
                       placeholder={`NEXT_PUBLIC_STORE_NAME=MyBrand\nDATABASE_URL=postgresql://...\nCUSTOM_WEBHOOK_URL=https://...`}
                       value={envConfig}
                       onChange={(e) => setEnvConfig(e.target.value)}
@@ -1339,7 +1367,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     {!showEnv && envConfig && (
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <span className="px-3 py-1 rounded-full bg-[#040819]/90 border border-cyan-500/40 text-cyan-300 text-xs font-semibold">
-                          🔒 Secrets Masked for Security
+                          🔒 {t('dashboard.integrationTab.secretsMasked')}
                         </span>
                       </div>
                     )}
@@ -1353,7 +1381,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                   className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {savingCollab ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                  Save All Configuration Details & Notify Super Admin
+                  {t('dashboard.integrationTab.saveCollabBtn')}
                 </button>
               </div>
 
@@ -1365,15 +1393,15 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                       <MessageSquare className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">Direct Integration Chat</h3>
+                      <h3 className="text-lg font-bold text-white">{t('dashboard.integrationTab.chatTitle')}</h3>
                       <p className="text-xs text-slate-300">
-                        Communicate directly with the integration engineer working on your repository
+                        {t('dashboard.integrationTab.chatSub')}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-slate-400">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    Super Admin Support Online
+                    {t('dashboard.integrationTab.superAdminOnline')}
                   </div>
                 </div>
 
@@ -1383,7 +1411,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-2 text-slate-400">
                       <MessageSquare className="w-8 h-8 text-cyan-400/50" />
                       <p className="text-xs">
-                        No messages yet. Send a greeting or ask questions about your integration!
+                        {t('dashboard.integrationTab.noChatMsgs')}
                       </p>
                     </div>
                   ) : (
@@ -1396,7 +1424,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                         >
                           <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
                             <span className="font-semibold text-slate-300">
-                              {isMe ? 'You' : 'Super Admin Engineer'}
+                              {isMe ? t('dashboard.integrationTab.you') : t('dashboard.integrationTab.superAdminEngineer')}
                             </span>
                             <span>•</span>
                             <span>{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -1421,7 +1449,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                 <form onSubmit={handleSendMessage} className="flex items-center gap-2 sm:gap-3">
                   <input
                     type="text"
-                    placeholder="Type your message to the Super Admin..."
+                    placeholder={t('dashboard.integrationTab.chatPlaceholder')}
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     disabled={sendingMsg}
@@ -1433,7 +1461,7 @@ PGX_MERCHANT_REF_ID=${merchantRef}`}</pre>
                     className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-[#040819] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 min-h-[44px] shrink-0"
                   >
                     {sendingMsg ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    Send
+                    {t('dashboard.integrationTab.sendBtn')}
                   </button>
                 </form>
               </div>

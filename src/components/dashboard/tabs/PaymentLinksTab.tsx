@@ -16,11 +16,13 @@ import {
 } from 'lucide-react'
 import { api, type PaymentLinkItem } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'] as const
 
 export default function PaymentLinksTab() {
   const { merchant, addToast } = useAuth()
+  const { t } = useTranslation()
 
   const [links, setLinks] = useState<PaymentLinkItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,7 +58,7 @@ export default function PaymentLinksTab() {
         }
       } catch (err: unknown) {
         if (active) {
-          setError(err instanceof Error ? err.message : 'Failed to load payment links.')
+          setError(err instanceof Error ? err.message : t('dashboard.paymentLinksTab.errLoad'))
         }
       } finally {
         if (active) {
@@ -68,7 +70,7 @@ export default function PaymentLinksTab() {
     return () => {
       active = false
     }
-  }, [])
+  }, [t])
 
   const getShareUrl = (slug: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://pgxgateway.com'
@@ -78,7 +80,11 @@ export default function PaymentLinksTab() {
   const handleCopy = (id: string, slug: string) => {
     navigator.clipboard.writeText(getShareUrl(slug))
     setCopiedId(id)
-    addToast('Payment Link Copied', 'Share this URL with your customer on WhatsApp, email, or social.', 'success')
+    addToast(
+      t('dashboard.paymentLinksTab.toastCopiedTitle'),
+      t('dashboard.paymentLinksTab.toastCopiedDesc'),
+      'success'
+    )
     setTimeout(() => setCopiedId(null), 2000)
   }
 
@@ -88,11 +94,11 @@ export default function PaymentLinksTab() {
 
     const numericAmount = parseFloat(amount)
     if (!title.trim()) {
-      setError('Please enter a title or product name.')
+      setError(t('dashboard.paymentLinksTab.errTitle'))
       return
     }
     if (isNaN(numericAmount) || numericAmount < 0.5) {
-      setError('Amount must be at least 0.50.')
+      setError(t('dashboard.paymentLinksTab.errAmount'))
       return
     }
 
@@ -111,9 +117,13 @@ export default function PaymentLinksTab() {
       setTitle('')
       setAmount('')
       setDescription('')
-      addToast('Payment Link Created', 'Your hosted payment link is ready to share.', 'success')
+      addToast(
+        t('dashboard.paymentLinksTab.toastCreatedTitle'),
+        t('dashboard.paymentLinksTab.toastCreatedDesc'),
+        'success'
+      )
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create payment link.')
+      setError(err instanceof Error ? err.message : t('dashboard.paymentLinksTab.errCreate'))
     } finally {
       setCreating(false)
     }
@@ -127,12 +137,16 @@ export default function PaymentLinksTab() {
         setLinks((prev) => prev.map((item) => (item._id === link._id ? res.data! : item)))
       }
       addToast(
-        nextStatus === 'active' ? 'Link Activated' : 'Link Paused',
-        `"${link.title}" is now ${nextStatus === 'active' ? 'accepting payments' : 'paused'}.`,
+        t('dashboard.paymentLinksTab.toastUpdatedTitle'),
+        `${link.title}: ${nextStatus === 'active' ? t('dashboard.paymentLinksTab.activeBadge') : t('dashboard.paymentLinksTab.pausedBadge')}`,
         'success'
       )
     } catch (err: unknown) {
-      addToast('Error', err instanceof Error ? err.message : 'Could not update link status.', 'error')
+      addToast(
+        t('dashboard.quickActions.errorTitle'),
+        err instanceof Error ? err.message : t('dashboard.paymentLinksTab.errStatus'),
+        'error'
+      )
     }
   }
 
@@ -140,9 +154,17 @@ export default function PaymentLinksTab() {
     try {
       await api.paymentLinks.remove(link._id)
       setLinks((prev) => prev.filter((item) => item._id !== link._id))
-      addToast('Deleted', `Payment link "${link.title}" removed.`, 'success')
+      addToast(
+        t('dashboard.paymentLinksTab.toastDeletedTitle'),
+        t('dashboard.paymentLinksTab.toastDeletedDesc', { title: link.title }),
+        'success'
+      )
     } catch (err: unknown) {
-      addToast('Error', err instanceof Error ? err.message : 'Failed to delete link.', 'error')
+      addToast(
+        t('dashboard.quickActions.errorTitle'),
+        err instanceof Error ? err.message : t('dashboard.paymentLinksTab.errStatus'),
+        'error'
+      )
     }
   }
 
@@ -153,10 +175,10 @@ export default function PaymentLinksTab() {
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
             <Link2 className="h-6 w-6 text-cyan-400" />
-            <span>Payment Links</span>
+            <span>{t('dashboard.paymentLinksTab.title')}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
-            Create hosted payment links with no coding required. Share with customers to accept cards, Apple Pay, Google Pay, and local payment methods.
+            {t('dashboard.paymentLinksTab.desc')}
           </p>
         </div>
 
@@ -169,7 +191,11 @@ export default function PaymentLinksTab() {
                 : 'bg-amber-500/15 text-amber-300 border-amber-400/50'
           }`}
         >
-          {isLive ? 'Live Processing Active' : isTrialActive ? `24h Sandbox (Max $${maxTrialAmount})` : 'Pending Activation'}
+          {isLive
+            ? t('dashboard.paymentLinksTab.statusLive')
+            : isTrialActive
+              ? `${t('dashboard.paymentLinksTab.statusTrial')} (Max $${maxTrialAmount})`
+              : t('dashboard.paymentLinksTab.statusLocked')}
         </span>
       </div>
 
@@ -180,9 +206,9 @@ export default function PaymentLinksTab() {
             1
           </div>
           <div className="text-xs space-y-1">
-            <strong className="text-white block font-bold text-sm">1. Create Payment Link</strong>
+            <strong className="text-white block font-bold text-sm">{t('dashboard.paymentLinksTab.step1Title')}</strong>
             <p className="text-slate-300 leading-relaxed">
-              Enter item title, amount, and currency. Choose <span className="text-cyan-300 font-semibold">Reusable</span> for multiple buyers or <span className="text-cyan-300 font-semibold">One-Time</span> for single invoices.
+              {t('dashboard.paymentLinksTab.step1Desc')}
             </p>
           </div>
         </div>
@@ -192,9 +218,9 @@ export default function PaymentLinksTab() {
             2
           </div>
           <div className="text-xs space-y-1">
-            <strong className="text-white block font-bold text-sm">2. Share Link Anywhere</strong>
+            <strong className="text-white block font-bold text-sm">{t('dashboard.paymentLinksTab.step2Title')}</strong>
             <p className="text-slate-300 leading-relaxed">
-              Click <span className="text-cyan-300 font-semibold">Copy Link</span> and send the <code className="text-cyan-300 font-mono">/pay/...</code> URL via WhatsApp, email, DM, or invoice. Buyers pay via Card, Apple Pay, Google Pay, or local methods.
+              {t('dashboard.paymentLinksTab.step2Desc')}
             </p>
           </div>
         </div>
@@ -204,9 +230,9 @@ export default function PaymentLinksTab() {
             3
           </div>
           <div className="text-xs space-y-1">
-            <strong className="text-white block font-bold text-sm">3. Track & Auto-Settle</strong>
+            <strong className="text-white block font-bold text-sm">{t('dashboard.paymentLinksTab.step3Title')}</strong>
             <p className="text-slate-300 leading-relaxed">
-              Payments appear instantly in your <span className="text-cyan-300 font-semibold">Transactions</span> ledger and update link volume automatically. Pause or delete links anytime.
+              {t('dashboard.paymentLinksTab.step3Desc')}
             </p>
           </div>
         </div>
@@ -217,9 +243,9 @@ export default function PaymentLinksTab() {
         <div className="p-4 rounded-2xl bg-amber-950/50 border border-amber-400/60 text-amber-200 text-xs flex items-start gap-3">
           <Lock className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <div className="font-bold text-sm text-white">Account Activation Required Before Collecting Payments</div>
+            <div className="font-bold text-sm text-white">{t('dashboard.paymentLinksTab.activationRequiredTitle')}</div>
             <p className="text-amber-200/80 mt-0.5">
-              You can draft and organize payment links now, but customers cannot complete checkout until underwriting enables your 24-hour sandbox trial or live processing.
+              {t('dashboard.paymentLinksTab.activationRequiredDesc')}
             </p>
           </div>
         </div>
@@ -229,9 +255,9 @@ export default function PaymentLinksTab() {
         <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-400/40 text-cyan-200 text-xs flex items-start gap-3">
           <Sparkles className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
           <div>
-            <div className="font-bold text-white">24-Hour Sandbox Mode Active</div>
+            <div className="font-bold text-white">{t('dashboard.paymentLinksTab.trialActiveTitle')}</div>
             <p className="text-slate-300 mt-0.5">
-              Trial links support test orders up to <span className="font-bold text-cyan-300">${maxTrialAmount}.00</span>. Complete your setup fee to unlock unlimited live volume.
+              {t('dashboard.paymentLinksTab.trialActiveDesc', { max: maxTrialAmount })}
             </p>
           </div>
         </div>
@@ -244,7 +270,7 @@ export default function PaymentLinksTab() {
       >
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
           <Plus className="h-5 w-5 text-cyan-400" />
-          <h3 className="text-base font-bold text-white">Create a New Payment Link</h3>
+          <h3 className="text-base font-bold text-white">{t('dashboard.paymentLinksTab.createTitle')}</h3>
         </div>
 
         {error && (
@@ -256,24 +282,25 @@ export default function PaymentLinksTab() {
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 text-xs">
           <div className="md:col-span-6 space-y-1.5">
-            <label className="text-slate-300 font-semibold block">Item / Service Title *</label>
+            <label className="text-slate-300 font-semibold block">{t('dashboard.paymentLinksTab.itemLabel')}</label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Monthly Retainer, Coaching Package, Custom Order"
+              placeholder={t('dashboard.paymentLinksTab.itemPlaceholder')}
               className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
             />
           </div>
 
           <div className="md:col-span-3 space-y-1.5">
-            <label className="text-slate-300 font-semibold block">Amount *</label>
+            <label className="text-slate-300 font-semibold block">{t('dashboard.paymentLinksTab.amountLabel')}</label>
             <input
               type="number"
               required
               min="0.50"
               step="0.01"
+              dir="ltr"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="100.00"
@@ -282,10 +309,11 @@ export default function PaymentLinksTab() {
           </div>
 
           <div className="md:col-span-3 space-y-1.5">
-            <label className="text-slate-300 font-semibold block">Currency</label>
+            <label className="text-slate-300 font-semibold block">{t('dashboard.paymentLinksTab.currencyLabel')}</label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
+              dir="ltr"
               className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono"
             >
               {CURRENCIES.map((curr) => (
@@ -297,25 +325,25 @@ export default function PaymentLinksTab() {
           </div>
 
           <div className="md:col-span-8 space-y-1.5">
-            <label className="text-slate-300 font-semibold block">Description (Optional)</label>
+            <label className="text-slate-300 font-semibold block">{t('dashboard.paymentLinksTab.descLabel')}</label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Shown to the buyer on the hosted payment page"
+              placeholder={t('dashboard.paymentLinksTab.descPlaceholder')}
               className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
             />
           </div>
 
           <div className="md:col-span-4 space-y-1.5">
-            <label className="text-slate-300 font-semibold block">Link Usage</label>
+            <label className="text-slate-300 font-semibold block">{t('dashboard.paymentLinksTab.usageLabel')}</label>
             <select
               value={reusable ? 'reusable' : 'one_time'}
               onChange={(e) => setReusable(e.target.value === 'reusable')}
               className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400"
             >
-              <option value="reusable">Reusable (Multiple Customers)</option>
-              <option value="one_time">One-Time (Auto-closes after 1 payment)</option>
+              <option value="reusable">{t('dashboard.paymentLinksTab.usageReusable')}</option>
+              <option value="one_time">{t('dashboard.paymentLinksTab.usageOneTime')}</option>
             </select>
           </div>
         </div>
@@ -327,7 +355,7 @@ export default function PaymentLinksTab() {
             className="px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs shadow-[0_0_18px_rgba(0,240,255,0.45)] hover:shadow-[0_0_26px_rgba(0,240,255,0.75)] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
           >
             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            <span>{creating ? 'Generating...' : 'Generate Payment Link'}</span>
+            <span>{creating ? t('dashboard.paymentLinksTab.creatingBtn') : t('dashboard.paymentLinksTab.createBtn')}</span>
           </button>
         </div>
       </form>
@@ -335,19 +363,21 @@ export default function PaymentLinksTab() {
       {/* Created Payment Links List */}
       <div className="rounded-3xl bg-[#060b20]/90 border border-cyan-500/30 p-5 sm:p-7 backdrop-blur-xl space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
-          <h3 className="text-base font-bold text-white">Your Payment Links ({links.length})</h3>
+          <h3 className="text-base font-bold text-white">
+            {t('dashboard.paymentLinksTab.yourLinksTitle', { count: links.length })}
+          </h3>
         </div>
 
         {loading ? (
           <div className="py-12 flex items-center justify-center gap-2 text-slate-400 text-xs">
             <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
-            <span>Loading payment links...</span>
+            <span>{t('dashboard.paymentLinksTab.loading')}</span>
           </div>
         ) : links.length === 0 ? (
           <div className="py-10 text-center space-y-2 text-slate-400 text-xs">
             <Link2 className="h-8 w-8 text-cyan-500/40 mx-auto" />
-            <p className="font-semibold text-slate-300">No payment links created yet</p>
-            <p>Create your first link above and send it to customers anywhere.</p>
+            <p className="font-semibold text-slate-300">{t('dashboard.paymentLinksTab.emptyTitle')}</p>
+            <p>{t('dashboard.paymentLinksTab.emptyDesc')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -364,7 +394,7 @@ export default function PaymentLinksTab() {
                   <div className="space-y-1.5 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-bold text-white">{link.title}</span>
-                      <span className="text-xs font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                      <span dir="ltr" className="text-xs font-mono font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                         {link.amount.toFixed(2)} {link.currency}
                       </span>
                       <span
@@ -376,20 +406,27 @@ export default function PaymentLinksTab() {
                               : 'bg-slate-700/50 text-slate-300 border-slate-600'
                         }`}
                       >
-                        {isActive ? 'Active' : isCompleted ? 'Paid & Completed' : 'Paused'}
+                        {isActive
+                          ? t('dashboard.paymentLinksTab.activeBadge')
+                          : isCompleted
+                            ? t('dashboard.invoicesTab.statusPaid')
+                            : t('dashboard.paymentLinksTab.pausedBadge')}
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">
-                        {link.reusable ? 'Reusable' : 'One-Time'}
+                        {link.reusable
+                          ? t('dashboard.paymentLinksTab.reusableBadge')
+                          : t('dashboard.paymentLinksTab.oneTimeBadge')}
                       </span>
                     </div>
 
                     {link.description && <p className="text-xs text-slate-400 truncate">{link.description}</p>}
 
                     <div className="flex items-center gap-3 flex-wrap text-[11px]">
-                      <span className="font-mono text-cyan-300 truncate max-w-full">{shareUrl}</span>
-                      <span className="text-slate-400 flex items-center gap-1">
+                      <span dir="ltr" className="font-mono text-cyan-300 truncate max-w-full">{shareUrl}</span>
+                      <span className="text-slate-400 flex items-center gap-1" dir="ltr">
                         <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                        {link.totalPayments} paid (${(link.totalVolume || 0).toFixed(2)})
+                        {t('dashboard.paymentLinksTab.paidCount', { count: link.totalPayments })} ($
+                        {(link.totalVolume || 0).toFixed(2)})
                       </span>
                     </div>
                   </div>
@@ -401,7 +438,11 @@ export default function PaymentLinksTab() {
                       className="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/50 text-cyan-300 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                     >
                       {copiedId === link._id ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                      <span>{copiedId === link._id ? 'Copied' : 'Copy Link'}</span>
+                      <span>
+                        {copiedId === link._id
+                          ? t('dashboard.paymentLinksTab.copied')
+                          : t('dashboard.paymentLinksTab.copyLink')}
+                      </span>
                     </button>
 
                     <a
@@ -411,7 +452,7 @@ export default function PaymentLinksTab() {
                       className="px-3 py-1.5 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 border border-fuchsia-400/50 text-fuchsia-200 text-xs font-bold flex items-center gap-1.5"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
-                      <span>Open</span>
+                      <span>{t('dashboard.paymentLinksTab.open')}</span>
                     </a>
 
                     {!isCompleted && (
@@ -419,7 +460,7 @@ export default function PaymentLinksTab() {
                         type="button"
                         onClick={() => handleToggleStatus(link)}
                         className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-200 cursor-pointer"
-                        title={isActive ? 'Pause link' : 'Activate link'}
+                        title={isActive ? t('dashboard.paymentLinksTab.pause') : t('dashboard.paymentLinksTab.resume')}
                       >
                         {isActive ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                       </button>
@@ -429,7 +470,7 @@ export default function PaymentLinksTab() {
                       type="button"
                       onClick={() => handleDelete(link)}
                       className="p-2 rounded-xl bg-red-950/50 hover:bg-red-900/70 border border-red-500/40 text-red-300 cursor-pointer"
-                      title="Delete payment link"
+                      title={t('dashboard.paymentLinksTab.deleteTitle')}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

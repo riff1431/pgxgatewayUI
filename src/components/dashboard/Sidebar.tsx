@@ -17,6 +17,7 @@ import {
   X
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 interface SidebarProps {
   className?: string
@@ -29,21 +30,22 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const navigate = useNavigate()
   const { merchant, unreadCount, logout, offer } = useAuth()
+  const { t } = useTranslation()
   const hasNewOffer = Boolean(offer?.isAvailable && !offer?.accepted)
 
   const currentTab = controlledTab !== undefined ? controlledTab : internalTab
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'transactions', label: 'Transactions', icon: CreditCard },
-    { id: 'payment-links', label: 'Payment Links', icon: Link2 },
-    { id: 'integration', label: 'API & Integration', icon: Code2 },
-    { id: 'invoices', label: 'Weekly Invoices', icon: Receipt },
-    { id: 'application', label: 'My Application', icon: FileText },
-    { id: 'documents', label: 'Documents', icon: Folder },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadCount },
-    { id: 'offer', label: 'Offer', icon: Tag, isOfferNew: hasNewOffer },
-    { id: 'settings', label: 'Account Settings', icon: Settings },
+    { id: 'dashboard', label: t('dashboard.sidebar.dashboard'), icon: Home },
+    { id: 'transactions', label: t('dashboard.sidebar.transactions'), icon: CreditCard },
+    { id: 'payment-links', label: t('dashboard.sidebar.paymentLinks'), icon: Link2 },
+    { id: 'integration', label: t('dashboard.sidebar.integration'), icon: Code2 },
+    { id: 'invoices', label: t('dashboard.sidebar.invoices'), icon: Receipt },
+    { id: 'application', label: t('dashboard.sidebar.application'), icon: FileText },
+    { id: 'documents', label: t('dashboard.sidebar.documents'), icon: Folder },
+    { id: 'messages', label: t('dashboard.sidebar.messages'), icon: MessageSquare, badge: unreadCount },
+    { id: 'offer', label: t('dashboard.sidebar.offer'), icon: Tag, isOfferNew: hasNewOffer },
+    { id: 'settings', label: t('dashboard.sidebar.settings'), icon: Settings },
   ]
 
   const activeItem = navItems.find((i) => i.id === currentTab) || navItems[0]
@@ -72,7 +74,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
           <button
             type="button"
             onClick={() => setIsMobileOpen(true)}
-            className="flex items-center gap-2.5 min-w-0 flex-1 text-left cursor-pointer group"
+            className="flex items-center gap-2.5 min-w-0 flex-1 text-start cursor-pointer group"
           >
             <div className="w-8 h-8 rounded-full p-0.5 bg-gradient-to-tr from-cyan-400 to-fuchsia-500 shrink-0 shadow-[0_0_8px_rgba(0,240,255,0.4)]">
               <div className="w-full h-full rounded-full overflow-hidden bg-[#040819] flex items-center justify-center">
@@ -100,12 +102,12 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                 )}
                 {activeItem.isOfferNew && (
                   <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[9px] font-bold">
-                    Ready
+                    {t('dashboard.sidebar.readyBadge')}
                   </span>
                 )}
               </div>
               <div className="text-[10px] text-cyan-300 truncate">
-                {merchant?.fullName || 'Merchant Account'} • Tap for menu
+                {merchant?.fullName || t('dashboard.sidebar.merchantAccount')} • {t('dashboard.sidebar.tapForMenu')}
               </div>
             </div>
           </button>
@@ -115,20 +117,20 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
               type="button"
               onClick={handleSignOut}
               className="px-2.5 py-1.5 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all font-semibold text-xs flex items-center gap-1.5 cursor-pointer border border-slate-800"
-              title="Sign Out"
+              title={t('dashboard.sidebar.signOut')}
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span className="text-[11px] hidden xs:inline">Sign Out</span>
+              <span className="text-[11px] hidden xs:inline">{t('dashboard.sidebar.signOut')}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setIsMobileOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:to-fuchsia-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(217,70,239,0.5)] border border-fuchsia-400 cursor-pointer shrink-0 transition-transform active:scale-95"
-              aria-label="Open Navigation Menu"
+              aria-label={t('dashboard.sidebar.openMenuAria')}
             >
               <Menu className="h-4 w-4" />
-              <span>Menu</span>
+              <span>{t('dashboard.sidebar.menu')}</span>
             </button>
           </div>
         </div>
@@ -144,7 +146,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
           />
 
           {/* Slide-out Menu Panel */}
-          <div className="fixed inset-y-0 left-0 w-[88vw] max-w-xs sm:max-w-sm bg-[#060b20] border-r-[1.5px] border-cyan-400/90 shadow-[0_0_50px_rgba(0,240,255,0.45)] p-4 sm:p-5 flex flex-col justify-between overflow-y-auto z-50">
+          <div className="fixed inset-y-0 start-0 w-[88vw] max-w-xs sm:max-w-sm bg-[#060b20] border-e-[1.5px] border-cyan-400/90 shadow-[0_0_50px_rgba(0,240,255,0.45)] p-4 sm:p-5 flex flex-col justify-between overflow-y-auto z-50">
             <div className="space-y-4">
               {/* Drawer Top Row: Identity + Close X */}
               <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
@@ -164,10 +166,10 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs font-bold text-white truncate">
-                      {merchant?.fullName || 'Merchant Account'}
+                      {merchant?.fullName || t('dashboard.sidebar.merchantAccount')}
                     </div>
                     <div className="text-[10px] text-cyan-300 truncate">
-                      {merchant?.legalName || 'PGX Direct Gateway'}
+                      {merchant?.legalName || t('dashboard.sidebar.brandSub')}
                     </div>
                   </div>
                 </div>
@@ -176,7 +178,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                   type="button"
                   onClick={() => setIsMobileOpen(false)}
                   className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
-                  aria-label="Close menu"
+                  aria-label={t('dashboard.sidebar.closeMenuAria')}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -185,7 +187,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
               {/* Navigation Items in Drawer */}
               <div className="space-y-1.5 pt-1">
                 <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Merchant Portal Navigation
+                  {t('dashboard.sidebar.portalNav')}
                 </div>
 
                 {navItems.map((item) => {
@@ -213,7 +215,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                         >
                           <Icon className="h-4 w-4 shrink-0" />
                         </div>
-                        <span className="whitespace-nowrap text-left">{item.label}</span>
+                        <span className="whitespace-nowrap text-start">{item.label}</span>
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
@@ -228,7 +230,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
                         {item.isOfferNew && (
                           <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[9px] font-bold">
-                            Ready
+                            {t('dashboard.sidebar.readyBadge')}
                           </span>
                         )}
                       </div>
@@ -246,7 +248,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
                 className="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-2xl bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 text-red-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
               >
                 <LogOut className="h-3.5 w-3.5" />
-                <span>Sign Out</span>
+                <span>{t('dashboard.sidebar.signOut')}</span>
               </button>
             </div>
           </div>
@@ -273,10 +275,10 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold text-white truncate">
-              {merchant?.fullName || 'Merchant Account'}
+              {merchant?.fullName || t('dashboard.sidebar.merchantAccount')}
             </div>
             <div className="text-[10px] text-cyan-300 truncate">
-              {merchant?.legalName || 'PGX Direct Gateway'}
+              {merchant?.legalName || t('dashboard.sidebar.brandSub')}
             </div>
           </div>
         </div>
@@ -314,7 +316,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
 
                 {item.isOfferNew && (
                   <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-[10px] font-bold shadow-[0_0_8px_rgba(16,185,129,0.5)]">
-                    Ready
+                    {t('dashboard.sidebar.readyBadge')}
                   </span>
                 )}
               </button>
@@ -330,7 +332,7 @@ export default function Sidebar({ className = '', activeTab: controlledTab, onTa
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all font-semibold text-xs sm:text-sm cursor-pointer"
           >
             <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span>Sign Out</span>
+            <span>{t('dashboard.sidebar.signOut')}</span>
           </button>
         </div>
 

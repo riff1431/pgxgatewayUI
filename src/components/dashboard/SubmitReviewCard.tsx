@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Star, Send, ShieldCheck, CheckCircle2, Sparkles, Loader2, AlertCircle } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 export default function SubmitReviewCard() {
   const { merchant, addToast } = useAuth()
+  const { t } = useTranslation()
 
   const [rating, setRating] = useState<number>(5)
   const [hoverRating, setHoverRating] = useState<number>(0)
@@ -21,12 +23,12 @@ export default function SubmitReviewCard() {
     setErrorMessage(null)
 
     if (!content.trim()) {
-      setErrorMessage('Please provide your review content before submitting.')
+      setErrorMessage(t('dashboard.reviewCard.errEmpty'))
       return
     }
 
     if (content.trim().length < 15) {
-      setErrorMessage('Review content should be at least 15 characters long.')
+      setErrorMessage(t('dashboard.reviewCard.errMinLength'))
       return
     }
 
@@ -43,15 +45,15 @@ export default function SubmitReviewCard() {
       if (res?.success) {
         setSubmitted(true)
         addToast(
-          'Review Submitted',
-          'Thank you! Your testimonial has been routed to Underwriting for verification.',
+          t('dashboard.reviewCard.toastTitle'),
+          t('dashboard.reviewCard.toastDesc'),
           'success'
         )
       } else {
-        setErrorMessage(res?.message || 'Failed to submit review. Please try again.')
+        setErrorMessage(res?.message || t('dashboard.reviewCard.errFailed'))
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to submit review'
+      const msg = err instanceof Error ? err.message : t('dashboard.reviewCard.errFallback')
       setErrorMessage(msg)
     } finally {
       setSubmitting(false)
@@ -76,14 +78,14 @@ export default function SubmitReviewCard() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/10 border border-cyan-400/40 text-cyan-300">
             <Sparkles className="h-3 w-3 text-cyan-400" />
-            <span>Merchant Social Proof & Recognition</span>
+            <span>{t('dashboard.reviewCard.badge')}</span>
           </div>
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>Share Your Merchant Experience</span>
+            <span>{t('dashboard.reviewCard.title')}</span>
             <ShieldCheck className="h-5 w-5 text-cyan-400" />
           </h3>
           <p className="text-xs sm:text-sm text-slate-300">
-            Submit your feedback and processing experience. Approved testimonials are prominently featured on the global PGX Gateway homepage marquee.
+            {t('dashboard.reviewCard.desc')}
           </p>
         </div>
       </div>
@@ -94,9 +96,9 @@ export default function SubmitReviewCard() {
             <CheckCircle2 className="h-8 w-8" />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
-            <h4 className="text-lg font-bold text-white">Review Submitted to Underwriting!</h4>
+            <h4 className="text-lg font-bold text-white">{t('dashboard.reviewCard.successTitle')}</h4>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Thank you for your valuable feedback. Your review is currently pending moderation by our underwriting team and will go live on the public landing page once approved.
+              {t('dashboard.reviewCard.successDesc')}
             </p>
           </div>
           <button
@@ -104,7 +106,7 @@ export default function SubmitReviewCard() {
             onClick={handleReset}
             className="mt-4 px-5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-xs border border-cyan-400/50 transition-all cursor-pointer"
           >
-            Submit Another Review
+            {t('dashboard.reviewCard.submitAnother')}
           </button>
         </div>
       ) : (
@@ -119,7 +121,7 @@ export default function SubmitReviewCard() {
           {/* Star Rating Picker */}
           <div className="space-y-2">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Overall Rating <span className="text-rose-400">*</span>
+              {t('dashboard.reviewCard.ratingLabel')} <span className="text-rose-400">*</span>
             </label>
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 p-2 rounded-xl bg-[#060c22] border border-cyan-500/30 w-fit">
@@ -156,13 +158,13 @@ export default function SubmitReviewCard() {
             {/* Business / Brand Name */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Company or Brand Name
+                {t('dashboard.reviewCard.companyLabel')}
               </label>
               <input
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="e.g. Apex Commerce Ltd."
+                placeholder={t('dashboard.reviewCard.companyPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/30 bg-[#060c22] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
@@ -170,7 +172,7 @@ export default function SubmitReviewCard() {
             {/* Country */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Country of Operation
+                {t('dashboard.reviewCard.countryLabel')}
               </label>
               <select
                 value={country}
@@ -196,13 +198,13 @@ export default function SubmitReviewCard() {
           {/* Headline */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Review Headline
+              {t('dashboard.reviewCard.headlineLabel')}
             </label>
             <input
               type="text"
               value={headline}
               onChange={(e) => setHeadline(e.target.value)}
-              placeholder="e.g. 98% card approval rate and bulletproof 3DS2 checkout"
+              placeholder={t('dashboard.reviewCard.headlinePlaceholder')}
               className="w-full rounded-xl border border-cyan-500/30 bg-[#060c22] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
             />
           </div>
@@ -210,17 +212,17 @@ export default function SubmitReviewCard() {
           {/* Content */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
-              Testimonial / Feedback <span className="text-rose-400">*</span>
+              {t('dashboard.reviewCard.contentLabel')} <span className="text-rose-400">*</span>
             </label>
             <textarea
               rows={4}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share how PGX Gateway has helped your business process payments, bypass restrictions, or streamline checkouts..."
+              placeholder={t('dashboard.reviewCard.contentPlaceholder')}
               className="w-full rounded-xl border border-cyan-500/30 bg-[#060c22] px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 resize-none leading-relaxed"
             />
             <p className="text-[11px] text-slate-400">
-              Minimum 15 characters. Submissions are reviewed by compliance before being showcased on the homepage.
+              {t('dashboard.reviewCard.minCharsNote')}
             </p>
           </div>
 
@@ -234,12 +236,12 @@ export default function SubmitReviewCard() {
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                  <span>Submitting Testimonial...</span>
+                  <span>{t('dashboard.reviewCard.submittingBtn')}</span>
                 </>
               ) : (
                 <>
                   <Send className="h-4 w-4 text-slate-950" />
-                  <span>Submit Review for Verification</span>
+                  <span>{t('dashboard.reviewCard.submitBtn')}</span>
                 </>
               )}
             </button>

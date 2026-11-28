@@ -1,48 +1,51 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { 
-  Bell, 
-  ChevronDown, 
-  User, 
-  Menu, 
-  X, 
-  ArrowRight, 
-  Home as HomeIcon, 
-  Zap, 
-  Workflow, 
+import {
+  Bell,
+  ChevronDown,
+  User,
+  Menu,
+  X,
+  ArrowRight,
+  Home as HomeIcon,
+  Zap,
+  Workflow,
   Headphones,
-  type LucideIcon
+  type LucideIcon,
 } from 'lucide-react'
 import Logo from '@/components/brand/Logo'
+import LanguageSwitcher from '@/components/layout/LanguageSwitcher'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
+import type { TranslationKey } from '@/i18n/locales/en'
 
 interface NavbarProps {
   isDashboard?: boolean
 }
 
 interface NavItem {
-  label: string
+  labelKey: TranslationKey
   path: string
   icon: LucideIcon
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', path: '/', icon: HomeIcon },
-  { label: 'Solutions', path: '/solutions', icon: Zap },
-  { label: 'How It Works', path: '/how-it-works', icon: Workflow },
-  { label: 'Support', path: '/support', icon: Headphones },
+  { labelKey: 'nav.home', path: '/', icon: HomeIcon },
+  { labelKey: 'nav.solutions', path: '/solutions', icon: Zap },
+  { labelKey: 'nav.howItWorks', path: '/how-it-works', icon: Workflow },
+  { labelKey: 'nav.support', path: '/support', icon: Headphones },
 ]
 
 export default function Navbar({ isDashboard = false }: NavbarProps) {
   const location = useLocation()
   const { merchant, unreadCount, isAuthenticated } = useAuth()
+  const { t } = useTranslation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const merchantName = merchant?.fullName ? merchant.fullName.split(' ')[0] : 'Merchant'
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#05091a]/90 border-b border-cyan-500/20 backdrop-blur-xl transition-all">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-[4.5rem] flex items-center justify-between">
-        
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-[4.5rem] flex items-center justify-between gap-2">
         {/* Brand / Logo */}
         <Logo />
 
@@ -57,34 +60,38 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 key={item.path}
                 to={item.path}
                 className={`relative px-3 py-2 text-xs lg:text-sm font-semibold transition-all flex items-center gap-2 group ${
-                  isActive
-                    ? 'text-cyan-300 font-bold'
-                    : 'text-slate-300 hover:text-white'
+                  isActive ? 'text-cyan-300 font-bold' : 'text-slate-300 hover:text-white'
                 }`}
               >
-                <Icon className={`h-4 w-4 transition-colors ${isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-300'}`} />
-                <span>{item.label}</span>
+                <Icon
+                  className={`h-4 w-4 transition-colors ${
+                    isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-300'
+                  }`}
+                />
+                <span>{t(item.labelKey)}</span>
                 {isActive && !isDashboard && (
-                  <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
+                  <span className="absolute -bottom-1 inset-x-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-fuchsia-500 rounded-full shadow-[0_0_8px_rgba(0,240,255,0.8)]" />
                 )}
               </Link>
             )
           })}
         </nav>
 
-        {/* Right CTA / Auth Area */}
-        <div className="flex items-center gap-3">
+        {/* Right CTA / Auth Area + Language Switcher */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
+
           {isAuthenticated ? (
             /* User Authenticated Dropdown / Profile Pill */
             <div className="flex items-center gap-2">
               <Link
                 to="/dashboard?tab=messages"
                 className="relative p-2 rounded-xl text-slate-300 hover:text-cyan-300 bg-[#070e28] border border-cyan-500/30 hover:border-cyan-400 transition-all"
-                title="Notifications & Messages"
+                title={t('nav.notificationsTitle')}
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex items-center justify-center">
+                  <span className="absolute -top-1.5 -end-1.5 flex items-center justify-center">
                     <span className="animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full bg-rose-400 opacity-75"></span>
                     <span className="relative w-4 h-4 rounded-full bg-rose-500 text-[10px] font-black text-white flex items-center justify-center shadow-[0_0_8px_rgba(244,63,94,1)] animate-pulse">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -108,7 +115,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                     <User className="h-3 w-3" />
                   )}
                 </div>
-                <span>{merchantName}</span>
+                <span className="hidden xs:inline">{merchantName}</span>
                 <ChevronDown className="h-3 w-3 text-slate-400" />
               </Link>
             </div>
@@ -117,10 +124,10 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white bg-[#070e28] border border-slate-700 hover:border-cyan-500/50 transition-all flex items-center gap-1.5"
+                className="px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-200 hover:text-white bg-[#070e28] border border-slate-700 hover:border-cyan-500/50 transition-all flex items-center gap-1.5"
               >
                 <User className="h-3.5 w-3.5 text-cyan-400" />
-                <span>Sign In</span>
+                <span className="hidden xs:inline">{t('nav.signIn')}</span>
               </Link>
 
               {/* Quick Apply Button on tablet/desktop */}
@@ -129,7 +136,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 hover:from-purple-600 hover:to-purple-600 text-white text-xs font-bold shadow-[0_0_14px_rgba(217,70,239,0.4)] transition-all"
               >
                 <ArrowRight className="h-3 w-3" />
-                <span>Apply</span>
+                <span>{t('nav.apply')}</span>
               </Link>
             </div>
           )}
@@ -139,7 +146,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 border border-slate-700/60 transition-colors"
-            aria-label="Toggle Navigation Menu"
+            aria-label={t('nav.toggleMenu')}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -166,7 +173,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                   }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
-                  <span>{item.label}</span>
+                  <span>{t(item.labelKey)}</span>
                 </Link>
               )
             })}
@@ -181,7 +188,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#070e28] border border-cyan-500/30 text-white text-xs font-semibold hover:border-cyan-400 transition-all min-h-[44px]"
                 >
                   <User className="h-4 w-4 text-cyan-400" />
-                  <span>Sign In to Merchant Portal</span>
+                  <span>{t('nav.signInPortal')}</span>
                 </Link>
                 <Link
                   to="/register"
@@ -189,7 +196,7 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold border border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.5)] min-h-[44px]"
                 >
                   <ArrowRight className="h-4 w-4" />
-                  <span>Start Merchant Application</span>
+                  <span>{t('nav.startApplication')}</span>
                 </Link>
               </>
             ) : (
@@ -199,7 +206,9 @@ export default function Navbar({ isDashboard = false }: NavbarProps) {
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#081335] border border-cyan-400/60 text-white text-xs font-bold min-h-[44px]"
               >
                 <User className="h-4 w-4 text-cyan-400" />
-                <span>Go to Dashboard ({merchantName})</span>
+                <span>
+                  {t('nav.dashboard')} ({merchantName})
+                </span>
               </Link>
             )}
           </div>

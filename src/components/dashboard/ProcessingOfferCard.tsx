@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Tag, Check, ShieldCheck, X, Clock, Zap, CreditCard } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import SetupPaymentModal from './SetupPaymentModal'
 
 export default function ProcessingOfferCard({ className = '' }: { className?: string }) {
   const { offer, acceptOffer, merchant } = useAuth()
+  const { t } = useTranslation()
   const [showModal, setShowModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [accepting, setAccepting] = useState(false)
@@ -35,7 +37,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
   let settlementSub = ''
   if (rawSettlement) {
     if (rawSettlement.toLowerCase().includes('daily')) {
-      settlementMain = 'Daily'
+      settlementMain = t('dashboard.offerCard.daily')
       const rest = rawSettlement.replace(/daily/i, '').replace(/[()]/g, '').trim()
       settlementSub = rest ? rest : 'T+2 (Next Day)'
     } else {
@@ -86,7 +88,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               <Tag className="h-4 w-4" />
             </div>
             <h3 className="text-base sm:text-lg font-bold text-white tracking-tight truncate">
-              Processing Offer
+              {t('dashboard.offerCard.title')}
             </h3>
           </div>
 
@@ -95,18 +97,18 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
             isAccepted ? (
               <span className="px-3 py-1 rounded-full text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/80 shadow-[0_0_10px_rgba(0,240,255,0.4)] flex items-center gap-1.5 shrink-0">
                 <Check className="h-3 w-3 stroke-[3]" />
-                Terms Accepted
+                {t('dashboard.offerCard.termsAccepted')}
               </span>
             ) : (
               <span className="px-3 py-1 rounded-full text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-400/80 shadow-[0_0_10px_rgba(16,185,129,0.4)] flex items-center gap-1.5 animate-pulse shrink-0">
                 <Zap className="h-3 w-3" />
-                Offer Available
+                {t('dashboard.offerCard.offerAvailable')}
               </span>
             )
           ) : (
             <span className="px-3 py-1 rounded-full text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-400/70 shadow-[0_0_10px_rgba(245,158,11,0.25)] flex items-center gap-1.5 shrink-0">
               <Clock className="h-3 w-3 animate-pulse" />
-              Awaiting Offer
+              {t('dashboard.offerCard.awaitingOffer')}
             </span>
           )}
         </div>
@@ -117,12 +119,12 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           {/* Rate Chamber */}
           <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
             <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
-              Rate
+              {t('dashboard.offerCard.rate')}
             </div>
-            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? baseRate : '—'}
             </div>
-            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
               {isAvailable ? perTxFee : '—'}
             </div>
           </div>
@@ -130,12 +132,12 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           {/* Volume Chamber */}
           <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
             <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
-              Volume
+              {t('dashboard.offerCard.volume')}
             </div>
-            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? volumeAmount : '—'}
             </div>
-            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
               {isAvailable ? volumePeriod : '—'}
             </div>
           </div>
@@ -143,12 +145,12 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           {/* Settlement Chamber */}
           <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
             <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
-              Settlement
+              {t('dashboard.offerCard.settlement')}
             </div>
             <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? settlementMain : '—'}
             </div>
-            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
               {isAvailable ? settlementSub : '—'}
             </div>
           </div>
@@ -156,12 +158,12 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
           {/* Reserve Chamber */}
           <div className="p-2.5 sm:p-3 rounded-2xl bg-[#091332]/70 border border-cyan-500/25 flex flex-col items-center justify-center text-center shadow-[inset_0_0_10px_rgba(0,240,255,0.05)] hover:border-cyan-400/50 transition-all min-w-0">
             <div className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate w-full">
-              Reserve
+              {t('dashboard.offerCard.reserve')}
             </div>
-            <div className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-base sm:text-lg xl:text-xl font-black mt-1 tracking-tight truncate w-full ${isAvailable ? 'text-white' : 'text-slate-600'}`}>
               {isAvailable ? reserveMain : '—'}
             </div>
-            <div className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
+            <div dir="ltr" className={`text-[10px] sm:text-[11px] font-semibold mt-0.5 truncate w-full ${isAvailable ? 'text-cyan-400' : 'text-slate-600'}`}>
               {isAvailable ? reserveSub : '—'}
             </div>
           </div>
@@ -175,7 +177,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               <Clock className="h-4 w-4" />
             </div>
             <div className="flex-1 font-semibold leading-relaxed">
-              Please check back every 24hrs to see if offer is available and accept to proceed
+              {t('dashboard.offerCard.reminder')}
             </div>
           </div>
         )}
@@ -188,7 +190,11 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               onClick={() => setShowModal(true)}
               className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(217,70,239,0.7)] hover:shadow-[0_0_28px_rgba(217,70,239,0.9)] hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{isAccepted ? 'View Accepted Offer Terms' : 'View Offer & Accept to Proceed'}</span>
+              <span>
+                {isAccepted
+                  ? t('dashboard.offerCard.termsAcceptedActive')
+                  : t('dashboard.offerCard.viewTermsBtn')}
+              </span>
               <span>&rarr;</span>
             </button>
           ) : (
@@ -198,7 +204,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               className="w-full py-2.5 px-4 rounded-full bg-slate-900/80 border border-slate-700/60 text-slate-400 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
             >
               <Clock className="h-4 w-4 text-amber-400/80" />
-              <span>Offer Pending Underwriter Review</span>
+              <span>{t('dashboard.offerCard.awaitingBtn')}</span>
             </button>
           )}
         </div>
@@ -213,8 +219,8 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="h-6 w-6 text-fuchsia-400" />
                 <div>
-                  <h3 className="text-lg font-bold text-white">PGX Processing Terms</h3>
-                  <div className="text-[11px] text-cyan-300">Customized Underwriting Schedule</div>
+                  <h3 className="text-lg font-bold text-white">{t('dashboard.offerCard.modalTitle')}</h3>
+                  <div className="text-[11px] text-cyan-300">{t('dashboard.offerCard.modalSub')}</div>
                 </div>
               </div>
               <button
@@ -228,36 +234,36 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
 
             <div className="space-y-3 text-xs sm:text-sm text-slate-300">
               <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/30 flex justify-between items-center">
-                <span className="text-slate-400">Interchange / Processing Rate:</span>
-                <span className="font-bold text-white">{offer.rate}</span>
+                <span className="text-slate-400">{t('dashboard.offerCard.rateLabel')}</span>
+                <span className="font-bold text-white" dir="ltr">{offer.rate}</span>
               </div>
               <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/30 flex justify-between items-center">
-                <span className="text-slate-400">Monthly Processing Ceiling:</span>
-                <span className="font-bold text-white">{offer.volume}</span>
+                <span className="text-slate-400">{t('dashboard.offerCard.ceilingLabel')}</span>
+                <span className="font-bold text-white" dir="ltr">{offer.volume}</span>
               </div>
               <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/30 flex justify-between items-center">
-                <span className="text-slate-400">Settlement Schedule:</span>
-                <span className="font-bold text-white">{offer.settlement}</span>
+                <span className="text-slate-400">{t('dashboard.offerCard.settlementLabel')}</span>
+                <span className="font-bold text-white" dir="ltr">{offer.settlement}</span>
               </div>
               <div className="p-3 rounded-xl bg-[#091332] border border-cyan-500/30 flex justify-between items-center">
-                <span className="text-slate-400">Rolling Reserve Requirement:</span>
-                <span className="font-bold text-white">{offer.reserve}</span>
+                <span className="text-slate-400">{t('dashboard.offerCard.reserveLabel')}</span>
+                <span className="font-bold text-white" dir="ltr">{offer.reserve}</span>
               </div>
               {!isArxo ? (
                 <>
                   <div className="p-3 rounded-xl bg-[#091332] border border-amber-500/30 flex justify-between items-center">
-                    <span className="text-amber-300 font-semibold">One-Time Setup Fee:</span>
-                    <span className="font-bold text-amber-300">{offer.setupFee || defaultSetupFee}</span>
+                    <span className="text-amber-300 font-semibold">{t('dashboard.offerCard.setupFeeLabel')}</span>
+                    <span className="font-bold text-amber-300" dir="ltr">{offer.setupFee || defaultSetupFee}</span>
                   </div>
                   <div className="p-3 rounded-xl bg-[#091332] border border-purple-500/30 flex justify-between items-center">
-                    <span className="text-purple-300 font-semibold">Monthly Maintenance Fee:</span>
-                    <span className="font-bold text-purple-300">{offer.monthlyFee || defaultMonthlyFee}</span>
+                    <span className="text-purple-300 font-semibold">{t('dashboard.offerCard.monthlyFeeLabel')}</span>
+                    <span className="font-bold text-purple-300" dir="ltr">{offer.monthlyFee || defaultMonthlyFee}</span>
                   </div>
                 </>
               ) : (
                 <div className="p-3 rounded-xl bg-[#091332] border border-emerald-500/30 flex justify-between items-center">
-                  <span className="text-emerald-300 font-semibold">Partner Fee Coverage:</span>
-                  <span className="font-bold text-emerald-400">Setup & Platform Maintenance Covered by Arxopay</span>
+                  <span className="text-emerald-300 font-semibold">{t('dashboard.offerCard.partnerCoverageLabel')}</span>
+                  <span className="font-bold text-emerald-400">{t('dashboard.offerCard.partnerCoverageVal')}</span>
                 </div>
               )}
             </div>
@@ -267,7 +273,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                 <>
                   <div className="w-full py-2 rounded-full bg-emerald-500/20 border border-emerald-400/80 text-emerald-300 font-bold text-xs flex items-center justify-center gap-2">
                     <Check className="h-4 w-4 stroke-[3]" />
-                    <span>Terms Accepted & Active</span>
+                    <span>{t('dashboard.offerCard.termsAcceptedActive')}</span>
                   </div>
                   {!isArxo ? (
                     <button
@@ -279,12 +285,12 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                       className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-black text-xs shadow-[0_0_20px_rgba(0,240,255,0.4)] flex items-center justify-center gap-2 cursor-pointer transition-all"
                     >
                       <CreditCard className="h-4 w-4" />
-                      <span>Pay Setup Fee ({offer.setupFee || defaultSetupFee}) & Unlock Desk</span>
+                      <span>{t('dashboard.offerCard.paySetupBtn', { amount: offer.setupFee || defaultSetupFee })}</span>
                     </button>
                   ) : (
                     <div className="w-full py-2.5 rounded-full bg-cyan-500/10 border border-cyan-400/50 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2">
                       <ShieldCheck className="h-4 w-4 text-cyan-400" />
-                      <span>Arxopay Partner Plan: Account Ready for Partner Go-Live</span>
+                      <span>{t('dashboard.offerCard.partnerGoLive')}</span>
                     </div>
                   )}
                 </>
@@ -296,7 +302,7 @@ export default function ProcessingOfferCard({ className = '' }: { className?: st
                   className="w-full py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(0,240,255,0.6)] hover:shadow-[0_0_28px_rgba(0,240,255,0.85)] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Check className="h-4 w-4 stroke-[3]" />
-                  <span>{accepting ? 'Recording Acceptance...' : 'Accept to Proceed'}</span>
+                  <span>{accepting ? t('dashboard.offerCard.acceptingBtn') : t('dashboard.offerCard.acceptOfferBtn')}</span>
                 </button>
               )}
             </div>

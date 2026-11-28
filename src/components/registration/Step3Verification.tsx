@@ -1,18 +1,20 @@
 import { useState, useRef } from 'react'
-import { 
+import {
   AlertCircle,
-  Building2, 
-  Check, 
-  CreditCard, 
-  FileText, 
+  Building2,
+  Check,
+  CreditCard,
+  FileText,
   Loader2,
-  UploadCloud, 
-  Upload, 
+  UploadCloud,
+  Upload,
   X,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
+import type { TranslationKey } from '@/i18n/locales/en'
 
 interface Step3VerificationProps {
   onSubmit: () => void
@@ -21,9 +23,9 @@ interface Step3VerificationProps {
 
 interface DocItem {
   id: 'businessReg' | 'directorId' | 'processingStatement'
-  title: string
+  titleKey: TranslationKey
   required: boolean
-  subtitle: string
+  subtitleKey: TranslationKey
   icon: typeof Building2
   fileName?: string
   fileSize?: string
@@ -33,6 +35,7 @@ interface DocItem {
 
 export default function Step3Verification({ onSubmit, onBack }: Step3VerificationProps) {
   const { merchant, refreshStatus, addToast } = useAuth()
+  const { t } = useTranslation()
   const [agreed, setAgreed] = useState(merchant?.agreedToTerms || false)
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -40,9 +43,9 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
   const [docs, setDocs] = useState<DocItem[]>([
     {
       id: 'businessReg',
-      title: 'Business Registration Document',
+      titleKey: 'registration.step3.doc1Title',
       required: true,
-      subtitle: '(e.g. Articles of Incorporation, Business License)',
+      subtitleKey: 'registration.step3.doc1Sub',
       icon: Building2,
       fileName: merchant?.businessRegDoc?.name,
       fileSize: merchant?.businessRegDoc?.size,
@@ -50,9 +53,9 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
     },
     {
       id: 'directorId',
-      title: 'Owner / Director Government ID',
+      titleKey: 'registration.step3.doc2Title',
       required: true,
-      subtitle: "(Passport, Driver's License, or National ID)",
+      subtitleKey: 'registration.step3.doc2Sub',
       icon: CreditCard,
       fileName: merchant?.directorIdDoc?.name,
       fileSize: merchant?.directorIdDoc?.size,
@@ -60,9 +63,9 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
     },
     {
       id: 'processingStatement',
-      title: 'Recent Processing Statement',
+      titleKey: 'registration.step3.doc3Title',
       required: false,
-      subtitle: '(Last 3 months, if available)',
+      subtitleKey: 'registration.step3.doc3Sub',
       icon: FileText,
       fileName: merchant?.processingStatementDoc?.name,
       fileSize: merchant?.processingStatementDoc?.size,
@@ -83,12 +86,10 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
     if (!file || !activeUploadId) return
 
     const uploadTargetId = activeUploadId
-    // Reset file input value so re-selecting same file fires change
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
 
-    // Set uploading state
     setDocs((prev) =>
       prev.map((d) => (d.id === uploadTargetId ? { ...d, isUploading: true } : d))
     )
@@ -126,12 +127,12 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
       )
 
       addToast(
-        'Document Uploaded to Cloudinary',
-        `${file.name} securely stored in cloud storage.`,
+        t('registration.step3.toastDocUploadedTitle'),
+        t('registration.step3.toastDocUploadedMsg', { file: file.name }),
         'success'
       )
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to upload document.'
+      const msg = err instanceof Error ? err.message : t('registration.step3.errUploadFailed')
       setErrorMessage(msg)
       setDocs((prev) =>
         prev.map((d) => (d.id === uploadTargetId ? { ...d, isUploading: false } : d))
@@ -152,7 +153,7 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
     setErrorMessage(null)
 
     if (!agreed) {
-      setErrorMessage('Please confirm that the information provided is accurate and accept the Terms.')
+      setErrorMessage(t('registration.step3.errConsentReq'))
       return
     }
 
@@ -162,13 +163,13 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
       await api.merchants.submitApplication(true)
       await refreshStatus()
       addToast(
-        'Application Submitted Successfully!',
-        'Your application is now under review. Welcome to PGX Gateway.',
+        t('registration.step3.toastAppSubmittedTitle'),
+        t('registration.step3.toastAppSubmittedMsg'),
         'success'
       )
       onSubmit()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to submit application.'
+      const msg = err instanceof Error ? err.message : t('registration.step3.errSubmitFailed')
       setErrorMessage(msg)
     } finally {
       setSubmitting(false)
@@ -185,25 +186,22 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
         onChange={handleFileChange}
       />
 
-      {/* Step Header with Dual-Ring Purple Glow */}
+      {/* Step Header */}
       <div className="flex items-center gap-3.5 pb-3 border-b border-cyan-500/20">
         <div className="w-13 h-13 rounded-full bg-purple-600/20 border-2 border-fuchsia-400 flex items-center justify-center text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.6),inset_0_0_10px_rgba(217,70,239,0.3)] shrink-0">
           <UploadCloud className="h-6 w-6" />
         </div>
         <div>
           <div className="text-xs font-black text-fuchsia-400 uppercase tracking-wider">
-            Step 3 of 3
+            {t('registration.step3.eyebrow')}
           </div>
           <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-            Verification & Documents
+            {t('registration.step3.title')}
           </h2>
-          <p className="text-xs text-slate-400">
-            Securely upload your business and identity documents directly to Cloudinary KYC storage.
-          </p>
+          <p className="text-xs text-slate-400">{t('registration.step3.subtitle')}</p>
         </div>
       </div>
 
-      {/* Error alert banner */}
       {errorMessage && (
         <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/50 flex items-center gap-2.5 text-xs text-red-300 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
           <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
@@ -211,7 +209,6 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
         </div>
       )}
 
-      {/* Document Upload Rows */}
       <div className="space-y-3.5">
         {docs.map((doc) => {
           const Icon = doc.icon
@@ -236,23 +233,24 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
                 </div>
                 <div>
                   <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 flex-wrap">
-                    <span>{doc.title}</span>
+                    <span>{t(doc.titleKey)}</span>
                     {doc.required && <span className="text-fuchsia-400 font-bold">*</span>}
                     {isUploaded && (
                       <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                        <Check className="h-3 w-3 stroke-[3]" /> Cloudinary Secured
+                        <Check className="h-3 w-3 stroke-[3]" />{' '}
+                        {t('registration.step3.securedBadge')}
                       </span>
                     )}
                   </div>
-                  <div className="text-[11px] text-slate-300">
-                    {doc.subtitle}
-                  </div>
+                  <div className="text-[11px] text-slate-300">{t(doc.subtitleKey)}</div>
                   <div className="text-[10px] text-slate-500 mt-0.5">
-                    Accepted: PDF, JPG, PNG (Max 10 MB)
+                    {t('registration.step3.acceptedFormats')}
                   </div>
                   {isUploaded && (
                     <div className="text-xs text-cyan-300 font-mono mt-1 flex items-center gap-2 flex-wrap">
-                      <span>📄 {doc.fileName} ({doc.fileSize})</span>
+                      <span dir="ltr">
+                        📄 {doc.fileName} ({doc.fileSize})
+                      </span>
                       {doc.fileUrl && (
                         <a
                           href={doc.fileUrl}
@@ -260,15 +258,15 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
                           rel="noreferrer"
                           className="inline-flex items-center gap-1 text-[11px] text-cyan-400 underline hover:text-cyan-200"
                         >
-                          <span>View Document</span>
+                          <span>{t('registration.step3.viewDoc')}</span>
                           <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
                       <button
                         type="button"
                         onClick={() => removeDoc(doc.id)}
-                        className="text-red-400 hover:text-red-300 cursor-pointer ml-1"
-                        title="Remove file"
+                        className="text-red-400 hover:text-red-300 cursor-pointer ms-1"
+                        title={t('registration.step3.removeFile')}
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -291,12 +289,16 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
                   {doc.isUploading ? (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span>Uploading...</span>
+                      <span>{t('registration.step3.uploading')}</span>
                     </>
                   ) : (
                     <>
                       <Upload className="h-3.5 w-3.5" />
-                      <span>{isUploaded ? 'Replace File' : 'Upload File'}</span>
+                      <span>
+                        {isUploaded
+                          ? t('registration.step3.replaceFile')
+                          : t('registration.step3.uploadFile')}
+                      </span>
                     </>
                   )}
                 </button>
@@ -317,13 +319,13 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
             className="mt-0.5 h-4 w-4 rounded bg-[#070e28] border-cyan-500/50 text-purple-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
           />
           <span className="text-xs text-slate-300 leading-relaxed group-hover:text-white transition-colors">
-            I confirm that the information provided is accurate and I agree to the{' '}
+            {t('registration.step3.consentPrefix')}{' '}
             <a href="#terms" className="text-cyan-400 underline hover:text-cyan-300">
-              Terms of Service
+              {t('registration.step3.termsLink')}
             </a>{' '}
-            and{' '}
+            {t('registration.step3.consentAnd')}{' '}
             <a href="#privacy" className="text-cyan-400 underline hover:text-cyan-300">
-              Privacy Policy
+              {t('registration.step3.privacyLink')}
             </a>
             .
           </span>
@@ -337,7 +339,7 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
           onClick={onBack}
           className="w-full sm:w-auto px-6 py-2.5 rounded-full border border-cyan-400/80 bg-[#08102a] text-white text-xs font-bold hover:bg-cyan-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(0,240,255,0.25)] min-h-[44px]"
         >
-          <span>&larr;</span> Back
+          <span>&larr;</span> {t('common.back')}
         </button>
 
         <button
@@ -348,11 +350,11 @@ export default function Step3Verification({ onSubmit, onBack }: Step3Verificatio
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Submitting Application...</span>
+              <span>{t('registration.step3.submittingApp')}</span>
             </>
           ) : (
             <>
-              <span>Submit Application</span>
+              <span>{t('registration.step3.submitApp')}</span>
               <Check className="h-4 w-4 stroke-[3]" />
             </>
           )}

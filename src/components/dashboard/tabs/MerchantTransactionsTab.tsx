@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { getStoredToken } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 
 interface TransactionItem {
   _id: string
@@ -71,6 +72,7 @@ const API_BASE =
 
 export default function MerchantTransactionsTab() {
   const { merchant } = useAuth()
+  const { t } = useTranslation()
   const isArxo = merchant?.resellerId === 'ARXO' || merchant?.refId?.startsWith('ARXO-')
   const tier = merchant?.tier || (merchant?.offer?.rate?.includes('15') || merchant?.offer?.setupFee?.includes('2500') ? 2 : 1)
   const holdDays = isArxo ? (tier === 2 ? 45 : 14) : 14
@@ -111,7 +113,7 @@ export default function MerchantTransactionsTab() {
       })
 
       if (!res.ok) {
-        throw new Error(`Failed to load transactions: HTTP ${res.status}`)
+        throw new Error(t('dashboard.transactionsTab.errLoad', { status: res.status }))
       }
 
       const data = await res.json()
@@ -122,15 +124,15 @@ export default function MerchantTransactionsTab() {
           setMetrics(data.metrics)
         }
       } else {
-        throw new Error(data.message || 'Failed to retrieve transaction ledger.')
+        throw new Error(data.message || t('dashboard.transactionsTab.errRetrieve'))
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error fetching transaction history')
+      setError(err instanceof Error ? err.message : t('dashboard.transactionsTab.errFetch'))
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchTransactions()
@@ -172,10 +174,10 @@ export default function MerchantTransactionsTab() {
         <div>
           <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-cyan-400" />
-            Merchant Sales &amp; Settlement Ledger
+            {t('dashboard.transactionsTab.title')}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300">
-            Real-time verified customer card transactions, hold maturity timeline, and payout balance.
+            {t('dashboard.transactionsTab.desc')}
           </p>
         </div>
 
@@ -186,7 +188,7 @@ export default function MerchantTransactionsTab() {
           className="px-4 py-2.5 rounded-2xl bg-[#030614] hover:bg-[#09153a] border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shrink-0 self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          <span>Refresh Ledger</span>
+          <span>{t('dashboard.transactionsTab.refreshLedger')}</span>
         </button>
       </div>
 
@@ -202,61 +204,67 @@ export default function MerchantTransactionsTab() {
         {/* Metric 1: Total Gross Sales */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Gross Sales Volume</span>
+            <span>{t('dashboard.transactionsTab.grossVolume')}</span>
             <DollarSign className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-2xl font-black text-white tracking-tight">
+          <div dir="ltr" className="text-2xl font-black text-white tracking-tight">
             ${metrics.totalGross.toFixed(2)}
           </div>
-          <p className="text-[11px] text-slate-400">{metrics.totalCount} total processed orders</p>
+          <p className="text-[11px] text-slate-400">
+            {t('dashboard.transactionsTab.txCount', { count: metrics.totalCount })}
+          </p>
         </div>
 
         {/* Metric 2: Net Available for Payout */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-emerald-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Available for Payout</span>
+            <span>{t('dashboard.transactionsTab.availablePayout')}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-2xl font-black text-emerald-400 tracking-tight">
+          <div dir="ltr" className="text-2xl font-black text-emerald-400 tracking-tight">
             ${metrics.availableBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-emerald-300/80">Ready for instant USDT / Wire withdrawal</p>
+          <p className="text-[11px] text-emerald-300/80">{t('dashboard.transactionsTab.availableDesc')}</p>
         </div>
 
-        {/* Metric 3: 14-Day Hold Balance */}
+        {/* Metric 3: Hold Balance */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-amber-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>{holdDays}-Day Settlement Hold</span>
+            <span>{t('dashboard.transactionsTab.heldBalanceLabel', { days: holdDays })}</span>
             <Clock className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-2xl font-black text-amber-300 tracking-tight">
+          <div dir="ltr" className="text-2xl font-black text-amber-300 tracking-tight">
             ${metrics.onHoldBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-amber-200/80">Auto-matures into available balance ({holdDays} days)</p>
+          <p className="text-[11px] text-amber-200/80">
+            {t('dashboard.transactionsTab.heldDesc', { days: holdDays })}
+          </p>
         </div>
 
         {/* Metric 4: Rolling Reserve */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-cyan-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Rolling Reserve ({reserveRate}%)</span>
+            <span>{t('dashboard.transactionsTab.rollingReserve', { rate: reserveRate })}</span>
             <ShieldCheck className="w-4 h-4 text-cyan-400" />
           </div>
-          <div className="text-2xl font-black text-cyan-300 tracking-tight">
+          <div dir="ltr" className="text-2xl font-black text-cyan-300 tracking-tight">
             ${metrics.rollingReserveBalance.toFixed(2)}
           </div>
-          <p className="text-[11px] text-cyan-200/80">{reserveDays}-day rolling reserve escrow</p>
+          <p className="text-[11px] text-cyan-200/80">
+            {t('dashboard.transactionsTab.reserveTermNote', { days: reserveDays })}
+          </p>
         </div>
 
         {/* Metric 5: Total Deposited to Merchant */}
         <div className="p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 border border-purple-500/30 space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-            <span>Total Deposited</span>
+            <span>{t('dashboard.transactionsTab.totalDeposited')}</span>
             <Landmark className="w-4 h-4 text-purple-400" />
           </div>
-          <div className="text-2xl font-black text-purple-300 tracking-tight">
+          <div dir="ltr" className="text-2xl font-black text-purple-300 tracking-tight">
             ${(metrics.totalDeposited || 0).toFixed(2)}
           </div>
-          <p className="text-[11px] text-purple-200/80">Daily payouts received to date</p>
+          <p className="text-[11px] text-purple-200/80">{t('dashboard.transactionsTab.depositedDesc')}</p>
         </div>
       </div>
 
@@ -268,18 +276,18 @@ export default function MerchantTransactionsTab() {
           </div>
           <div>
             <div className="font-bold text-white flex items-center gap-2 flex-wrap">
-              <span>Agreed Processing Formula:</span>
+              <span>{t('dashboard.transactionsTab.formulaLabel')}</span>
               <span className="text-[11px] font-mono text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/40">
-                Gross &minus; Processing MDR &minus; Rolling Reserve ({reserveRate}%) = Net {holdDays}-Day Hold
+                {t('dashboard.transactionsTab.formulaValue', { rate: reserveRate, days: holdDays })}
               </span>
             </div>
             <p className="text-slate-400 text-[11px] mt-0.5">
-              Settlement hold auto-clears after {holdDays} days. Once cleared, Admin disburses daily deposits directly to your saved USDC or SWIFT destination.
+              {t('dashboard.transactionsTab.formulaDesc', { days: holdDays })}
             </p>
           </div>
         </div>
 
-        <div className="px-3 py-1.5 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono text-[11px] shrink-0">
+        <div dir="ltr" className="px-3 py-1.5 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 font-mono text-[11px] shrink-0">
           Tier {tier}: {holdDays}d Hold &bull; {reserveRate}% Reserve ({reserveDays}d)
         </div>
       </div>
@@ -300,7 +308,7 @@ export default function MerchantTransactionsTab() {
               }`}
             >
               <CreditCard className="w-3.5 h-3.5" />
-              <span>Processed Transactions ({filteredTransactions.length})</span>
+              <span>{t('dashboard.transactionsTab.viewTransactions', { count: filteredTransactions.length })}</span>
             </button>
             <button
               type="button"
@@ -312,37 +320,49 @@ export default function MerchantTransactionsTab() {
               }`}
             >
               <Landmark className="w-3.5 h-3.5" />
-              <span>Daily Deposits &amp; Payouts ({payoutHistory.length})</span>
+              <span>{t('dashboard.transactionsTab.viewDeposits', { count: payoutHistory.length })}</span>
             </button>
           </div>
 
           {/* Search Input & Status Filter (Only in Transactions View) */}
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search className="w-4 h-4 absolute start-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder={activeView === 'transactions' ? 'Search Txn, Order, Email...' : 'Search Payout ID, Ref...'}
+                placeholder={
+                  activeView === 'transactions'
+                    ? t('dashboard.transactionsTab.searchTxnPlaceholder')
+                    : t('dashboard.transactionsTab.searchPayoutPlaceholder')
+                }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
+                className="w-full ps-10 pe-4 py-2 rounded-xl bg-[#030614] border border-cyan-500/30 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
               />
             </div>
 
             {activeView === 'transactions' && (
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#030614] border border-cyan-500/20 shrink-0">
-                {(['all', 'succeeded', 'pending', 'failed', 'refunded'] as const).map((st) => (
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-[#030614] border border-cyan-500/20 shrink-0 overflow-x-auto">
+                {(
+                  [
+                    { id: 'all', label: t('dashboard.transactionsTab.statusAll') },
+                    { id: 'succeeded', label: t('dashboard.transactionsTab.statusSucceeded') },
+                    { id: 'pending', label: t('dashboard.transactionsTab.statusPending') },
+                    { id: 'failed', label: t('dashboard.transactionsTab.statusFailed') },
+                    { id: 'refunded', label: t('dashboard.transactionsTab.statusRefunded') },
+                  ] as const
+                ).map((st) => (
                   <button
-                    key={st}
+                    key={st.id}
                     type="button"
-                    onClick={() => setStatusFilter(st)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold capitalize transition-all cursor-pointer ${
-                      statusFilter === st
+                    onClick={() => setStatusFilter(st.id)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                      statusFilter === st.id
                         ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {st}
+                    {st.label}
                   </button>
                 ))}
               </div>
@@ -354,36 +374,36 @@ export default function MerchantTransactionsTab() {
         {loading ? (
           <div className="flex flex-col items-center justify-center p-16 space-y-3">
             <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-            <p className="text-xs text-slate-400">Loading verified records...</p>
+            <p className="text-xs text-slate-400">{t('dashboard.transactionsTab.loading')}</p>
           </div>
         ) : activeView === 'transactions' ? (
           /* Processed Transactions Table */
           filteredTransactions.length === 0 ? (
             <div className="text-center p-12 space-y-3 rounded-2xl bg-[#030614] border border-cyan-500/20">
               <CreditCard className="w-8 h-8 text-cyan-400/40 mx-auto" />
-              <div className="text-sm font-bold text-white">No Transactions Found</div>
+              <div className="text-sm font-bold text-white">{t('dashboard.transactionsTab.noTxnTitle')}</div>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Transactions processed via your PGX checkout integration will automatically appear here in real time.
+                {t('dashboard.transactionsTab.noTxnDesc')}
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-2xl border border-cyan-500/20">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-start text-xs">
                 <thead className="bg-[#030614] text-slate-400 border-b border-cyan-500/20 uppercase tracking-wider font-semibold text-[10px]">
                   <tr>
-                    <th className="p-3.5 whitespace-nowrap">Date &amp; Time</th>
-                    <th className="p-3.5 whitespace-nowrap">Transaction ID / Order</th>
-                    <th className="p-3.5 whitespace-nowrap">Customer</th>
-                    <th className="p-3.5 whitespace-nowrap text-right">Gross Amount</th>
-                    <th className="p-3.5 whitespace-nowrap text-right">Merchant Net</th>
-                    <th className="p-3.5 whitespace-nowrap text-center">Status</th>
-                    <th className="p-3.5 whitespace-nowrap">Hold &amp; Reserve Schedule</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colDateTime')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colTxnOrder')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colCustomer')}</th>
+                    <th className="p-3.5 whitespace-nowrap text-end">{t('dashboard.transactionsTab.colGross')}</th>
+                    <th className="p-3.5 whitespace-nowrap text-end">{t('dashboard.transactionsTab.colNet')}</th>
+                    <th className="p-3.5 whitespace-nowrap text-center">{t('dashboard.transactionsTab.colStatus')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colHoldSchedule')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cyan-500/10">
-                  {filteredTransactions.map((t) => {
-                    const rawHold = t.settlementEligibleAt || t.holdMaturesAt
-                    const rawReserve = t.rollingReserveReleaseAt || t.reserveReleaseDate
+                  {filteredTransactions.map((tr) => {
+                    const rawHold = tr.settlementEligibleAt || tr.holdMaturesAt
+                    const rawReserve = tr.rollingReserveReleaseAt || tr.reserveReleaseDate
                     const holdDate = rawHold
                       ? new Date(rawHold).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
                       : null
@@ -392,45 +412,47 @@ export default function MerchantTransactionsTab() {
                       : null
 
                     return (
-                      <tr key={t._id} className="hover:bg-cyan-500/5 transition-colors">
+                      <tr key={tr._id} className="hover:bg-cyan-500/5 transition-colors">
                         {/* Date & Time */}
                         <td className="p-3.5 whitespace-nowrap text-slate-300">
                           <div className="font-semibold text-white">
-                            {new Date(t.createdAt).toLocaleDateString()}
+                            {new Date(tr.createdAt).toLocaleDateString()}
                           </div>
                           <div className="text-[10px] text-slate-400">
-                            {new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(tr.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </td>
 
                         {/* Transaction ID / Order */}
                         <td className="p-3.5 whitespace-nowrap">
-                          <div className="font-mono font-bold text-cyan-300 text-xs">{t.transactionId}</div>
-                          {t.orderId && (
-                            <div className="text-[10px] text-slate-400 font-mono">Ref: {t.orderId}</div>
+                          <div dir="ltr" className="font-mono font-bold text-cyan-300 text-xs">{tr.transactionId}</div>
+                          {tr.orderId && (
+                            <div dir="ltr" className="text-[10px] text-slate-400 font-mono">
+                              {t('dashboard.transactionsTab.orderRef', { id: tr.orderId })}
+                            </div>
                           )}
                         </td>
 
                         {/* Customer */}
                         <td className="p-3.5 whitespace-nowrap text-slate-300">
-                          <div className="text-white font-medium">{t.customerEmail || 'Guest Buyer'}</div>
-                          <div className="text-[10px] text-slate-500">Stripe Card Payment</div>
+                          <div dir="ltr" className="text-white font-medium">{tr.customerEmail || 'Guest Buyer'}</div>
+                          <div className="text-[10px] text-slate-500">{t('dashboard.transactionsTab.cardPayment')}</div>
                         </td>
 
                         {/* Gross Amount */}
-                        <td className="p-3.5 whitespace-nowrap text-right font-bold text-white">
-                          ${t.grossAmount?.toFixed(2)}{' '}
-                          <span className="text-[10px] text-slate-400 font-normal">{t.currency}</span>
+                        <td className="p-3.5 whitespace-nowrap text-end font-bold text-white" dir="ltr">
+                          ${tr.grossAmount?.toFixed(2)}{' '}
+                          <span className="text-[10px] text-slate-400 font-normal">{tr.currency}</span>
                         </td>
 
                         {/* Merchant Net */}
-                        <td className="p-3.5 whitespace-nowrap text-right">
+                        <td className="p-3.5 whitespace-nowrap text-end" dir="ltr">
                           <div className="font-bold text-emerald-400 text-sm">
-                            ${t.merchantNetAmount?.toFixed(2)}
+                            ${tr.merchantNetAmount?.toFixed(2)}
                           </div>
-                          {(t.resellerFeeAmount !== undefined || t.platformFeeAmount !== undefined) && (
+                          {(tr.resellerFeeAmount !== undefined || tr.platformFeeAmount !== undefined) && (
                             <div className="text-[10px] text-slate-500">
-                              Fee: -${(t.resellerFeeAmount || t.platformFeeAmount || 0).toFixed(2)}
+                              Fee: -${(tr.resellerFeeAmount || tr.platformFeeAmount || 0).toFixed(2)}
                             </div>
                           )}
                         </td>
@@ -439,45 +461,51 @@ export default function MerchantTransactionsTab() {
                         <td className="p-3.5 whitespace-nowrap text-center">
                           <span
                             className={`text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase ${
-                              t.status === 'succeeded'
+                              tr.status === 'succeeded'
                                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                : t.status === 'pending'
+                                : tr.status === 'pending'
                                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
                                 : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
                             }`}
                           >
-                            {t.status}
+                            {tr.status === 'succeeded'
+                              ? t('dashboard.transactionsTab.statusSucceeded')
+                              : tr.status === 'pending'
+                              ? t('dashboard.transactionsTab.statusPending')
+                              : tr.status === 'refunded'
+                              ? t('dashboard.transactionsTab.statusRefunded')
+                              : t('dashboard.transactionsTab.statusFailed')}
                           </span>
                         </td>
 
                         {/* Hold & Reserve Schedule */}
                         <td className="p-3.5 whitespace-nowrap">
-                          {t.status === 'failed' ? (
+                          {tr.status === 'failed' ? (
                             <div className="space-y-1">
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 font-bold border border-rose-500/30">
-                                NO SETTLEMENT (FAILED)
+                                {t('dashboard.transactionsTab.noSettlementFailed')}
                               </span>
                             </div>
-                          ) : t.status === 'pending' ? (
+                          ) : tr.status === 'pending' ? (
                             <div className="space-y-1">
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
-                                AWAITING PAYMENT
+                                {t('dashboard.transactionsTab.awaitingPayment')}
                               </span>
                             </div>
                           ) : (
                             <div className="space-y-1">
                               <div className="flex items-center gap-1.5">
-                                {t.settlementStatus === 'available' ? (
+                                {tr.settlementStatus === 'available' ? (
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
-                                    AVAILABLE
+                                    {t('dashboard.transactionsTab.statusAvailable')}
                                   </span>
-                                ) : t.settlementStatus === 'paid_out' ? (
+                                ) : tr.settlementStatus === 'paid_out' ? (
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/40">
-                                    PAID OUT
+                                    {t('dashboard.transactionsTab.statusPaidOut')}
                                   </span>
                                 ) : (
                                   <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                                    ON HOLD ({holdDays}D)
+                                    {t('dashboard.transactionsTab.statusOnHold', { days: holdDays })}
                                   </span>
                                 )}
                                 {holdDate && (
@@ -488,10 +516,15 @@ export default function MerchantTransactionsTab() {
                                 )}
                               </div>
 
-                              {t.rollingReserveAmount !== undefined && t.rollingReserveAmount > 0 && (
+                              {tr.rollingReserveAmount !== undefined && tr.rollingReserveAmount > 0 && (
                                 <div className="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
                                   <Lock className="w-2.5 h-2.5 text-cyan-400" />
-                                  <span>Rolling Reserve ({reserveRate}%): ${t.rollingReserveAmount.toFixed(2)}</span>
+                                  <span>
+                                    {t('dashboard.transactionsTab.reserveAmount', {
+                                      rate: reserveRate,
+                                      amount: tr.rollingReserveAmount.toFixed(2),
+                                    })}
+                                  </span>
                                   {reserveDate && <span className="text-slate-500">({reserveDate})</span>}
                                 </div>
                               )}
@@ -510,23 +543,23 @@ export default function MerchantTransactionsTab() {
           filteredPayouts.length === 0 ? (
             <div className="text-center p-12 space-y-3 rounded-2xl bg-[#030614] border border-cyan-500/20">
               <Landmark className="w-8 h-8 text-cyan-400/40 mx-auto" />
-              <div className="text-sm font-bold text-white">No Daily Deposits Recorded Yet</div>
+              <div className="text-sm font-bold text-white">{t('dashboard.transactionsTab.noDepositsTitle')}</div>
               <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Once your 14-day settlement hold period matures, admin disbursements sent to your USDC or SWIFT coordinates will be logged and displayed here daily.
+                {t('dashboard.transactionsTab.noDepositsDesc', { days: holdDays })}
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-2xl border border-cyan-500/20">
-              <table className="w-full text-left text-xs">
+              <table className="w-full text-start text-xs">
                 <thead className="bg-[#030614] text-slate-400 border-b border-cyan-500/20 uppercase tracking-wider font-semibold text-[10px]">
                   <tr>
-                    <th className="p-3.5 whitespace-nowrap">Deposit Date</th>
-                    <th className="p-3.5 whitespace-nowrap">Payout ID</th>
-                    <th className="p-3.5 whitespace-nowrap text-right">Amount Deposited</th>
-                    <th className="p-3.5 whitespace-nowrap">Method &amp; Rail</th>
-                    <th className="p-3.5 whitespace-nowrap">Destination Coordinates</th>
-                    <th className="p-3.5 whitespace-nowrap">TxID / Bank Wire Ref</th>
-                    <th className="p-3.5 whitespace-nowrap text-center">Status</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colDepositDate')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colPayoutId')}</th>
+                    <th className="p-3.5 whitespace-nowrap text-end">{t('dashboard.transactionsTab.colDeposited')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colMethodRail')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colDestination')}</th>
+                    <th className="p-3.5 whitespace-nowrap">{t('dashboard.transactionsTab.colTxWireRef')}</th>
+                    <th className="p-3.5 whitespace-nowrap text-center">{t('dashboard.transactionsTab.colPayoutStatus')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-cyan-500/10">
@@ -543,12 +576,12 @@ export default function MerchantTransactionsTab() {
                       </td>
 
                       {/* Payout ID */}
-                      <td className="p-3.5 whitespace-nowrap font-mono font-bold text-cyan-300">
+                      <td dir="ltr" className="p-3.5 whitespace-nowrap font-mono font-bold text-cyan-300">
                         {p.payoutId}
                       </td>
 
                       {/* Amount */}
-                      <td className="p-3.5 whitespace-nowrap text-right font-black text-emerald-400 text-sm">
+                      <td dir="ltr" className="p-3.5 whitespace-nowrap text-end font-black text-emerald-400 text-sm">
                         +${p.amount.toFixed(2)} USD
                       </td>
 
@@ -558,19 +591,19 @@ export default function MerchantTransactionsTab() {
                           {p.method === 'crypto_usdc' ? (
                             <>
                               <Wallet className="w-3 h-3 text-cyan-400" />
-                              USDC Stablecoin
+                              {t('dashboard.transactionsTab.methodUsdc')}
                             </>
                           ) : (
                             <>
                               <Landmark className="w-3 h-3 text-cyan-400" />
-                              Bank SWIFT Wire
+                              {t('dashboard.transactionsTab.methodSwift')}
                             </>
                           )}
                         </span>
                       </td>
 
                       {/* Destination */}
-                      <td className="p-3.5 whitespace-nowrap font-mono text-[11px] text-slate-300">
+                      <td dir="ltr" className="p-3.5 whitespace-nowrap font-mono text-[11px] text-slate-300">
                         <div className="max-w-[180px] truncate" title={p.destination}>
                           {p.destination || 'Registered Bank / Wallet'}
                         </div>
@@ -578,13 +611,13 @@ export default function MerchantTransactionsTab() {
 
                       {/* Reference */}
                       <td className="p-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 font-mono text-xs text-white">
+                        <div className="flex items-center gap-1.5 font-mono text-xs text-white" dir="ltr">
                           <span className="max-w-[140px] truncate">{p.reference}</span>
                           <button
                             type="button"
                             onClick={() => handleCopyRef(p.reference, p.payoutId)}
                             className="p-1 rounded hover:bg-cyan-500/20 text-cyan-400 cursor-pointer"
-                            title="Copy Reference"
+                            title={t('dashboard.transactionsTab.copyRefTitle')}
                           >
                             {copiedPayoutId === p.payoutId ? (
                               <Check className="w-3 h-3 text-emerald-400" />
@@ -599,7 +632,7 @@ export default function MerchantTransactionsTab() {
                       {/* Status */}
                       <td className="p-3.5 whitespace-nowrap text-center">
                         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full border uppercase bg-emerald-500/20 text-emerald-300 border-emerald-500/40">
-                          {p.status || 'COMPLETED'}
+                          {p.status || t('dashboard.transactionsTab.statusCompleted')}
                         </span>
                       </td>
                     </tr>

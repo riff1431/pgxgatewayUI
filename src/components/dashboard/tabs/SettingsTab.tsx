@@ -19,12 +19,14 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import { api } from '@/lib/api'
 import AvatarUploader from '@/components/dashboard/AvatarUploader'
 import SubmitReviewCard from '@/components/dashboard/SubmitReviewCard'
 
 export default function SettingsTab() {
   const { merchant, updateProfile, changePassword, addToast, refreshMerchant } = useAuth()
+  const { t } = useTranslation()
 
   // Profile Form State
   const [fullName, setFullName] = useState(merchant?.fullName || '')
@@ -90,11 +92,15 @@ export default function SettingsTab() {
       })
       await refreshMerchant()
       setPayoutSuccess(true)
-      addToast('Payout Destination Saved', 'Your settlement receiving destination has been securely recorded.', 'success')
+      addToast(
+        t('dashboard.settingsTab.payoutToastTitle'),
+        t('dashboard.settingsTab.payoutToastDesc'),
+        'success'
+      )
       setTimeout(() => setPayoutSuccess(false), 4000)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to save payout settings'
-      addToast('Error', msg, 'error')
+      const msg = err instanceof Error ? err.message : t('dashboard.quickActions.errorTitle')
+      addToast(t('dashboard.quickActions.errorTitle'), msg, 'error')
     } finally {
       setPayoutLoading(false)
     }
@@ -125,12 +131,12 @@ export default function SettingsTab() {
     setPasswordError(null)
 
     if (newPassword !== confirmPassword) {
-      setPasswordError('New password and confirmation do not match.')
+      setPasswordError(t('dashboard.settingsTab.errPwMatch'))
       return
     }
 
     if (newPassword.length < 8) {
-      setPasswordError('New password must be at least 8 characters long.')
+      setPasswordError(t('dashboard.settingsTab.errPwLength'))
       return
     }
 
@@ -141,7 +147,7 @@ export default function SettingsTab() {
       setNewPassword('')
       setConfirmPassword('')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to update password'
+      const msg = err instanceof Error ? err.message : t('dashboard.quickActions.errorTitle')
       setPasswordError(msg)
     } finally {
       setPasswordLoading(false)
@@ -157,7 +163,7 @@ export default function SettingsTab() {
       setCopiedId(true)
       setTimeout(() => setCopiedId(false), 2000)
     }
-    addToast('Copied', 'Credential copied to clipboard.', 'success')
+    addToast(t('dashboard.settingsTab.copiedTitle'), t('dashboard.settingsTab.copiedCredDesc'), 'success')
   }
 
   return (
@@ -165,10 +171,10 @@ export default function SettingsTab() {
       {/* Header */}
       <div>
         <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-          Account & Security Settings
+          {t('dashboard.settingsTab.title')}
         </h2>
         <p className="text-sm text-slate-300 mt-1">
-          Manage your personal profile, credentials, and merchant gateway integrations.
+          {t('dashboard.settingsTab.desc')}
         </p>
       </div>
 
@@ -177,7 +183,7 @@ export default function SettingsTab() {
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
           <Camera className="h-5 w-5 text-cyan-400" />
           <h3 className="text-base font-bold text-white tracking-tight">
-            Merchant Avatar & Visual Identity
+            {t('dashboard.settingsTab.avatarTitle')}
           </h3>
         </div>
 
@@ -190,7 +196,7 @@ export default function SettingsTab() {
           <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
             <User className="h-5 w-5 text-cyan-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Profile & Contact Details
+              {t('dashboard.settingsTab.profileTitle')}
             </h3>
           </div>
 
@@ -203,32 +209,33 @@ export default function SettingsTab() {
 
           <form onSubmit={handleProfileSubmit} className="space-y-4 text-xs">
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Authorized Full Name</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.fullNameLabel')}</label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Full Name"
+                placeholder={t('dashboard.settingsTab.fullNamePlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Primary Business Email</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.emailLabel')}</label>
               <div className="flex items-center gap-2 rounded-xl border border-slate-700/60 bg-[#040817] px-3 py-2 text-slate-400">
-                <Mail className="h-4 w-4 text-slate-500" />
-                <span className="truncate">{merchant?.businessEmail || 'merchant@pgxgateway.com'}</span>
-                <span className="ml-auto text-[10px] text-cyan-400 font-mono">Immutable</span>
+                <Mail className="h-4 w-4 text-slate-500 shrink-0" />
+                <span dir="ltr" className="truncate">{merchant?.businessEmail || 'merchant@pgxgateway.com'}</span>
+                <span className="ms-auto text-[10px] text-cyan-400 font-mono">{t('dashboard.settingsTab.immutable')}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">Direct Phone / Mobile</label>
+                <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.phoneLabel')}</label>
                 <input
                   type="text"
                   required
+                  dir="ltr"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+1 (555) 000-0000"
@@ -237,21 +244,23 @@ export default function SettingsTab() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-300 font-semibold">WhatsApp Number</label>
+                <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.whatsappLabel')}</label>
                 <input
                   type="text"
+                  dir="ltr"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  placeholder="WhatsApp number"
+                  placeholder={t('dashboard.settingsTab.whatsappPlaceholder')}
                   className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                 />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Telegram Handle</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.telegramLabel')}</label>
               <input
                 type="text"
+                dir="ltr"
                 value={telegram}
                 onChange={(e) => setTelegram(e.target.value)}
                 placeholder="@username"
@@ -265,7 +274,7 @@ export default function SettingsTab() {
               className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_15px_rgba(217,70,239,0.6)] hover:shadow-[0_0_22px_rgba(217,70,239,0.85)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
               {profileLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-              <span>Save Profile Changes</span>
+              <span>{profileLoading ? t('dashboard.settingsTab.savingProfile') : t('dashboard.settingsTab.saveProfileBtn')}</span>
             </button>
           </form>
         </div>
@@ -275,7 +284,7 @@ export default function SettingsTab() {
           <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
             <Lock className="h-5 w-5 text-cyan-400" />
             <h3 className="text-base font-bold text-white tracking-tight">
-              Password & Authentication
+              {t('dashboard.settingsTab.passwordTitle')}
             </h3>
           </div>
 
@@ -288,39 +297,39 @@ export default function SettingsTab() {
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4 text-xs">
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Current Password</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.currentPwLabel')}</label>
               <input
                 type="password"
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
+                placeholder={t('dashboard.settingsTab.currentPwPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">New Password (Min 8 Characters)</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.newPwLabel')}</label>
               <input
                 type="password"
                 required
                 minLength={8}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new secure password"
+                placeholder={t('dashboard.settingsTab.newPwPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-slate-300 font-semibold">Confirm New Password</label>
+              <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.confirmPwLabel')}</label>
               <input
                 type="password"
                 required
                 minLength={8}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
+                placeholder={t('dashboard.settingsTab.confirmPwPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
@@ -331,7 +340,7 @@ export default function SettingsTab() {
               className="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white font-bold text-xs shadow-[0_0_15px_rgba(217,70,239,0.6)] hover:shadow-[0_0_22px_rgba(217,70,239,0.85)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
               {passwordLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-              <span>Update Password</span>
+              <span>{passwordLoading ? t('dashboard.settingsTab.updatingPw') : t('dashboard.settingsTab.updatePwBtn')}</span>
             </button>
           </form>
         </div>
@@ -345,14 +354,14 @@ export default function SettingsTab() {
               <Landmark className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                Settlement &amp; Payout Receiving Destination
+              <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2 flex-wrap">
+                {t('dashboard.settingsTab.payoutTitle')}
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                  Required for Daily Payouts
+                  {t('dashboard.settingsTab.payoutBadge')}
                 </span>
               </h3>
               <p className="text-xs text-slate-300">
-                Configure your USDC cryptocurrency address and/or bank account SWIFT transfer details to receive matured settlements.
+                {t('dashboard.settingsTab.payoutDesc')}
               </p>
             </div>
           </div>
@@ -369,7 +378,7 @@ export default function SettingsTab() {
               }`}
             >
               <Wallet className="h-3.5 w-3.5" />
-              <span>Crypto USDC</span>
+              <span>{t('dashboard.settingsTab.cryptoUsdc')}</span>
             </button>
             <button
               type="button"
@@ -381,7 +390,7 @@ export default function SettingsTab() {
               }`}
             >
               <Landmark className="h-3.5 w-3.5" />
-              <span>Bank SWIFT Transfer</span>
+              <span>{t('dashboard.settingsTab.bankSwift')}</span>
             </button>
           </div>
         </div>
@@ -389,7 +398,7 @@ export default function SettingsTab() {
         {payoutSuccess && (
           <div className="p-3.5 rounded-2xl bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 text-xs flex items-center gap-2.5 animate-fade-in">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-            <span>Payout receiving destination saved securely! Admin will disburse daily payouts to these verified coordinates.</span>
+            <span>{t('dashboard.settingsTab.payoutSavedNotice')}</span>
           </div>
         )}
 
@@ -397,41 +406,42 @@ export default function SettingsTab() {
           {preferredMethod === 'crypto_usdc' ? (
             /* Crypto USDC Receiving Section */
             <div className="space-y-4 rounded-2xl bg-[#04081b] border border-cyan-500/30 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Wallet className="h-4 w-4 text-cyan-400" />
-                  Circle USDC Wallet Coordinates
+                  {t('dashboard.settingsTab.usdcTitle')}
                 </span>
-                <span className="text-[11px] text-slate-400">Zero wire fees &bull; Instant daily clearing</span>
+                <span className="text-[11px] text-slate-400">{t('dashboard.settingsTab.usdcSub')}</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div className="md:col-span-2 space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    USDC Wallet Address / Receiving ID
+                    {t('dashboard.settingsTab.usdcAddrLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required={preferredMethod === 'crypto_usdc'}
                     value={usdcAddress}
                     onChange={(e) => setUsdcAddress(e.target.value)}
-                    placeholder="e.g. 0x4520FBE6d418c1bAcE97A1E517e5Be2d78eb9598 or Solana address"
+                    placeholder={t('dashboard.settingsTab.usdcAddrPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono text-xs"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-slate-300 font-semibold">USDC Network / Protocol</label>
+                  <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.usdcNetLabel')}</label>
                   <select
                     value={usdcNetwork}
                     onChange={(e) => setUsdcNetwork(e.target.value)}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs cursor-pointer"
                   >
-                    <option value="ERC-20">Ethereum (ERC-20)</option>
-                    <option value="TRC-20">Tron (TRC-20)</option>
-                    <option value="Solana">Solana (SPL)</option>
-                    <option value="Polygon">Polygon (PoS)</option>
+                    <option value="ERC-20">{t('dashboard.settingsTab.netEth')}</option>
+                    <option value="TRC-20">{t('dashboard.settingsTab.netTron')}</option>
+                    <option value="Solana">{t('dashboard.settingsTab.netSol')}</option>
+                    <option value="Polygon">{t('dashboard.settingsTab.netPoly')}</option>
                   </select>
                 </div>
               </div>
@@ -439,18 +449,18 @@ export default function SettingsTab() {
           ) : (
             /* Bank SWIFT Wire Transfer Receiving Section */
             <div className="space-y-4 rounded-2xl bg-[#04081b] border border-cyan-500/30 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Landmark className="h-4 w-4 text-cyan-400" />
-                  International Bank Wire (SWIFT / BIC)
+                  {t('dashboard.settingsTab.swiftTitle')}
                 </span>
-                <span className="text-[11px] text-slate-400">Direct business bank deposit</span>
+                <span className="text-[11px] text-slate-400">{t('dashboard.settingsTab.swiftSub')}</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    Beneficiary / Account Holder Full Legal Name
+                    {t('dashboard.settingsTab.beneficiaryLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
@@ -458,14 +468,14 @@ export default function SettingsTab() {
                     required={preferredMethod === 'bank_swift'}
                     value={bankBeneficiary}
                     onChange={(e) => setBankBeneficiary(e.target.value)}
-                    placeholder="Legal Entity or Account Holder Name"
+                    placeholder={t('dashboard.settingsTab.beneficiaryPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    Bank Name
+                    {t('dashboard.settingsTab.bankNameLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
@@ -473,44 +483,46 @@ export default function SettingsTab() {
                     required={preferredMethod === 'bank_swift'}
                     value={bankName}
                     onChange={(e) => setBankName(e.target.value)}
-                    placeholder="e.g. JPMorgan Chase, Barclays, DBS"
+                    placeholder={t('dashboard.settingsTab.bankNamePlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    SWIFT / BIC Code (8 or 11 Characters)
+                    {t('dashboard.settingsTab.swiftCodeLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required={preferredMethod === 'bank_swift'}
                     value={bankSwiftBic}
                     onChange={(e) => setBankSwiftBic(e.target.value.toUpperCase())}
-                    placeholder="e.g. CHASUS33XXX"
+                    placeholder={t('dashboard.settingsTab.swiftCodePlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    IBAN or Bank Account Number
+                    {t('dashboard.settingsTab.ibanLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
                     type="text"
+                    dir="ltr"
                     required={preferredMethod === 'bank_swift'}
                     value={bankIban}
                     onChange={(e) => setBankIban(e.target.value)}
-                    placeholder="e.g. GB29NWBK60161331926819 or Account #"
+                    placeholder={t('dashboard.settingsTab.ibanPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-slate-300 font-semibold flex items-center gap-1">
-                    Bank Country
+                    {t('dashboard.settingsTab.bankCountryLabel')}
                     <span className="text-rose-400">*</span>
                   </label>
                   <input
@@ -518,29 +530,30 @@ export default function SettingsTab() {
                     required={preferredMethod === 'bank_swift'}
                     value={bankCountry}
                     onChange={(e) => setBankCountry(e.target.value)}
-                    placeholder="e.g. United States, United Kingdom, Singapore"
+                    placeholder={t('dashboard.settingsTab.bankCountryPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-slate-300 font-semibold">Routing Number / Branch Code (Optional)</label>
+                  <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.routingLabel')}</label>
                   <input
                     type="text"
+                    dir="ltr"
                     value={bankRouting}
                     onChange={(e) => setBankRouting(e.target.value)}
-                    placeholder="ABA / Sort Code / FedWire"
+                    placeholder={t('dashboard.settingsTab.routingPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-slate-300 font-semibold">Bank Branch Address (Optional)</label>
+                  <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.branchAddrLabel')}</label>
                   <input
                     type="text"
                     value={bankAddress}
                     onChange={(e) => setBankAddress(e.target.value)}
-                    placeholder="e.g. 270 Park Ave, New York, NY 10017"
+                    placeholder={t('dashboard.settingsTab.branchAddrPlaceholder')}
                     className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] px-3.5 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
@@ -551,7 +564,7 @@ export default function SettingsTab() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
             <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-cyan-400 shrink-0" />
-              <span>Receiving coordinates are encrypted and utilized exclusively for underwriting settlement disbursements.</span>
+              <span>{t('dashboard.settingsTab.payoutEncryptedNote')}</span>
             </div>
 
             <button
@@ -560,7 +573,7 @@ export default function SettingsTab() {
               className="px-6 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 text-white font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:shadow-[0_0_22px_rgba(0,240,255,0.7)] cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
             >
               {payoutLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-              <span>Save Payout Destination</span>
+              <span>{payoutLoading ? t('dashboard.settingsTab.savingPayout') : t('dashboard.settingsTab.savePayoutBtn')}</span>
             </button>
           </div>
         </form>
@@ -571,7 +584,7 @@ export default function SettingsTab() {
         <div className="flex items-center gap-2 pb-3 border-b border-cyan-500/20">
           <Key className="h-5 w-5 text-cyan-400" />
           <h3 className="text-base font-bold text-white tracking-tight">
-            Store Reference ID & Developer Gateway Credentials
+            {t('dashboard.settingsTab.devTitle')}
           </h3>
         </div>
 
@@ -581,20 +594,24 @@ export default function SettingsTab() {
             <div>
               <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-cyan-400" />
-                <span>Your Store Reference ID (Ref ID)</span>
+                <span>{t('dashboard.settingsTab.refIdLabel')}</span>
               </div>
               <div className="text-xl sm:text-2xl font-black font-mono text-white flex items-center gap-2 mt-0.5">
-                <span className="text-cyan-300 tracking-wide">{refId}</span>
+                <span dir="ltr" className="text-cyan-300 tracking-wide">{refId}</span>
                 <button
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(refId)
                     setCopiedRef(true)
-                    addToast('Copied', 'Ref ID copied to clipboard.', 'success')
+                    addToast(
+                      t('dashboard.settingsTab.copiedTitle'),
+                      t('dashboard.settingsTab.copiedRefDesc'),
+                      'success'
+                    )
                     setTimeout(() => setCopiedRef(false), 2000)
                   }}
                   className="p-1.5 rounded-lg bg-black/40 text-cyan-400 hover:text-white cursor-pointer border border-cyan-500/30"
-                  title="Copy Reference ID"
+                  title={t('dashboard.settingsTab.copyRefTitle')}
                 >
                   {copiedRef ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
                 </button>
@@ -607,13 +624,19 @@ export default function SettingsTab() {
                 onClick={() => {
                   navigator.clipboard.writeText(checkoutUrl)
                   setCopiedLink(true)
-                  addToast('Copied', 'Checkout URL copied to clipboard.', 'success')
+                  addToast(
+                    t('dashboard.settingsTab.copiedTitle'),
+                    t('dashboard.settingsTab.copiedLinkDesc'),
+                    'success'
+                  )
                   setTimeout(() => setCopiedLink(false), 2000)
                 }}
                 className="px-3.5 py-2 rounded-full bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(0,240,255,0.2)]"
               >
                 {copiedLink ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>Copy Checkout Link</span>
+                <span>
+                  {copiedLink ? t('dashboard.settingsTab.copiedLink') : t('dashboard.settingsTab.copyCheckoutLink')}
+                </span>
               </button>
 
               <a
@@ -623,26 +646,26 @@ export default function SettingsTab() {
                 className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-700 via-fuchsia-600 to-purple-700 text-white text-xs font-bold shadow-[0_0_15px_rgba(217,70,239,0.6)] hover:shadow-[0_0_22px_rgba(217,70,239,0.85)] transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span>Test Checkout</span>
+                <span>{t('dashboard.settingsTab.testCheckout')}</span>
               </a>
             </div>
           </div>
           <p className="text-xs text-slate-300">
-            Provide this <span className="font-mono text-cyan-300 font-semibold">{refId}</span> to your ecommerce shop (WooCommerce/Shopify/custom code) or share your direct Checkout Link. All transactions are securely routed through our central Stripe engine.
+            {t('dashboard.settingsTab.refIdDesc', { refId })}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
           {/* Merchant ID */}
           <div className="space-y-1.5">
-            <label className="text-slate-300 font-semibold">Internal Merchant Account ID</label>
+            <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.merchantIdLabel')}</label>
             <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] p-2.5 items-center justify-between font-mono">
-              <span className="text-white truncate">{merchantId}</span>
+              <span dir="ltr" className="text-white truncate">{merchantId}</span>
               <button
                 type="button"
                 onClick={() => handleCopy(merchantId, false)}
-                className="p-1 rounded text-cyan-400 hover:text-white cursor-pointer ml-2"
-                title="Copy Merchant ID"
+                className="p-1 rounded text-cyan-400 hover:text-white cursor-pointer ms-2"
+                title={t('dashboard.settingsTab.copyMerchantIdTitle')}
               >
                 {copiedId ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
               </button>
@@ -651,17 +674,16 @@ export default function SettingsTab() {
 
           {/* Secret Key */}
           <div className="space-y-1.5">
-            <label className="text-slate-300 font-semibold">Production API Secret Key</label>
+            <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.secretKeyLabel')}</label>
             <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] p-2.5 items-center justify-between font-mono">
-              <span className="text-white truncate">
+              <span dir="ltr" className="text-white truncate">
                 {showSecretKey ? liveSecretKey : '••••••••••••••••••••••••••••••••'}
               </span>
-              <div className="flex items-center gap-1.5 ml-2">
+              <div className="flex items-center gap-1.5 ms-2">
                 <button
                   type="button"
                   onClick={() => setShowSecretKey(!showSecretKey)}
                   className="p-1 rounded text-slate-400 hover:text-white cursor-pointer"
-                  title={showSecretKey ? 'Hide key' : 'Show key'}
                 >
                   {showSecretKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -669,7 +691,7 @@ export default function SettingsTab() {
                   type="button"
                   onClick={() => handleCopy(liveSecretKey, true)}
                   className="p-1 rounded text-cyan-400 hover:text-white cursor-pointer"
-                  title="Copy Secret Key"
+                  title={t('dashboard.settingsTab.copySecretTitle')}
                 >
                   {copiedKey ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
                 </button>
@@ -679,10 +701,11 @@ export default function SettingsTab() {
 
           {/* Webhook Endpoint */}
           <div className="space-y-1.5 md:col-span-2">
-            <label className="text-slate-300 font-semibold">Payment Webhook URL (HTTP POST Events)</label>
+            <label className="text-slate-300 font-semibold">{t('dashboard.settingsTab.webhookLabel')}</label>
             <div className="flex rounded-xl border border-cyan-500/40 bg-[#060c24] overflow-hidden focus-within:border-cyan-400">
               <input
                 type="url"
+                dir="ltr"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
                 placeholder="https://yourstore.com/api/payment-webhook"
@@ -690,10 +713,16 @@ export default function SettingsTab() {
               />
               <button
                 type="button"
-                onClick={() => addToast('Webhook Updated', 'Webhook endpoint saved.', 'success')}
-                className="px-4 py-2 bg-cyan-500/20 text-cyan-300 font-bold hover:bg-cyan-500/30 transition-colors cursor-pointer"
+                onClick={() =>
+                  addToast(
+                    t('dashboard.settingsTab.webhookToastTitle'),
+                    t('dashboard.settingsTab.webhookToastDesc'),
+                    'success'
+                  )
+                }
+                className="px-4 py-2 bg-cyan-500/20 text-cyan-300 font-bold hover:bg-cyan-500/30 transition-colors cursor-pointer shrink-0"
               >
-                Save
+                {t('dashboard.settingsTab.saveWebhook')}
               </button>
             </div>
           </div>

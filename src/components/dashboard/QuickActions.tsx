@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Clock, Headphones, Mail, UploadCloud, X, CheckCircle, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
+import { useTranslation } from '@/context/LanguageContext'
 import { api } from '@/lib/api'
 
 interface QuickActionsProps {
@@ -12,6 +13,7 @@ interface QuickActionsProps {
 export default function QuickActions({ className = '', onNavigateTab }: QuickActionsProps) {
   const navigate = useNavigate()
   const { unreadCount, notifications, refreshMessages, addToast } = useAuth()
+  const { t } = useTranslation()
   
   const [modalType, setModalType] = useState<'messages' | 'activity' | 'support' | null>(null)
   const [supportMessage, setSupportMessage] = useState('')
@@ -23,21 +25,21 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
 
     setSupportSubmitting(true)
     try {
-      const res = await api.dashboard.createSupportTicket({
+      await api.dashboard.createSupportTicket({
         subject: 'Merchant Support Request',
         message: supportMessage,
       })
       await refreshMessages()
       addToast(
-        'Support Ticket Created',
-        `Ticket #${res.data?.ticketId || 'TICKET'} logged. Our team is on it!`,
+        t('dashboard.quickActions.supportSentTitle'),
+        t('dashboard.quickActions.supportSentDesc'),
         'success'
       )
       setSupportMessage('')
       setModalType(null)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to submit support request.'
-      addToast('Error', msg, 'error')
+      const msg = err instanceof Error ? err.message : t('dashboard.quickActions.errFallback')
+      addToast(t('dashboard.quickActions.errorTitle'), msg, 'error')
     } finally {
       setSupportSubmitting(false)
     }
@@ -46,7 +48,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
   const actions = [
     {
       id: 'upload',
-      title: 'Upload Documents',
+      title: t('dashboard.quickActions.uploadDocs'),
       icon: UploadCloud,
       borderType: 'cyan',
       onClick: () => {
@@ -59,7 +61,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
     },
     {
       id: 'messages',
-      title: 'Messages',
+      title: t('dashboard.quickActions.messages'),
       icon: Mail,
       badge: unreadCount,
       borderType: 'purple',
@@ -73,14 +75,14 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
     },
     {
       id: 'activity',
-      title: 'Recent Activity',
+      title: t('dashboard.quickActions.recentActivity'),
       icon: Clock,
       borderType: 'cyan',
       onClick: () => setModalType('activity'),
     },
     {
       id: 'support',
-      title: 'Request Support',
+      title: t('dashboard.quickActions.requestSupport'),
       icon: Headphones,
       borderType: 'purple',
       onClick: () => setModalType('support'),
@@ -99,7 +101,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
               key={act.id}
               type="button"
               onClick={act.onClick}
-              className={`p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 flex items-center justify-between transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left backdrop-blur-xl ${
+              className={`p-4 sm:p-5 rounded-2xl bg-[#060b20]/90 flex items-center justify-between transition-all duration-300 hover:scale-[1.02] cursor-pointer text-start backdrop-blur-xl ${
                 isCyan
                   ? 'border-[1.5px] border-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_22px_rgba(0,240,255,0.5)]'
                   : 'border-[1.5px] border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.35)] hover:shadow-[0_0_22px_rgba(217,70,239,0.6)]'
@@ -117,7 +119,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
                   <Icon className="h-5 w-5" />
 
                   {Boolean(act.badge && act.badge > 0) && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_6px_rgba(217,70,239,0.9)]">
+                    <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-fuchsia-600 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_6px_rgba(217,70,239,0.9)]">
                       {act.badge}
                     </span>
                   )}
@@ -130,7 +132,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
               </div>
 
               {/* Chevron Right */}
-              <span className="text-slate-400 text-sm font-bold ml-2">
+              <span className="text-slate-400 text-sm font-bold ms-2">
                 &gt;
               </span>
             </button>
@@ -145,7 +147,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
             <div className="flex items-center justify-between pb-3 border-b border-fuchsia-500/20">
               <div className="flex items-center gap-2.5">
                 <Mail className="h-5 w-5 text-fuchsia-400" />
-                <h3 className="text-lg font-bold text-white">Merchant Messages & Notifications</h3>
+                <h3 className="text-lg font-bold text-white">{t('dashboard.quickActions.messagesModalTitle')}</h3>
               </div>
               <button
                 type="button"
@@ -156,10 +158,10 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
               </button>
             </div>
 
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-80 overflow-y-auto pe-1">
               {notifications.length === 0 ? (
                 <div className="text-center py-6 text-slate-400 text-xs">
-                  No messages yet. Real-time updates will appear here automatically.
+                  {t('dashboard.quickActions.noMessages')}
                 </div>
               ) : (
                 notifications.map((msg) => (
@@ -189,7 +191,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
             <div className="flex items-center justify-between pb-3 border-b border-cyan-500/20">
               <div className="flex items-center gap-2.5">
                 <Clock className="h-5 w-5 text-cyan-400" />
-                <h3 className="text-base sm:text-lg font-bold text-white">Application Audit Activity</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">{t('dashboard.quickActions.activityModalTitle')}</h3>
               </div>
               <button
                 type="button"
@@ -204,24 +206,24 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
                 <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">Merchant Application Live</div>
-                  <div className="text-[11px] text-slate-400">Step 1 & Step 2 saved in MongoDB Atlas.</div>
+                  <div className="font-bold text-white">{t('dashboard.quickActions.actAppLive')}</div>
+                  <div className="text-[11px] text-slate-400">{t('dashboard.quickActions.actAppLiveDesc')}</div>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
                 <CheckCircle className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">Cloudinary KYC Secure Storage</div>
-                  <div className="text-[11px] text-slate-400">Document uploads configured with encrypted storage.</div>
+                  <div className="font-bold text-white">{t('dashboard.quickActions.actKyc')}</div>
+                  <div className="text-[11px] text-slate-400">{t('dashboard.quickActions.actKycDesc')}</div>
                 </div>
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#091332] border border-cyan-500/25">
                 <CheckCircle className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-bold text-white">WebSocket Gateway Connected</div>
-                  <div className="text-[11px] text-slate-400">Live bidirectional socket channel active.</div>
+                  <div className="font-bold text-white">{t('dashboard.quickActions.actWs')}</div>
+                  <div className="text-[11px] text-slate-400">{t('dashboard.quickActions.actWsDesc')}</div>
                 </div>
               </div>
             </div>
@@ -239,7 +241,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
             <div className="flex items-center justify-between pb-3 border-b border-fuchsia-500/20">
               <div className="flex items-center gap-2.5">
                 <Headphones className="h-5 w-5 text-fuchsia-400" />
-                <h3 className="text-base sm:text-lg font-bold text-white">24/7 Priority Support Request</h3>
+                <h3 className="text-base sm:text-lg font-bold text-white">{t('dashboard.quickActions.supportModalTitle')}</h3>
               </div>
               <button
                 type="button"
@@ -251,19 +253,19 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
             </div>
 
             <p className="text-xs text-slate-300">
-              Send an inquiry directly to the underwriting desk. A specialist will reply via real-time message and email.
+              {t('dashboard.quickActions.supportDesc')}
             </p>
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-200">
-                Message / Question
+                {t('dashboard.quickActions.supportLabel')}
               </label>
               <textarea
                 required
                 rows={4}
                 value={supportMessage}
                 onChange={(e) => setSupportMessage(e.target.value)}
-                placeholder="Describe your inquiry or question regarding onboarding, processing rates, or technical integration..."
+                placeholder={t('dashboard.quickActions.supportPlaceholder')}
                 className="w-full rounded-xl border border-cyan-500/40 bg-[#060c24] p-3 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
             </div>
@@ -274,7 +276,7 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
                 onClick={() => setModalType(null)}
                 className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-xl sm:rounded-full border border-slate-600 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer flex items-center justify-center"
               >
-                Cancel
+                {t('dashboard.quickActions.cancel')}
               </button>
               <button
                 type="submit"
@@ -284,10 +286,10 @@ export default function QuickActions({ className = '', onNavigateTab }: QuickAct
                 {supportSubmitting ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Sending...</span>
+                    <span>{t('dashboard.quickActions.sending')}</span>
                   </>
                 ) : (
-                  <span>Submit Ticket</span>
+                  <span>{t('dashboard.quickActions.submitTicket')}</span>
                 )}
               </button>
             </div>

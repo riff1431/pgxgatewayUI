@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { createSetupCheckout, submitCryptoPayment } from '@/lib/setupApi'
+import { useTranslation } from '@/context/LanguageContext'
 
 interface SetupPaymentModalProps {
   isOpen: boolean
@@ -51,6 +52,7 @@ export default function SetupPaymentModal({
   usdcEthAddress = '0x4520FBE6d418c1bAcE97A1E517e5Be2d78eb9598',
   onPaymentSubmitted,
 }: SetupPaymentModalProps) {
+  const { t } = useTranslation()
   // 3 direct options in the same pop-up box
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('usdc')
   const [domain, setDomain] = useState(initialDomain)
@@ -118,7 +120,7 @@ Attached is my payment screenshot. Please activate my live integration.`
         window.location.assign(res.checkoutUrl)
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to launch checkout.')
+      setError(err instanceof Error ? err.message : t('dashboard.setupModal.errCheckout'))
       setPaying(false)
     }
   }
@@ -126,7 +128,7 @@ Attached is my payment screenshot. Please activate my live integration.`
   const handleSubmitCryptoProof = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!txHash.trim()) {
-      setError('Please paste your Transaction Hash (TxID).')
+      setError(t('dashboard.setupModal.errMissingTx'))
       return
     }
 
@@ -142,7 +144,7 @@ Attached is my payment screenshot. Please activate my live integration.`
       setCryptoSuccess(true)
       if (onPaymentSubmitted) onPaymentSubmitted()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to submit proof.')
+      setError(err instanceof Error ? err.message : t('dashboard.setupModal.errProof'))
     } finally {
       setSubmittingCrypto(false)
     }
@@ -161,14 +163,14 @@ Attached is my payment screenshot. Please activate my live integration.`
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-bold text-white truncate">
-                  Setup & Onboarding Fee
+                  {t('dashboard.setupModal.title')}
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
+                <span dir="ltr" className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono">
                   ${selectedMethod === 'stripe' ? totalCardAmount : amount.toFixed(2)} USD
                 </span>
               </div>
               <p className="text-xs text-slate-400 truncate mt-0.5">
-                Choose your preferred payment method below
+                {t('dashboard.setupModal.subtitle')}
               </p>
             </div>
           </div>
@@ -192,7 +194,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                 setSelectedMethod('stripe')
                 setError(null)
               }}
-              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
                 selectedMethod === 'stripe'
                   ? 'bg-cyan-500/15 border-cyan-400 shadow-[0_0_16px_rgba(0,240,255,0.25)]'
                   : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
@@ -203,9 +205,9 @@ Attached is my payment screenshot. Please activate my live integration.`
                 {selectedMethod === 'stripe' && <CheckCircle2 className="h-4 w-4 text-cyan-400" />}
               </div>
               <div>
-                <div className="font-bold text-white text-xs sm:text-sm">Card</div>
-                <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">
-                  ${totalCardAmount} (+3%)
+                <div className="font-bold text-white text-xs sm:text-sm">{t('dashboard.setupModal.cardTab')}</div>
+                <div className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate" dir="ltr">
+                  ${totalCardAmount} ({t('dashboard.setupModal.cardFeeBadge')})
                 </div>
               </div>
             </button>
@@ -217,7 +219,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                 setSelectedMethod('usdc')
                 setError(null)
               }}
-              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
                 selectedMethod === 'usdc'
                   ? 'bg-gradient-to-br from-blue-950/60 to-cyan-950/40 border-cyan-400 shadow-[0_0_16px_rgba(0,240,255,0.25)]'
                   : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
@@ -229,11 +231,13 @@ Attached is my payment screenshot. Please activate my live integration.`
               </div>
               <div>
                 <div className="font-bold text-white text-xs sm:text-sm flex items-center gap-1">
-                  <span>USDC</span>
-                  <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold hidden xs:inline">0% Fee</span>
+                  <span>{t('dashboard.setupModal.usdcTab')}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold hidden xs:inline">
+                    {t('dashboard.setupModal.zeroFeeBadge')}
+                  </span>
                 </div>
                 <div className="text-[10px] sm:text-[11px] text-cyan-300/80 mt-0.5 truncate">
-                  Ethereum ERC-20
+                  {t('dashboard.setupModal.usdcSub')}
                 </div>
               </div>
             </button>
@@ -245,7 +249,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                 setSelectedMethod('btc')
                 setError(null)
               }}
-              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border text-start transition-all cursor-pointer flex flex-col justify-between min-h-[82px] sm:min-h-[96px] ${
                 selectedMethod === 'btc'
                   ? 'bg-gradient-to-br from-amber-950/60 to-orange-950/40 border-amber-400 shadow-[0_0_16px_rgba(245,158,11,0.25)]'
                   : 'bg-[#08102b] border-slate-800 hover:border-slate-700 text-slate-400'
@@ -257,11 +261,13 @@ Attached is my payment screenshot. Please activate my live integration.`
               </div>
               <div>
                 <div className="font-bold text-white text-xs sm:text-sm flex items-center gap-1">
-                  <span>Bitcoin</span>
-                  <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold hidden xs:inline">0% Fee</span>
+                  <span>{t('dashboard.setupModal.btcTab')}</span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold hidden xs:inline">
+                    {t('dashboard.setupModal.zeroFeeBadge')}
+                  </span>
                 </div>
                 <div className="text-[10px] sm:text-[11px] text-amber-300/80 mt-0.5 truncate">
-                  Native BTC
+                  {t('dashboard.setupModal.btcSub')}
                 </div>
               </div>
             </button>
@@ -280,26 +286,27 @@ Attached is my payment screenshot. Please activate my live integration.`
             <div className="space-y-3.5 animate-fade-in">
               <div className="p-3.5 sm:p-4 rounded-xl bg-[#08102b] border border-cyan-500/20 space-y-2.5 text-xs">
                 <div className="flex justify-between items-center text-slate-300">
-                  <span>Setup & Integration Fee:</span>
-                  <span className="font-bold text-white font-mono">${amount.toFixed(2)} USD</span>
+                  <span>{t('dashboard.setupModal.setupFeeRow')}</span>
+                  <span className="font-bold text-white font-mono" dir="ltr">${amount.toFixed(2)} USD</span>
                 </div>
                 <div className="flex justify-between items-center text-slate-300">
-                  <span>Card Processing Fee (3%):</span>
-                  <span className="font-bold text-cyan-300 font-mono">+${stripeFee.toFixed(2)} USD</span>
+                  <span>{t('dashboard.setupModal.cardFeeRow')}</span>
+                  <span className="font-bold text-cyan-300 font-mono" dir="ltr">+${stripeFee.toFixed(2)} USD</span>
                 </div>
                 <div className="border-t border-cyan-500/15 pt-2 flex justify-between items-center font-bold">
-                  <span className="text-white">Total Charged:</span>
-                  <span className="text-cyan-400 font-mono text-base font-black">${totalCardAmount} USD</span>
+                  <span className="text-white">{t('dashboard.setupModal.totalChargedRow')}</span>
+                  <span className="text-cyan-400 font-mono text-base font-black" dir="ltr">${totalCardAmount} USD</span>
                 </div>
               </div>
 
               <div>
                 <label className="text-[11px] font-semibold text-slate-300 block mb-1">
-                  Store Website Domain (Optional)
+                  {t('dashboard.setupModal.domainLabel')}
                 </label>
                 <input
                   type="text"
-                  placeholder="https://yourstore.com"
+                  dir="ltr"
+                  placeholder={t('dashboard.setupModal.domainPlaceholder')}
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                   className="w-full px-3.5 py-2 rounded-xl bg-[#040817] border border-cyan-500/30 text-white text-xs focus:outline-none focus:border-cyan-400"
@@ -315,12 +322,12 @@ Attached is my payment screenshot. Please activate my live integration.`
                 {paying ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
-                    <span>Opening Checkout...</span>
+                    <span>{t('dashboard.setupModal.openingCheckout')}</span>
                   </>
                 ) : (
                   <>
                     <CreditCard className="h-4 w-4" />
-                    <span>Pay ${totalCardAmount} USD with Card</span>
+                    <span>{t('dashboard.setupModal.payCardBtn', { amount: totalCardAmount })}</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -328,7 +335,7 @@ Attached is my payment screenshot. Please activate my live integration.`
 
               <div className="text-center text-[10px] sm:text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
                 <Lock className="h-3 w-3 text-cyan-400" />
-                <span>256-Bit SSL Encrypted Card Processing</span>
+                <span>{t('dashboard.setupModal.sslNote')}</span>
               </div>
             </div>
           )}
@@ -343,12 +350,12 @@ Attached is my payment screenshot. Please activate my live integration.`
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-white text-sm">Payment Proof Submitted</h4>
+                    <h4 className="font-bold text-white text-sm">{t('dashboard.setupModal.proofSubmittedTitle')}</h4>
                     <p className="text-xs text-slate-300 mt-0.5">
-                      Please send your transfer screenshot to WhatsApp or Email for instant activation.
+                      {t('dashboard.setupModal.proofSubmittedDesc')}
                     </p>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#040817] border border-emerald-500/20 text-xs font-mono text-cyan-300 break-all">
+                  <div dir="ltr" className="p-2 rounded-lg bg-[#040817] border border-emerald-500/20 text-xs font-mono text-cyan-300 break-all">
                     TxID: {txHash}
                   </div>
                   <div className="pt-1 flex flex-wrap gap-2 justify-center">
@@ -359,7 +366,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                       className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)]"
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
-                      <span>WhatsApp Screenshot</span>
+                      <span>{t('dashboard.setupModal.whatsappScreenshot')}</span>
                       <ExternalLink className="h-3 w-3 opacity-70" />
                     </a>
                     <a
@@ -367,14 +374,14 @@ Attached is my payment screenshot. Please activate my live integration.`
                       className="px-3.5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                     >
                       <Mail className="h-3.5 w-3.5" />
-                      <span>Email Screenshot</span>
+                      <span>{t('dashboard.setupModal.emailScreenshot')}</span>
                     </a>
                     <button
                       type="button"
                       onClick={onClose}
                       className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs cursor-pointer"
                     >
-                      Done
+                      {t('dashboard.setupModal.doneBtn')}
                     </button>
                   </div>
                 </div>
@@ -388,7 +395,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-white uppercase tracking-wide">
-                          {selectedMethod === 'btc' ? 'Bitcoin (BTC) Wallet' : 'USDC Wallet'}
+                          {selectedMethod === 'btc' ? 'BTC' : 'USDC'}
                         </span>
                         <span className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
                           selectedMethod === 'btc' ? 'bg-amber-500/20 text-amber-300' : 'bg-cyan-500/20 text-cyan-300'
@@ -396,7 +403,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                           {activeNetwork}
                         </span>
                       </div>
-                      <span className="font-mono font-bold text-emerald-400">
+                      <span dir="ltr" className="font-mono font-bold text-emerald-400">
                         ${amount.toFixed(2)} USD
                       </span>
                     </div>
@@ -406,6 +413,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                       <input
                         type="text"
                         readOnly
+                        dir="ltr"
                         value={activeWallet}
                         className="w-full bg-transparent text-white font-mono text-xs select-all outline-none truncate"
                       />
@@ -421,12 +429,12 @@ Attached is my payment screenshot. Please activate my live integration.`
                         {copiedWallet ? (
                           <>
                             <Check className="h-3 w-3 stroke-[3]" />
-                            <span>Copied!</span>
+                            <span>{t('dashboard.setupModal.copied')}</span>
                           </>
                         ) : (
                           <>
                             <Copy className="h-3 w-3" />
-                            <span>Copy</span>
+                            <span>{t('dashboard.setupModal.copy')}</span>
                           </>
                         )}
                       </button>
@@ -434,14 +442,19 @@ Attached is my payment screenshot. Please activate my live integration.`
 
                     <div className="text-[11px] text-slate-300 flex items-center gap-1.5">
                       <Sparkles className="h-3 w-3 text-cyan-400 shrink-0" />
-                      <span>Send <strong>${amount.toFixed(2)} USD</strong> via <strong>{activeNetwork}</strong>. 0% surcharge.</span>
+                      <span>
+                        {t('dashboard.setupModal.sendAmountNote', {
+                          amount: amount.toFixed(2),
+                          network: activeNetwork,
+                        })}
+                      </span>
                     </div>
                   </div>
 
                   {/* Screenshot Instruction Box */}
                   <div className="p-3 rounded-xl bg-[#06122c] border border-cyan-400/30 space-y-2">
                     <p className="text-xs text-slate-200 leading-relaxed">
-                      📸 <strong>Screenshot Verification:</strong> Take a screenshot of payment with your <strong>Name & Company</strong>, and send to WhatsApp or Email:
+                      📸 {t('dashboard.setupModal.screenshotGuide')}
                     </p>
                     <div className="flex flex-wrap gap-2 text-xs">
                       <a
@@ -451,7 +464,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                         className="flex-1 min-w-[130px] px-3 py-2 rounded-lg bg-emerald-950/70 border border-emerald-500/40 hover:bg-emerald-900/60 text-emerald-200 font-bold flex items-center justify-center gap-1.5 transition-all"
                       >
                         <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
-                        <span>WhatsApp (+1 437 577-8785)</span>
+                        <span dir="ltr">{t('dashboard.setupModal.whatsappBtn')}</span>
                         <ExternalLink className="h-3 w-3 opacity-70" />
                       </a>
                       <a
@@ -459,7 +472,7 @@ Attached is my payment screenshot. Please activate my live integration.`
                         className="flex-1 min-w-[130px] px-3 py-2 rounded-lg bg-blue-950/70 border border-blue-500/40 hover:bg-blue-900/60 text-cyan-200 font-bold flex items-center justify-center gap-1.5 transition-all"
                       >
                         <Mail className="h-3.5 w-3.5 text-cyan-400" />
-                        <span>Email Proof</span>
+                        <span>{t('dashboard.setupModal.emailProofBtn')}</span>
                       </a>
                     </div>
                   </div>
@@ -469,7 +482,8 @@ Attached is my payment screenshot. Please activate my live integration.`
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder="Paste Blockchain TxID / Hash (Optional)"
+                        dir="ltr"
+                        placeholder={t('dashboard.setupModal.txPlaceholder')}
                         value={txHash}
                         onChange={(e) => setTxHash(e.target.value)}
                         className="flex-1 px-3 py-2 rounded-xl bg-[#040817] border border-slate-700 focus:border-cyan-400 text-white font-mono text-xs outline-none"
@@ -482,12 +496,12 @@ Attached is my payment screenshot. Please activate my live integration.`
                         {submittingCrypto ? (
                           <>
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            <span>Submitting...</span>
+                            <span>{t('dashboard.setupModal.submittingBtn')}</span>
                           </>
                         ) : (
                           <>
                             <CheckCircle2 className="h-3.5 w-3.5" />
-                            <span>Submit TxID</span>
+                            <span>{t('dashboard.setupModal.submitTxBtn')}</span>
                           </>
                         )}
                       </button>
@@ -501,15 +515,15 @@ Attached is my payment screenshot. Please activate my live integration.`
 
         {/* Footer */}
         <div className="p-3 sm:p-4 border-t border-cyan-500/15 bg-[#040819] flex items-center justify-between text-xs text-slate-400 shrink-0">
-          <span className="truncate text-[11px]">
-            Support: <a href={whatsappUrl} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">+1 437 577-8785</a>
+          <span className="truncate text-[11px]" dir="ltr">
+            <a href={whatsappUrl} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">+1 437 577-8785</a>
           </span>
           <button
             type="button"
             onClick={onClose}
             className="px-3 py-1 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
-            Close
+            {t('dashboard.setupModal.closeBtn')}
           </button>
         </div>
 
