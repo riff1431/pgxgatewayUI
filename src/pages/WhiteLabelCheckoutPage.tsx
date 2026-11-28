@@ -5,49 +5,36 @@ import {
   AlertCircle,
   ArrowLeft,
   Check,
+  CheckCircle2,
   Coins,
   Copy,
   CreditCard,
-  ExternalLink,
   FlaskConical,
   Loader2,
   Lock,
-  RefreshCw,
   ShieldCheck,
-  Zap,
 } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useBranding } from '@/context/BrandingContext'
 import { checkoutApi } from '@/lib/checkoutApi'
 import {
-  fetchCashAppInvoice,
   fetchWhiteLabelPayment,
   pollCryptoInvoice,
-  renewCashAppInvoice,
   resolveCardAcrossProviders,
   simulateWhiteLabelOutcome,
   startCryptoInvoice,
-  type CashAppInvoiceInfo,
   type CryptoInvoiceInfo,
   type WhiteLabelPaymentInfo,
 } from '@/lib/onePayCheckoutApi'
 
-type PaymentTab = 'card' | 'crypto' | 'cashapp'
+type PaymentTab = 'card' | 'crypto'
 
 export default function WhiteLabelCheckoutPage() {
   const { paymentId = '' } = useParams<{ paymentId: string }>()
   const { branding } = useBranding()
-  const brandName = branding.siteName || 'PGX Gateway'
+  const rawBrand = branding.siteName || 'PGX Gateway'
+  const brandName = rawBrand.replace(/\s+Platform$/i, '')
   const apiBase = branding.onePayCheckout?.checkoutApiBase || 'https://pay.pgxgateway.com/api'
 
   const [payment, setPayment] = useState<WhiteLabelPaymentInfo | null>(null)
@@ -63,47 +50,66 @@ export default function WhiteLabelCheckoutPage() {
   const [selectedAsset, setSelectedAsset] = useState<string>('')
   const [cryptoInvoice, setCryptoInvoice] = useState<CryptoInvoiceInfo | null>(null)
   const [cryptoLoading, setCryptoLoading] = useState(false)
-  const [copiedAddr, setCopiedAddr] = useState(false)
-
-  const [cashAppInvoice, setCashAppInvoice] = useState<CashAppInvoiceInfo | null>(null)
-  const [cashAppLoading, setCashAppLoading] = useState(false)
+  const [copiedField, setCopiedField] = useState<'address' | 'amount' | null>(null)
 
   const [simulating, setSimulating] = useState(false)
 
-  const loadPaymentState = useCallback(async () => {
-    if (!paymentId) return
-    try {
-      const [wlData, pgxStatus] = await Promise.all([
-        fetchWhiteLabelPayment(apiBase, paymentId),
-        checkoutApi.getSessionStatus(paymentId).catch(() => null),
-      ])
+  const applyPaymentSnapshot = useCallback(
+    (wlData: WhiteLabelPaymentInfo, pgxStatus: { status?: string } | null) => {
       setPayment(wlData)
       if (
         wlData.status === 'paid' ||
         pgxStatus?.status === 'succeeded' ||
-        (pgxStatus?.status as string) === 'completed'
+        pgxStatus?.status === 'completed'
       ) {
         setPgxSettled(true)
       }
       setLoadError(null)
       if (wlData.cardProviders.length === 0 && wlData.cryptoAssets.length > 0) {
-        setActiveTab((prev) => (prev === 'card' ? 'crypto' : prev))
+        setActiveTab('crypto')
       }
       if (wlData.cryptoAssets.length > 0) {
         setSelectedAsset((prev) => prev || wlData.cryptoAssets[0].id)
       }
-    } catch (err: unknown) {
-      setLoadError(err instanceof Error ? err.message : 'Unable to load payment session.')
-    } finally {
-      setLoading(false)
-    }
-  }, [apiBase, paymentId])
+    },
+    []
+  )
+
+  const refreshPaymentState = useCallback(async () => {
+    if (!paymentId) return
+    const [wlData, pgxStatus] = await Promise.all([
+      fetchWhiteLabelPayment(apiBase, paymentId),
+      checkoutApi.getSessionStatus(paymentId).catch(() => null),
+    ])
+    applyPaymentSnapshot(wlData, pgxStatus)
+  }, [apiBase, applyPaymentSnapshot, paymentId])
 
   useEffect(() => {
-    void loadPaymentState()
-  }, [loadPaymentState])
+    if (!paymentId) return
+    let active = true
+    ;(async () => {
+      try {
+        const [wlData, pgxStatus] = await Promise.all([
+          fetchWhiteLabelPayment(apiBase, paymentId),
+          checkoutApi.getSessionStatus(paymentId).catch(() => null),
+        ])
+        if (active) {
+          applyPaymentSnapshot(wlData, pgxStatus)
+        }
+      } catch (err: unknown) {
+        if (active) {
+          setLoadError(err instanceof Error ? err.message : 'Unable to load payment session.')
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
+    })()
+    return () => {
+      active = false
+    }
+  }, [apiBase, applyPaymentSnapshot, paymentId])
 
-  // Poll crypto invoice every 5s once generated while payment is pending
+  // Poll crypto deposit confirmation every 5s while waiting on-chain
   useEffect(() => {
     if (
       !paymentId ||
@@ -120,41 +126,14 @@ export default function WhiteLabelCheckoutPage() {
         setCryptoInvoice(updated)
         if (updated.status === 'confirmed') {
           setPgxSettled(true)
-          void loadPaymentState()
+          void refreshPaymentState()
         }
       } catch {
-        // Keep polling gracefully on transient error
+        // Retry silently on next interval
       }
     }, 5000)
     return () => window.clearInterval(timer)
-  }, [activeTab, apiBase, cryptoInvoice, loadPaymentState, paymentId, pgxSettled])
-
-  // Poll Lightning / Cash App invoice every 4s when active
-  useEffect(() => {
-    if (
-      !paymentId ||
-      activeTab !== 'cashapp' ||
-      !cashAppInvoice ||
-      cashAppInvoice.status === 'paid' ||
-      cashAppInvoice.status === 'expired' ||
-      pgxSettled
-    ) {
-      return
-    }
-    const timer = window.setInterval(async () => {
-      try {
-        const updated = await fetchCashAppInvoice(apiBase, paymentId)
-        setCashAppInvoice(updated)
-        if (updated.status === 'paid') {
-          setPgxSettled(true)
-          void loadPaymentState()
-        }
-      } catch {
-        // Continue polling cleanly
-      }
-    }, 4000)
-    return () => window.clearInterval(timer)
-  }, [activeTab, apiBase, cashAppInvoice, loadPaymentState, paymentId, pgxSettled])
+  }, [activeTab, apiBase, cryptoInvoice, paymentId, pgxSettled, refreshPaymentState])
 
   const handlePayByCard = async () => {
     if (!payment || payment.cardProviders.length === 0) return
@@ -172,7 +151,7 @@ export default function WhiteLabelCheckoutPage() {
         return
       }
       if (outcome.shouldReload) {
-        await loadPaymentState()
+        await refreshPaymentState()
       }
       setActionError(outcome.error || 'Unable to launch card checkout.')
     } catch (err: unknown) {
@@ -200,42 +179,13 @@ export default function WhiteLabelCheckoutPage() {
     }
   }
 
-  const handleOpenCashApp = async () => {
-    if (!payment) return
-    setActiveTab('cashapp')
-    setActionError(null)
-    setCashAppLoading(true)
-    try {
-      const data = await fetchCashAppInvoice(apiBase, payment.id)
-      setCashAppInvoice(data)
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Instant wallet rail is unavailable for this session.')
-    } finally {
-      setCashAppLoading(false)
-    }
-  }
-
-  const handleRenewCashApp = async () => {
-    if (!payment) return
-    setCashAppLoading(true)
-    setActionError(null)
-    try {
-      const data = await renewCashAppInvoice(apiBase, payment.id)
-      setCashAppInvoice(data)
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : 'Could not renew invoice.')
-    } finally {
-      setCashAppLoading(false)
-    }
-  }
-
   const handleSimulate = async (outcome: 'paid' | 'failed' | 'underpaid') => {
     if (!payment) return
     setSimulating(true)
     setActionError(null)
     try {
       await simulateWhiteLabelOutcome(apiBase, payment.id, outcome)
-      await loadPaymentState()
+      await refreshPaymentState()
     } catch (err: unknown) {
       setActionError(err instanceof Error ? err.message : 'Simulation failed.')
     } finally {
@@ -243,21 +193,21 @@ export default function WhiteLabelCheckoutPage() {
     }
   }
 
-  const handleCopyAddress = async (text: string) => {
+  const handleCopy = async (value: string, field: 'address' | 'amount') => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedAddr(true)
-      window.setTimeout(() => setCopiedAddr(false), 2000)
+      await navigator.clipboard.writeText(value)
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField(null), 1800)
     } catch {
-      // Clipboard blocked in non-HTTPS contexts
+      // Clipboard blocked in non-HTTPS context
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 text-slate-300 text-xs">
-        <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
-        <span>Loading {brandName} secure checkout...</span>
+      <div className="min-h-[65vh] flex flex-col items-center justify-center gap-3 text-slate-300 text-sm">
+        <Loader2 className="h-7 w-7 animate-spin text-slate-400" />
+        <span>Loading {brandName} checkout</span>
       </div>
     )
   }
@@ -265,136 +215,193 @@ export default function WhiteLabelCheckoutPage() {
   if (loadError || !payment) {
     return (
       <div className="max-w-md mx-auto px-4 py-16">
-        <Card className="border-[1.5px] border-red-500/60 bg-[#050b1f]/95 text-center p-6 space-y-4">
-          <AlertCircle className="h-10 w-10 text-red-400 mx-auto" />
-          <div className="space-y-1">
-            <h1 className="text-lg font-bold text-white">Checkout Session Unavailable</h1>
-            <p className="text-xs text-slate-400">
-              {loadError || 'This payment link is invalid or has already expired.'}
+        <div className="rounded-2xl border border-white/10 bg-[#0b1120] p-8 text-center space-y-4">
+          <AlertCircle className="h-9 w-9 text-red-400 mx-auto stroke-[1.5]" />
+          <div className="space-y-1.5">
+            <h1 className="text-lg font-semibold text-white">Checkout session unavailable</h1>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {loadError || 'This checkout session is invalid or has expired.'}
             </p>
           </div>
-          <Button asChild variant="outline" className="border-cyan-500/40 text-cyan-300">
+          <Button asChild variant="outline" className="border-white/15 bg-white/5 text-slate-200 hover:bg-white/10">
             <Link to="/">Return to {brandName}</Link>
           </Button>
-        </Card>
+        </div>
       </div>
     )
   }
 
   const isPaid = pgxSettled || payment.status === 'paid'
   const isTerminalFail = payment.status === 'failed' || payment.status === 'expired'
+  const formattedAmount = Number(payment.amount || 0).toFixed(2)
+  const currencyCode = (payment.currency || 'USD').toUpperCase()
+  const hasCards = payment.cardProviders.length > 0
+  const hasCrypto = payment.cryptoAssets.length > 0
 
-  return (
-    <div className="max-w-xl mx-auto px-3 sm:px-4 py-6 sm:py-10 space-y-6 relative animate-fade-in">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <Button asChild variant="ghost" size="sm" className="gap-2 text-slate-300 hover:text-white">
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" /> Back to {brandName}
-          </Link>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs gap-1 border-cyan-500/40 text-cyan-300 bg-cyan-950/40">
-            <Lock className="h-3 w-3 text-cyan-400" /> 256-Bit TLS
-          </Badge>
-          <Badge variant="outline" className="text-xs gap-1 border-emerald-500/40 text-emerald-300 bg-emerald-950/40">
-            <ShieldCheck className="h-3 w-3 text-emerald-400" /> {brandName} Verified
-          </Badge>
-        </div>
-      </div>
-
-      {isPaid ? (
-        <Card className="border-[1.5px] border-emerald-400/80 shadow-[0_0_35px_rgba(16,185,129,0.35)] bg-[#050b1f]/95 backdrop-blur-xl">
-          <CardHeader className="text-center pb-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-400 mx-auto flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.5)] mb-3">
-              <Check className="h-8 w-8 stroke-[3]" />
+  if (isPaid) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-12 animate-fade-in">
+        <div className="rounded-2xl border border-emerald-500/30 bg-[#0b1120] overflow-hidden">
+          <div className="px-6 py-8 text-center border-b border-white/[0.08]">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 mx-auto flex items-center justify-center text-emerald-400 mb-4">
+              <CheckCircle2 className="h-6 w-6 stroke-[1.75]" />
             </div>
-            <CardTitle className="text-2xl font-black text-white">Payment Confirmed</CardTitle>
-            <CardDescription className="text-slate-300 text-xs">
-              Your payment through {brandName} has been settled and confirmed.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-xs">
-            <div className="p-4 rounded-2xl bg-[#07102e] border border-cyan-500/30 space-y-2">
+            <h1 className="text-xl font-semibold text-white">Payment confirmed</h1>
+            <p className="text-xs text-slate-400 mt-1">
+              Settled securely through {brandName}
+            </p>
+          </div>
+
+          <div className="p-6 space-y-4 text-xs">
+            <div className="rounded-xl bg-[#070b14] border border-white/[0.08] p-4 space-y-3">
               <div className="flex justify-between text-slate-400">
-                <span>Processor</span>
-                <span className="font-bold text-white">{brandName}</span>
+                <span>Merchant rail</span>
+                <span className="font-medium text-white">{brandName}</span>
               </div>
               {payment.productName && (
                 <div className="flex justify-between text-slate-400">
                   <span>Order</span>
-                  <span className="font-semibold text-slate-200">{payment.productName}</span>
+                  <span className="text-slate-200">{payment.productName}</span>
                 </div>
               )}
               <div className="flex justify-between text-slate-400">
                 <span>Reference</span>
-                <span dir="ltr" className="font-mono text-cyan-300">{payment.id}</span>
+                <span dir="ltr" className="font-mono text-slate-300">{payment.id}</span>
               </div>
-              <div className="border-t border-slate-700/60 pt-2 flex justify-between items-center">
-                <span className="font-bold text-slate-200">Amount Paid</span>
-                <span dir="ltr" className="text-lg font-black text-emerald-400">
-                  ${Number(payment.amount || 0).toFixed(2)} {(payment.currency || 'USD').toUpperCase()}
+              <div className="border-t border-white/[0.08] pt-3 flex justify-between items-baseline">
+                <span className="text-slate-300 font-medium">Total paid</span>
+                <span dir="ltr" className="text-lg font-semibold tabular-nums text-emerald-400">
+                  ${formattedAmount} {currencyCode}
                 </span>
               </div>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button asChild className="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black" size="lg">
+
+            <Button asChild className="w-full h-11 bg-white text-slate-950 hover:bg-slate-200 font-semibold">
               <Link to="/">Return to {brandName}</Link>
             </Button>
-          </CardFooter>
-        </Card>
-      ) : (
-        <Card className="border-[1.5px] border-cyan-400/70 shadow-[0_0_30px_rgba(0,240,255,0.2)] bg-[#050b1f]/95 backdrop-blur-xl">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-300 bg-cyan-950/70 border border-cyan-500/40 px-2 py-0.5 rounded-full">
-                    {brandName} Checkout
-                  </span>
-                  {payment.testMode && (
-                    <span className="text-[10px] font-bold uppercase text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2 py-0.5 rounded-full">
-                      Sandbox Mode
-                    </span>
-                  )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12 animate-fade-in">
+      {/* Top Minimal Navigation Bar */}
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 stroke-[1.75]" />
+          <span>{brandName}</span>
+        </Link>
+        <div className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+          <Lock className="h-3.5 w-3.5 text-emerald-400 stroke-[1.75]" />
+          <span>256-bit TLS encrypted</span>
+        </div>
+      </div>
+
+      {/* Main Split Checkout Vault Card */}
+      <div className="rounded-2xl border border-white/[0.09] bg-[#0b1120] overflow-hidden grid grid-cols-1 md:grid-cols-12">
+        {/* Left Column: Order Summary & Trust Rails */}
+        <div className="md:col-span-5 bg-[#080d1a] p-6 sm:p-8 border-b md:border-b-0 md:border-r border-white/[0.08] flex flex-col justify-between gap-8">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/10 flex items-center justify-center text-white font-semibold text-xs">
+                  P
                 </div>
-                <CardTitle className="text-xl sm:text-2xl font-black text-white">
-                  {payment.productName || `${brandName} Express Checkout`}
-                </CardTitle>
-                <CardDescription className="text-slate-400 text-xs mt-1">
-                  Reference <span dir="ltr" className="font-mono text-slate-300">{payment.id}</span>
-                </CardDescription>
+                <span className="text-sm font-medium text-white">{brandName}</span>
               </div>
-              <div className="text-start sm:text-end">
-                <span dir="ltr" className="text-2xl sm:text-3xl font-black text-white">
-                  ${Number(payment.amount || 0).toFixed(2)}
+              {payment.testMode && (
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                  Sandbox
                 </span>
-                <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
-                  {(payment.currency || 'USD').toUpperCase()}
-                </p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <p className="text-xs text-slate-400">Amount due</p>
+              <div className="flex items-baseline gap-2" dir="ltr">
+                <span className="text-3xl sm:text-4xl font-semibold tracking-tight tabular-nums text-white">
+                  ${formattedAmount}
+                </span>
+                <span className="text-xs font-medium text-slate-400">{currencyCode}</span>
               </div>
             </div>
-          </CardHeader>
 
-          <CardContent className="space-y-5">
+            <div className="rounded-xl bg-[#0b1120] border border-white/[0.07] divide-y divide-white/[0.06] text-xs">
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-slate-400">Order</span>
+                <span className="font-medium text-slate-100 truncate">
+                  {payment.productName || 'Digital Order'}
+                </span>
+              </div>
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-slate-400">Reference</span>
+                <span dir="ltr" className="font-mono text-slate-300">{payment.id}</span>
+              </div>
+              <div className="px-4 py-3 flex items-center justify-between gap-3">
+                <span className="text-slate-400">Processing fee</span>
+                <span className="text-emerald-400 font-medium">Included</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2 text-xs text-slate-400">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-4 w-4 text-slate-400 shrink-0 stroke-[1.5]" />
+                <span>Verified merchant checkout protection</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Lock className="h-4 w-4 text-slate-400 shrink-0 stroke-[1.5]" />
+                <span>Direct encrypted payment routing</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-white/[0.06]">
+              {['Visa', 'Mastercard', 'Apple Pay', 'BTC', 'USDC'].map((method) => (
+                <span
+                  key={method}
+                  className="px-2 py-1 rounded bg-white/[0.04] border border-white/[0.07] text-[10px] font-medium text-slate-300"
+                >
+                  {method}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Interactive Payment Terminal */}
+        <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between gap-6">
+          <div className="space-y-5">
+            <div>
+              <h1 className="text-base font-semibold text-white">Complete payment</h1>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Choose a payment method to authorize this transaction
+              </p>
+            </div>
+
             {isTerminalFail && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-200 text-xs flex items-start gap-2">
+              <div className="p-3.5 rounded-xl bg-red-950/50 border border-red-500/35 text-red-200 text-xs flex items-start gap-2.5">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-red-400" />
                 <span>
-                  This checkout session is {payment.status}. Please initiate a fresh order from the store.
+                  This checkout session is {payment.status}. Please return to the store and start a new payment.
                 </span>
               </div>
             )}
 
             {payment.status === 'underpaid' && (
-              <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-200 text-xs flex items-start gap-2">
+              <div className="p-3.5 rounded-xl bg-amber-950/50 border border-amber-500/35 text-amber-200 text-xs flex items-start gap-2.5">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
-                <span>Partial payment detected. Please complete the remaining balance or contact support.</span>
+                <span>Partial payment received. Send the remaining amount to settle this order.</span>
               </div>
             )}
 
             {actionError && (
-              <div className="p-3 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-300 text-xs flex items-start gap-2">
+              <div className="p-3.5 rounded-xl bg-amber-950/50 border border-amber-500/35 text-amber-200 text-xs flex items-start gap-2.5">
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-400" />
                 <span>{actionError}</span>
               </div>
@@ -402,237 +409,216 @@ export default function WhiteLabelCheckoutPage() {
 
             {!isTerminalFail && !payment.testMode && (
               <>
-                {/* Method Selector */}
-                <div className="grid grid-cols-3 gap-2">
+                {/* 2-Option Segmented Rail Switcher (Card & Crypto only) */}
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#070b14] border border-white/[0.08]">
                   <button
                     type="button"
-                    onClick={() => setActiveTab('card')}
-                    disabled={payment.cardProviders.length === 0}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    onClick={() => {
+                      setActiveTab('card')
+                      setActionError(null)
+                    }}
+                    disabled={!hasCards}
+                    className={`h-10 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                       activeTab === 'card'
-                        ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-[0_0_12px_rgba(0,240,255,0.2)]'
-                        : 'bg-[#07102e] border-slate-800 text-slate-300 hover:border-slate-700'
+                        ? 'bg-[#162038] text-white border border-white/15'
+                        : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <CreditCard className="h-3.5 w-3.5 text-cyan-400" />
+                    <CreditCard className="h-4 w-4 stroke-[1.6]" />
                     <span>Card</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       setActiveTab('crypto')
+                      setActionError(null)
                       if (!cryptoInvoice && selectedAsset) {
                         void handleStartCrypto(selectedAsset)
                       }
                     }}
-                    disabled={payment.cryptoAssets.length === 0}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    disabled={!hasCrypto}
+                    className={`h-10 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                       activeTab === 'crypto'
-                        ? 'bg-emerald-500/20 border-emerald-400 text-white shadow-[0_0_12px_rgba(16,185,129,0.2)]'
-                        : 'bg-[#07102e] border-slate-800 text-slate-300 hover:border-slate-700'
+                        ? 'bg-[#162038] text-white border border-white/15'
+                        : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
-                    <Coins className="h-3.5 w-3.5 text-emerald-400" />
+                    <Coins className="h-4 w-4 stroke-[1.6]" />
                     <span>Crypto</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleOpenCashApp()}
-                    className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                      activeTab === 'cashapp'
-                        ? 'bg-emerald-500/20 border-emerald-400 text-white'
-                        : 'bg-[#07102e] border-slate-800 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <Zap className="h-3.5 w-3.5 text-emerald-400" />
-                    <span>Instant</span>
                   </button>
                 </div>
 
-                {/* Card Tab */}
-                {activeTab === 'card' && payment.cardProviders.length > 0 && (
-                  <div className="space-y-4 p-4 rounded-2xl bg-[#07102e] border border-cyan-500/25">
+                {/* Card Payment View */}
+                {activeTab === 'card' && hasCards && (
+                  <div className="space-y-4">
                     {payment.cardsDegraded && (
-                      <div className="p-2.5 rounded-xl bg-amber-950/50 border border-amber-500/40 text-amber-200 text-[11px]">
-                        Card network is experiencing higher traffic. You may proceed or choose Crypto for instant settlement.
+                      <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs">
+                        Card networks are experiencing heavy volume. Crypto settlement is available for instant confirmation.
                       </div>
                     )}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-slate-200">
-                        Email for Receipt (Optional)
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-slate-300 block">
+                        Receipt email (optional)
                       </label>
                       <Input
                         type="email"
                         dir="ltr"
-                        placeholder="buyer@example.com"
+                        placeholder="you@example.com"
                         value={buyerEmail}
                         onChange={(e) => setBuyerEmail(e.target.value)}
-                        className="bg-[#040819] border-cyan-500/35 text-white placeholder-slate-500 min-h-[42px]"
+                        className="h-11 bg-[#070b14] border-white/10 focus-visible:border-white/30 text-white placeholder:text-slate-500"
                       />
                     </div>
+
+                    <div className="rounded-xl bg-[#070b14] border border-white/[0.07] p-3.5 text-xs text-slate-400 flex items-center justify-between">
+                      <span>Accepted cards &amp; wallets</span>
+                      <span className="text-slate-200 font-medium">Visa · Mastercard · Apple Pay</span>
+                    </div>
+
                     <Button
                       size="lg"
                       disabled={cardResolving}
                       onClick={() => void handlePayByCard()}
-                      className="w-full gap-2 min-h-[48px] bg-gradient-to-r from-cyan-500 via-blue-600 to-cyan-500 hover:from-cyan-400 hover:via-blue-500 hover:to-cyan-400 text-white font-extrabold cursor-pointer"
+                      className="w-full h-12 rounded-xl bg-white text-slate-950 hover:bg-slate-200 font-semibold text-sm cursor-pointer transition-colors"
                     >
                       {cardResolving ? (
-                        <>
+                        <span className="inline-flex items-center gap-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Preparing encrypted card session...</span>
-                        </>
+                          <span>Connecting to card processor...</span>
+                        </span>
                       ) : (
-                        <>
-                          <ExternalLink className="h-4 w-4" />
-                          <span>
-                            Pay by Card — ${Number(payment.amount || 0).toFixed(2)}{' '}
-                            {(payment.currency || 'USD').toUpperCase()}
-                          </span>
-                        </>
+                        <span>
+                          Pay ${formattedAmount} {currencyCode}
+                        </span>
                       )}
                     </Button>
-                    <p className="text-[11px] text-slate-400 text-center">
-                      Supports Visa, Mastercard, Apple Pay &amp; Google Pay where available.
-                    </p>
                   </div>
                 )}
 
-                {/* Crypto Tab */}
-                {activeTab === 'crypto' && payment.cryptoAssets.length > 0 && (
-                  <div className="space-y-4 p-4 rounded-2xl bg-[#07102e] border border-emerald-500/25">
+                {/* Crypto Payment View */}
+                {activeTab === 'crypto' && hasCrypto && (
+                  <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200">Select Cryptocurrency</label>
-                      <div className="flex flex-wrap gap-1.5">
-                        {payment.cryptoAssets.map((asset) => (
-                          <button
-                            key={asset.id}
-                            type="button"
-                            onClick={() => void handleStartCrypto(asset.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer ${
-                              selectedAsset === asset.id
-                                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200'
-                                : 'bg-[#040819] border-slate-800 text-slate-300 hover:border-slate-700'
-                            }`}
-                          >
-                            {asset.symbol}
-                          </button>
-                        ))}
+                      <label className="text-xs font-medium text-slate-300 block">
+                        Select coin and network
+                      </label>
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-36 overflow-y-auto pr-1">
+                        {payment.cryptoAssets.map((asset) => {
+                          const isSelected = selectedAsset === asset.id
+                          return (
+                            <button
+                              key={asset.id}
+                              type="button"
+                              onClick={() => void handleStartCrypto(asset.id)}
+                              className={`p-2 rounded-lg text-left border transition-colors cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#162038] border-white/25 text-white'
+                                  : 'bg-[#070b14] border-white/[0.07] text-slate-300 hover:border-white/15'
+                              }`}
+                            >
+                              <div className="text-xs font-semibold font-mono">{asset.symbol}</div>
+                              {asset.chain && (
+                                <div className="text-[10px] text-slate-400 truncate">{asset.chain}</div>
+                              )}
+                            </button>
+                          )
+                        })}
                       </div>
                     </div>
 
                     {cryptoLoading ? (
-                      <div className="py-8 flex flex-col items-center gap-2 text-xs text-slate-300">
-                        <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
-                        <span>Generating secure deposit address...</span>
+                      <div className="py-10 rounded-xl bg-[#070b14] border border-white/[0.07] flex flex-col items-center gap-2.5 text-xs text-slate-400">
+                        <Loader2 className="h-6 w-6 animate-spin text-slate-300" />
+                        <span>Generating deposit address...</span>
                       </div>
                     ) : cryptoInvoice ? (
-                      <div className="space-y-4">
+                      <div className="rounded-xl bg-[#070b14] border border-white/[0.08] p-4 space-y-4">
                         <div className="flex flex-col sm:flex-row items-center gap-4">
-                          <div className="p-3 bg-white rounded-2xl shrink-0">
+                          <div className="p-2.5 bg-white rounded-xl shrink-0">
                             {cryptoInvoice.address ? (
-                              <QRCodeSVG value={cryptoInvoice.address} size={136} />
+                              <QRCodeSVG value={cryptoInvoice.address} size={128} />
                             ) : (
-                              <div className="w-[136px] h-[136px] flex items-center justify-center text-slate-600 text-xs">
+                              <div className="w-[128px] h-[128px] flex items-center justify-center text-slate-500 text-xs">
                                 Assigning...
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 w-full space-y-2.5 text-xs">
+
+                          <div className="flex-1 w-full space-y-3 text-xs">
                             <div>
-                              <span className="text-slate-400 block">Send Exact Amount</span>
-                              <span dir="ltr" className="text-lg font-black text-emerald-400 font-mono">
-                                {cryptoInvoice.expectedDisplay} {cryptoInvoice.symbol}
-                              </span>
+                              <span className="text-slate-400 block mb-1">Exact amount</span>
+                              <div className="flex items-center justify-between gap-2 bg-[#0b1120] border border-white/[0.08] rounded-lg px-3 py-2">
+                                <span dir="ltr" className="font-mono font-semibold text-sm text-white tabular-nums">
+                                  {cryptoInvoice.expectedDisplay} {cryptoInvoice.symbol}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleCopy(cryptoInvoice.expectedDisplay, 'amount')}
+                                  className="text-slate-400 hover:text-white cursor-pointer"
+                                  title="Copy amount"
+                                >
+                                  {copiedField === 'amount' ? (
+                                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="h-3.5 w-3.5" />
+                                  )}
+                                </button>
+                              </div>
                             </div>
+
                             <div>
-                              <span className="text-slate-400 block mb-1">Deposit Address</span>
-                              <div className="flex items-center gap-2 bg-[#040819] border border-slate-700 rounded-xl px-3 py-2">
-                                <span dir="ltr" className="font-mono text-[11px] text-slate-200 break-all flex-1">
+                              <span className="text-slate-400 block mb-1">Deposit address</span>
+                              <div className="flex items-center justify-between gap-2 bg-[#0b1120] border border-white/[0.08] rounded-lg px-3 py-2">
+                                <span dir="ltr" className="font-mono text-[11px] text-slate-200 break-all">
                                   {cryptoInvoice.address || 'Allocating address...'}
                                 </span>
                                 {cryptoInvoice.address && (
                                   <button
                                     type="button"
-                                    onClick={() => void handleCopyAddress(cryptoInvoice.address || '')}
-                                    className="text-cyan-400 hover:text-cyan-300 shrink-0 cursor-pointer"
+                                    onClick={() => void handleCopy(cryptoInvoice.address || '', 'address')}
+                                    className="text-slate-400 hover:text-white shrink-0 cursor-pointer"
                                     title="Copy address"
                                   >
-                                    {copiedAddr ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                                    {copiedField === 'address' ? (
+                                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                    ) : (
+                                      <Copy className="h-3.5 w-3.5" />
+                                    )}
                                   </button>
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                              <span>Status: <strong className="text-cyan-300 uppercase">{cryptoInvoice.status}</strong></span>
-                              {typeof cryptoInvoice.confirmations === 'number' && (
-                                <span>
-                                  Confirmations: {cryptoInvoice.confirmations}/{cryptoInvoice.minConfirmations ?? 1}
-                                </span>
-                              )}
-                            </div>
                           </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-white/[0.06]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                            <span>Status: <strong className="text-slate-200">{cryptoInvoice.status}</strong></span>
+                          </span>
+                          {typeof cryptoInvoice.confirmations === 'number' && (
+                            <span className="tabular-nums">
+                              Confirmations: {cryptoInvoice.confirmations}/{cryptoInvoice.minConfirmations ?? 1}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ) : null}
                   </div>
                 )}
-
-                {/* Cash App / Instant Lightning Tab */}
-                {activeTab === 'cashapp' && (
-                  <div className="space-y-4 p-4 rounded-2xl bg-[#07102e] border border-emerald-500/25 text-center">
-                    {cashAppLoading ? (
-                      <div className="py-8 flex flex-col items-center gap-2 text-xs text-slate-300">
-                        <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
-                        <span>Preparing Lightning invoice...</span>
-                      </div>
-                    ) : cashAppInvoice?.bolt11 ? (
-                      <div className="space-y-4">
-                        <div className="inline-block p-3 bg-white rounded-2xl">
-                          <QRCodeSVG value={cashAppInvoice.lightningUrl || cashAppInvoice.bolt11} size={156} />
-                        </div>
-                        <div className="flex flex-wrap justify-center gap-2">
-                          {cashAppInvoice.cashAppUrl && (
-                            <Button asChild className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold">
-                              <a href={cashAppInvoice.cashAppUrl} rel="noreferrer">Open Cash App</a>
-                            </Button>
-                          )}
-                          {cashAppInvoice.lightningUrl && (
-                            <Button asChild variant="outline" className="border-cyan-500/40 text-cyan-300">
-                              <a href={cashAppInvoice.lightningUrl} rel="noreferrer">Open Lightning Wallet</a>
-                            </Button>
-                          )}
-                          {cashAppInvoice.status === 'expired' && (
-                            <Button
-                              variant="outline"
-                              onClick={() => void handleRenewCashApp()}
-                              className="gap-1.5 border-amber-500/40 text-amber-300"
-                            >
-                              <RefreshCw className="h-3.5 w-3.5" /> Renew Invoice
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 py-4">
-                        {cashAppInvoice?.status === 'preparing'
-                          ? 'Preparing instant invoice...'
-                          : 'Click Card or Crypto above to complete this payment.'}
-                      </p>
-                    )}
-                  </div>
-                )}
               </>
             )}
 
-            {/* Sandbox Simulation Bar */}
+            {/* Sandbox Controls */}
             {payment.testMode && !isTerminalFail && (
-              <div className="p-4 rounded-2xl bg-amber-950/25 border border-amber-500/40 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
+              <div className="p-4 rounded-xl bg-[#070b14] border border-amber-500/30 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-medium text-amber-300">
                   <FlaskConical className="h-4 w-4" />
-                  <span>PGX Gateway Sandbox Controls</span>
+                  <span>{brandName} Sandbox Controls</span>
                 </div>
-                <p className="text-[11px] text-slate-300">
-                  This is a test transaction. Simulate any payment outcome below to trigger webhook settlement.
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Simulate an outcome below to test webhook delivery and order confirmation.
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
@@ -640,7 +626,7 @@ export default function WhiteLabelCheckoutPage() {
                     size="sm"
                     disabled={simulating}
                     onClick={() => void handleSimulate('paid')}
-                    className="bg-emerald-500 hover:bg-emerald-400 text-black font-bold cursor-pointer"
+                    className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold cursor-pointer"
                   >
                     Simulate Paid
                   </Button>
@@ -649,7 +635,7 @@ export default function WhiteLabelCheckoutPage() {
                     size="sm"
                     disabled={simulating}
                     onClick={() => void handleSimulate('underpaid')}
-                    className="bg-amber-500 hover:bg-amber-400 text-black font-bold cursor-pointer"
+                    className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold cursor-pointer"
                   >
                     Underpaid
                   </Button>
@@ -658,23 +644,24 @@ export default function WhiteLabelCheckoutPage() {
                     size="sm"
                     disabled={simulating}
                     onClick={() => void handleSimulate('failed')}
-                    className="bg-red-500 hover:bg-red-400 text-white font-bold cursor-pointer"
+                    className="bg-red-500 hover:bg-red-400 text-white font-semibold cursor-pointer"
                   >
                     Failed
                   </Button>
                 </div>
               </div>
             )}
-          </CardContent>
+          </div>
 
-          <CardFooter className="flex items-center justify-center text-[11px] text-slate-400 border-t border-cyan-500/15 pt-4">
-            <span className="flex items-center gap-1.5">
+          <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-400">
+            <span className="inline-flex items-center gap-1.5">
               <Lock className="h-3 w-3 text-emerald-400" />
-              Powered securely by <strong className="text-slate-200">{brandName}</strong>
+              <span>Secured by {brandName}</span>
             </span>
-          </CardFooter>
-        </Card>
-      )}
+            <span dir="ltr" className="font-mono text-slate-500">TLS 1.3</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
